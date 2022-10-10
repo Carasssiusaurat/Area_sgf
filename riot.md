@@ -5,7 +5,7 @@
 ---
 ### ACCOUNT BY RIOT ID
 ```
-    GET /riot/account/v1/accounts/by-riot-id/{gameName}/{tagLine}
+    GET /riot/account/by-riot-id/{gameName}/{tagLine}
 ```
 
 ##### return value: AccountDto
@@ -43,7 +43,7 @@
 ---
 ### CHAMPION ROTATION
 ```
-    GET /lol/platform/v3/champion-rotations
+    GET /riot/lol/champion-rotations
 ```
 #### Return value: Champion info
 ##### ChampionInfo
