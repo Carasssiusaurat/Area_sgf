@@ -3,7 +3,7 @@ import Auth from "../components/Auth";
 import Logo from "../components/Logo";
 import GoogleLoginComponent from "../components/Google";
 import { NavLink } from "react-router-dom";
-// import Navigation from "../components/Navigation";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const Login = () => {
   return (
@@ -11,7 +11,9 @@ const Login = () => {
       <Logo />
       <Auth Text="Login" />
       <div className="google">
-        <GoogleLoginComponent />
+        <GoogleOAuthProvider clientId="392568468203-3lrfh8iiiast4keo921gj5n0qajp7vmd.apps.googleusercontent.com">
+          <GoogleLoginComponent />
+        </GoogleOAuthProvider>
       </div>
       <div className="container">
         <div className="not-a-member">
@@ -28,8 +30,6 @@ const Login = () => {
           </ul>
         </div>
       </div>
-      {/* <Navigation /> */}
-      {/* <Countries /> */}
     </div>
   );
 };

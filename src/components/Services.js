@@ -6,8 +6,8 @@ const Services = () => {
 
   return (
     <>
-      {services.map((service) => (
-        <Card service={service} />
+      {services.map((service, index) => (
+        <Card key={index} service={service} />
       ))}
     </>
   );

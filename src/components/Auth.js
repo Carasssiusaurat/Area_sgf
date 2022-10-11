@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
 
 const Auth = ({ Text }) => {
   const [mail, setMail] = useState([]);

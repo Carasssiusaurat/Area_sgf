@@ -1,70 +1,33 @@
-import React, { Component } from "react";
-import { GoogleLogin, GoogleLogout } from "react-google-login";
+import React, { Component, useState, useEffect } from "react";
+import { GoogleLogin } from "@react-oauth/google";
+// import { GoogleLogin, GoogleLogout } from "react-google-login";
+import jwt_decode from "jwt-decode";
+import { useNavigate } from "react-router-dom";
 
-const CLIENT_ID =
-  "827529413912-celsdkun_YOUR_API_KEY_lsn28.apps.googleusercontent.com";
+function GoogleLoginComponent() {
+  const navigate = useNavigate();
+  const [user, setUser] = useState({});
 
-class GoogleLoginComponent extends Component {
-  constructor() {
-    super();
-    this.state = {
-      isLoggedIn: false,
-      userInfo: {
-        name: "",
-        emailId: "",
-      },
-    };
-  }
-
-  responseGoogleSuccess = (response) => {
-    console.log();
-    let userInfo = {
-      name: response.profileObj.name,
-      emailId: response.profileObj.email,
-    };
-    this.setState({ userInfo, isLoggedIn: true });
-  };
-
-  responseGoogleError = (response) => {
-    console.log(response);
-  };
-
-  logout = (response) => {
-    console.log(response);
-    let userInfo = {
-      name: "",
-      emailId: "",
-    };
-    this.setState({ userInfo, isLoggedIn: false });
-  };
-
-  render() {
-    return (
-      <div className="row mt-5">
-        <div className="col-md-12">
-          {this.state.isLoggedIn ? (
-            <div>
-              <h1>Welcome, {this.state.userInfo.name}</h1>
-
-              <GoogleLogout
-                clientId={CLIENT_ID}
-                buttonText={"Logout"}
-                onLogoutSuccess={this.logout}
-              ></GoogleLogout>
-            </div>
-          ) : (
-            <GoogleLogin
-              clientId={CLIENT_ID}
-              buttonText="Sign In with Google"
-              onSuccess={this.responseGoogleSuccess}
-              onFailure={this.responseGoogleError}
-              isSignedIn={true}
-              cookiePolicy={"single_host_origin"}
-            />
-          )}
-        </div>
-      </div>
-    );
-  }
+  return (
+    <div className="GoogleLogin">
+      <header className="Login-header">
+        <GoogleLogin
+          onSuccess={(credentialResponse) => {
+            console.log(credentialResponse.credential);
+            var decoded = jwt_decode(credentialResponse.credential);
+            setUser(decoded);
+            console.log(decoded);
+            // <div className="user-name">
+            //   <h3>{user.name}</h3>
+            // </div>;
+            navigate("/home");
+          }}
+          onError={() => {
+            console.log("Login Failed");
+          }}
+        />
+      </header>
+    </div>
+  );
 }
 export default GoogleLoginComponent;

@@ -3,6 +3,7 @@ import Auth from "../components/Auth";
 import Logo from "../components/Logo";
 import GoogleLoginComponent from "../components/Google";
 import { NavLink } from "react-router-dom";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const Register = () => {
   return (
@@ -10,7 +11,9 @@ const Register = () => {
       <Logo />
       <Auth Text="Sign Up" />
       <div className="google">
-        <GoogleLoginComponent />
+        <GoogleOAuthProvider clientId="392568468203-3lrfh8iiiast4keo921gj5n0qajp7vmd.apps.googleusercontent.com">
+          <GoogleLoginComponent />
+        </GoogleOAuthProvider>
       </div>
       <div className="container">
         <div className="not-a-member">
