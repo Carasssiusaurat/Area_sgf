@@ -1,0 +1,95 @@
+{
+    "timestamp": 1665326316260,
+    "context": {
+      "external_urls": {
+        "spotify": "https://open.spotify.com/collection/tracks"
+      },
+      "href": "https://api.spotify.com/v1/me/tracks",
+      "type": "collection",
+      "uri": "spotify:user:213cny324o4dgaujlhbzxohpa:collection"
+    },
+    "progress_ms": 51786,
+    "item": {
+      "album": {
+        "album_type": "album",
+        "artists": [
+          {
+            "external_urls": {
+              "spotify": "https://open.spotify.com/artist/5DE0by3fZT0nrlJSutY2D7"
+            },
+            "href": "https://api.spotify.com/v1/artists/5DE0by3fZT0nrlJSutY2D7",
+            "id": "5DE0by3fZT0nrlJSutY2D7",
+            "name": "Caballero",
+            "type": "artist",
+            "uri": "spotify:artist:5DE0by3fZT0nrlJSutY2D7"
+          }
+        ],
+        "external_urls": {
+          "spotify": "https://open.spotify.com/album/3hIM9VBybjGSrUgleq0No0"
+        },
+        "href": "https://api.spotify.com/v1/albums/3hIM9VBybjGSrUgleq0No0",
+        "id": "3hIM9VBybjGSrUgleq0No0",
+        "images": [
+          {
+            "height": 640,
+            "url": "https://i.scdn.co/image/ab67616d0000b273d80cfda36627e8de4dd65ae6",
+            "width": 640
+          },
+          {
+            "height": 300,
+            "url": "https://i.scdn.co/image/ab67616d00001e02d80cfda36627e8de4dd65ae6",
+            "width": 300
+          },
+          {
+            "height": 64,
+            "url": "https://i.scdn.co/image/ab67616d00004851d80cfda36627e8de4dd65ae6",
+            "width": 64
+          }
+        ],
+        "name": "OSITO",
+        "release_date": "2022-04-07",
+        "release_date_precision": "day",
+        "total_tracks": 7,
+        "type": "album",
+        "uri": "spotify:album:3hIM9VBybjGSrUgleq0No0"
+      },
+      "artists": [
+        {
+          "external_urls": {
+            "spotify": "https://open.spotify.com/artist/5DE0by3fZT0nrlJSutY2D7"
+          },
+          "href": "https://api.spotify.com/v1/artists/5DE0by3fZT0nrlJSutY2D7",
+          "id": "5DE0by3fZT0nrlJSutY2D7",
+          "name": "Caballero",
+          "type": "artist",
+          "uri": "spotify:artist:5DE0by3fZT0nrlJSutY2D7"
+        }
+      ],
+      "disc_number": 1,
+      "duration_ms": 121522,
+      "explicit": true,
+      "external_ids": {
+        "isrc": "BEEO72200005"
+      },
+      "external_urls": {
+        "spotify": "https://open.spotify.com/track/1v5LkG0nNLgwENphiEyAz6"
+      },
+      "href": "https://api.spotify.com/v1/tracks/1v5LkG0nNLgwENphiEyAz6",
+      "id": "1v5LkG0nNLgwENphiEyAz6",
+      "is_local": false,
+      "is_playable": true,
+      "name": "PARTIE V : TOURNESOLS",
+      "popularity": 40,
+      "preview_url": "https://p.scdn.co/mp3-preview/df5b570ac16fbff9be1fc8382fa5f87a74e77cd5?cid=bc58bb1188ee4d08a5f45348c5a8bfdf",
+      "track_number": 5,
+      "type": "track",
+      "uri": "spotify:track:1v5LkG0nNLgwENphiEyAz6"
+    },
+    "currently_playing_type": "track",
+    "actions": {
+      "disallows": {
+        "resuming": true
+      }
+    },
+    "is_playing": true
+  }
