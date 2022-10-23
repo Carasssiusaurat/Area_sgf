@@ -6,14 +6,14 @@ const Auth = ({ Text }) => {
 
   return (
     <div className="auth">
-      <div>
+      <div className="center">
         <input type="text" placeholder="Email" className="email" />
       </div>
       <div className="second-input"></div>
-      <div>
+      <div className="center">
         <input type="password" placeholder="Password" className="password" />
       </div>
-      <div className="login_button"></div>
+      <div className="login"></div>
       <a href="home" class="button">
         {Text}
       </a>

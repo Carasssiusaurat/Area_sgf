@@ -17,6 +17,14 @@ const Navigation = () => {
         >
           <li>All services</li>
         </NavLink>
+        <NavLink
+          to="/Workspace"
+          className={(nav) => (nav.isActive ? "nav-active" : "")}
+        >
+          <li>Workspace
+              Aria                          
+          </li>
+        </NavLink>
       </ul>
     </div>
   );
