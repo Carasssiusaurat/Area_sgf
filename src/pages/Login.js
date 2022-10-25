@@ -9,7 +9,9 @@ const Login = () => {
   return (
     <div>
       <Logo />
-      <div className="center" ><Auth Text="Logina"/> </div>
+      <div className="center">
+        <Auth Text="Login" />{" "}
+      </div>
       <div className="google">
         <GoogleOAuthProvider clientId="392568468203-3lrfh8iiiast4keo921gj5n0qajp7vmd.apps.googleusercontent.com">
           <GoogleLoginComponent />
