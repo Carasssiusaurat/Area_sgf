@@ -91,8 +91,8 @@ async function sendMail(items) {
       auth: {
         type: "OAuth2",
         user: "area.epiteech@gmail.com",
-        clientId: GOOGLE_CLIENT_ID,
-        clientSecret: GOOGLE_CLIENT_SECRET,
+        clientId: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
         refreshToken: refreshToken,
         accessToken: accessToken,
       },
