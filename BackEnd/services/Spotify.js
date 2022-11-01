@@ -9,27 +9,62 @@ require('dotenv').config();
 const SCOPES = ["user-read-currently-playing", "user-read-playback-state", "user-modify-playback-state"]
 const SpotifyStrategy = require('passport-spotify').Strategy;
 const actual_device = '';
+let devices = [];
 
 class Spotify {
   Getcurrentsong = async () => {
-    const {data} = await axios.get('https://api.spotify.com/v1/me/player/currently-playing', {
+    await axios.get('https://api.spotify.com/v1/me/player/currently-playing', {
       headers: {
         Authorization: `Bearer ${SpotifyToken}`,
         'Content-Type': 'application/json'
       }
+    }).then((response) => {
+      let artists = [];
+      //actual_artist = response.item.artists[0].name;
+      for (let i = 0; i < response.data.item.artists.length; i++) {
+        artists.push(response.data.item.artists[i].name);
+      }
+      console.log({"song_name": response.data.item.name, "artist_name": artists, "album_name": response.data.item.album.name});
+      return {"song_name": response.data.item.name, "artist_name": artists, "album_name": response.data.item.album.name};
+    }).catch((error) => {
+      return {"code_error": error.response.data};
     });
-    actual_artist = data.item.artists[0].name;
-    return {"name": data.item.name, "artist": data.item.artists[0].name, "songid": data.item.uri, "artistid": data.item.artists[0].uri};
   }
   
-  GetDevice = async () => {
-    const {data} = await axios.get('https://api.spotify.com/v1/me/player/devices', {
-      headers: {
+  GetDevices = async () => {
+    console.log("Getting devices");
+    await axios.get('https://api.spotify.com/v1/me/player/devices', {
+      headers: {  
         Authorization: `Bearer ${SpotifyToken}`,
         'Content-Type': 'application/json'
       }
+    })
+    .then((response) => {
+      //fs.writeFileSync('response.json', JSON.stringify(response));
+      //console.log(response.data.devices);
+      devices = response.data;
+      //console.log(devices);
+      console.log(devices);
+      return devices;
+    }).catch((error) => {
+      console.log("error");
+      console.log("token =" + SpotifyToken);
+      console.log(error);
+      fs.writeFileSync('devices_error.json', JSON.stringify(error));
+      return {"status": "error"};
     });
-    actual_device = data.devices[0].id;
+  }
+
+  ChangeDevice = async (device) => {
+    if (devices.length() > 1) {
+      const {data} = await axios.put('https://api.spotify.com/v1/me/player', {
+        headers: {
+          Authorization: `Bearer ${SpotifyToken}`,
+          'Content-Type': 'application/json'
+        },
+        device_ids: [devices[1].id]
+      });
+    }
   }
 
   changeSong = async (song) => {
@@ -87,6 +122,8 @@ class Spotify {
   }
 }
 
+const my_spotify = new Spotify();
+
 passport.use(
   new SpotifyStrategy(
     {
@@ -142,10 +179,27 @@ router.get('/getSpotifyToken', (req, res) => {
 });
 
 router.get('/get_current_song', function(req, res) {
-  console.log('token: '+ SpotifyToken);
-  Spotify.Getcurrentsong().then((data) => {
+  my_spotify.Getcurrentsong().then((data) => {
     res.json(data);
     console.log(data);
+  }).catch((error) => {
+    res.json(error);
+    console.log(error);
+  });
+});
+
+router.get('/get_devices', async function(req, res) {
+  const data = await my_spotify.GetDevices();
+  res.json(data);
+});
+
+router.get('/change_song', function(req, res) {
+  my_spotify.changeSong(reaction).then((data) => {
+    res.json(data);
+    console.log(data);
+  }).catch((error) => {
+    res.json(error);
+    console.log(error);
   });
 });
 
@@ -155,7 +209,7 @@ router.post('/set_workflow', async function(req, res) {
   await Spotify.searchArtist(req.body.reactionInput, req.body.reactionType, req.body.artistReaction, reaction, 'reaction');
   console.log(trigger);
   console.log(reaction);
-  Spotify.isWorkflow(trigger, reaction);
+  my_spotify.isWorkflow(trigger, reaction);
 });
 
 module.exports = router;
