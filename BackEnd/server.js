@@ -5,6 +5,7 @@ const connectDB = require('./config/dbConn');
 const PORT = process.env.PORT || 8080;
 const bodyParser = require('body-parser');
 const userRoutes = require('./routes/users');
+const serviceRoutes = require('./routes/services');
 const app = express();
 
 
@@ -31,6 +32,8 @@ mongoose.connection.once('open', () => {
 })
 
 app.use('/', userRoutes);
+
+app.use('/', serviceRoutes);
 
 app.listen(PORT, () => {
     console.log(`server is running on port : ${PORT}`)

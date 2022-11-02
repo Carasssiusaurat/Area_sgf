@@ -9,14 +9,20 @@ router.get('/user', userController.getusers)
 
 router.post('/user', upload.none(), userController.newuser)
 
-//admin
+//admin -> verif jwt -> verif que role == 'admin'
 router.delete('/user', userController.delAlluser)
 
 router.get('/user/:id', userController.getuser)
 
-router.put('/user/:username', userController.moduser)
+router.put('/user/:id', userController.moduser)
 
-router.delete('/user/:username', userController.delOneuser)
+router.delete('/user/:id', userController.delOneuser)
+
+router.put('/user/:id/service', userController.addservice)
+
+router.put('/user/:uid/service/:sid', userController.modservice)
+
+router.delete('/user/:uid/service/:sid', userController.delOneservice)
 
 router.post('/login', userController.login)
 
