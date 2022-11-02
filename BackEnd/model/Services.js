@@ -7,7 +7,4 @@ const serviceSchema = new Schema({
     reaction_id: [mongoose.SchemaTypes.ObjectId],
 });
 
-module.exports = {
-    servicesModel: mongoose.model('Services', serviceSchema),
-    serviceSchema
-}
+module.exports = mongoose.model('Services', serviceSchema)

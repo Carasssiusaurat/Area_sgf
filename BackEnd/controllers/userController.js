@@ -1,7 +1,15 @@
 const Users = require('../model/Users');
+const asyncHandler = require('express-async-handler');
 const express = require('express');
 const routes = express.Router();
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
+const generateToken = (id) => {
+    return jwt.sign({ id }, process.env.JWT_SECRET, {
+      expiresIn: '1d',
+    })
+}
 
 const newuser = (req, res) => {
     Users.findOne({username: req.body.username}, (err, data) => {
@@ -56,19 +64,20 @@ const delOneuser = (req, res) => {
     res.json({message: "GET user with id"});
 }
 
-const login = (req, res) => {
+const login = asyncHandler(async (req, res) => {
     Users.findOne({username: req.body.username}).then(user => {
         if (!user) {
-            return res.status(401).json({message: 'username doesn\'t exist'});
+            return res.status(401).json({message: 'username doesnt exist'});
         }
         bcrypt.compare(req.body.password, user.password).then(valid => {
             if (!valid) {
                 return res.status(401).json({message: 'password incorrect'});
             }
-            res.status(200).json({userId: user._id, token: 'TOKEN'});
-        }).catch(err => res.statuts(500).json({err}));
+            res.status(200).json({userId: user._id, token: generateToken(user._id)});
+
+        }).catch(err => res.status(500).json({err}));
     }).catch(err => res.status(500).json({err}));
-}
+})
 
 module.exports = {
     newuser,
