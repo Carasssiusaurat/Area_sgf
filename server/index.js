@@ -6,6 +6,7 @@ const googlerouter = require("./services/google.js");
 
 app.use(cors());
 app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.listen(process.env.PORT || 8080, () => {

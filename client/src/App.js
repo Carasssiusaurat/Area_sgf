@@ -3,6 +3,8 @@ import React, { useState } from "react";
 function App() {
   const [action, setAction] = useState("");
   const [trigger, setTrigger] = useState("");
+  const [reaction, setReaction] = useState("");
+  const [id, setId] = useState("");
 
   const createGoogleAuthLink = async () => {
     try {
@@ -15,7 +17,7 @@ function App() {
       const response = await request.json();
       window.location.href = response.url;
     } catch (error) {
-      console.log("App.js 12 | error", error);
+      console.log("App.js 19 | error", error);
       throw new Error("Issue with Login", error.message);
     }
   };
@@ -25,6 +27,8 @@ function App() {
       JSON.stringify({
         trigger,
         action,
+        reaction,
+        id,
       })
     );
     const data = await fetch("http://localhost:8080/google/set_workflow", {
@@ -35,6 +39,8 @@ function App() {
       body: JSON.stringify({
         trigger,
         action,
+        reaction,
+        id,
       }),
     });
   };
@@ -47,16 +53,33 @@ function App() {
         <input
           type="text"
           name="Action"
+          placeholder="Action"
           onChange={(e) => setAction(e.target.value)}
           required
         />
         <input
           type="text"
           name="Trigger"
+          placeholder="Trigger"
           onChange={(e) => setTrigger(e.target.value)}
           required
         />
-        <button onClick={set_workflow}>Get Google Calendars</button>
+        <input
+          type="text"
+          placeholder="Reaction"
+          name="Reaction"
+          onChange={(e) => setReaction(e.target.value)}
+          required
+        />
+        <input
+          type="text"
+          placeholder="video id"
+          name="id"
+          onChange={(e) => setId(e.target.value)}
+          required
+        />
+        <button onClick={set_workflow}>Set Calendar</button>
+        <button onClick={set_workflow}>Set Youtube</button>
         {/* <button onClick={signOut}>Sign Out</button> */}
       </>
     </div>
