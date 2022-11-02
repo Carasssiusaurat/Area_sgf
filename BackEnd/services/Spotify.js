@@ -4,12 +4,14 @@ const Router = require('express').Router;
 const axios = require('axios');
 const router = Router();
 const fs = require('fs');
+const { json } = require('body-parser');
 require('dotenv').config();
 
 const SCOPES = ["user-read-currently-playing", "user-read-playback-state", "user-modify-playback-state"]
 const SpotifyStrategy = require('passport-spotify').Strategy;
-const actual_device = '';
+let actual_device = '';
 let devices = [];
+var track_uri = '';
 
 class Spotify {
   Getcurrentsong = async () => {
@@ -42,6 +44,11 @@ class Spotify {
     .then((response) => {
       //fs.writeFileSync('response.json', JSON.stringify(response));
       //console.log(response.data.devices);
+      for (let i = 0; i < response.data.devices.length; i++) {
+        if (response.data.devices[i].is_active == true) {
+          actual_device = response.data.devices[i].id;
+        }
+      }
       devices = response.data;
       //console.log(devices);
       console.log(devices);
@@ -67,10 +74,17 @@ class Spotify {
     }
   }
 
-  changeSong = async (song) => {
-    const {data} = await axios.put('https://api.spotify.com/v1/me/player/play?device_id=' + actual_device, 
+  changeSong = async (req) => {
+    await this.searchArtist(req)
+    await this.GetDevices();
+    if (track_uri == 400) {
+      console.log("error");
+    }
+    console.log("track_uri = " + track_uri);
+    console.log("dsssssssssssssssssss");
+    await axios.put('https://api.spotify.com/v1/me/player/play?device_id=' + actual_device, 
       {
-        uris: [song.songid]
+        uris: [track_uri]
         //"context_uri": "spotify:album:6R8nBTTPwlP7iur0wV3oLq",
         //"offset": {
         //  "position": 4
@@ -84,33 +98,48 @@ class Spotify {
           'Content-Type': 'application/json'
         },
       }
-    );
-    console.log(data); 
+    ).then((response) => {
+      console.log("success");
+      return {"status": "success"};
+    }).catch((error) => {
+      console.log(error.response.data);
+      return {"code_error": error.response.data.error.status};
+    });
   }
   
-  searchArtist = async (name, type, artist, effect, filename) => {
-    const {data} = await axios.get('https://api.spotify.com/v1/search', {
+  is_artist = (artist_name, artists_list) => {
+    for (let i = 0; i < artists_list.length; i++) {
+      if (artist_name.toLowerCase() == artists_list[i].name.toLowerCase()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  searchArtist = async (uri) => {
+  
+    console.log("pute pute pute pute pute pute pute pute pute pute");
+    await axios.get('https://api.spotify.com/v1/search', {
       headers: {
         Authorization: `Bearer ${SpotifyToken}`
       },
       params: {
-        q: name,
-        type: type,
+        q: uri.body.song_name,
+        type: 'track',
         market: 'FR',
         limit: 5
       }
-    });
-    if (type == 'artist') {
-      console.log(data.artists.items);
-    } else {
-      for (var i = 0; i < data.tracks.items.length; i++) {
-        if (data.tracks.items[i].artists[0].name.toLowerCase() === artist && data.tracks.items[i].name.toLowerCase() === name) {
-          effect.songid = data.tracks.items[i].uri;
-          effect.artistid = data.tracks.items[i].artists[0].uri;
-          fs.writeFileSync(filename + '.json', JSON.stringify(data.tracks.items[i]));
-        }
+    }).then((response) => {
+      for (let i = 0; i < response.data.tracks.items.length; i++) {
+        if (response.data.tracks.items[i].name.toLowerCase() == uri.body.song_name.toLowerCase() && this.is_artist(uri.body.artist_name, response.data.tracks.items[i].artists)) {
+          console.log("uri = " + response.data.tracks.items[i].uri);
+          track_uri = response.data.tracks.items[i].uri
+        }          
       }
-    }
+    }).catch((error) => {
+      console.log(error);
+      track_uri = 400;
+    });
   }
   
   isWorkflow = async (trigger, reaction) => {
@@ -194,7 +223,7 @@ router.get('/get_devices', async function(req, res) {
 });
 
 router.get('/change_song', function(req, res) {
-  my_spotify.changeSong(reaction).then((data) => {
+  my_spotify.changeSong(req).then((data) => {
     res.json(data);
     console.log(data);
   }).catch((error) => {
