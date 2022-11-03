@@ -7,11 +7,21 @@ const Auth = ({ Text }) => {
   return (
     <div className="auth">
       <div className="center">
-        <input type="text" placeholder="Email" className="email" />
+        <input
+          type="text"
+          placeholder="Email"
+          className="email"
+          onChange={(e) => setMail(e.target.value)}
+        />
       </div>
       <div className="second-input"></div>
       <div className="center">
-        <input type="password" placeholder="Password" className="password" />
+        <input
+          type="password"
+          placeholder="Password"
+          className="password"
+          onChange={(e) => setPassword(e.target.value)}
+        />
       </div>
       <div className="login"></div>
       <a href="home" class="button">
