@@ -9,7 +9,7 @@ const nodemailer = require("nodemailer");
 const axios = require("axios");
 require("dotenv").config();
 
-var actions = ["calendar", "youtube"];
+var services = ["calendar", "youtube"];
 var accessToken = "";
 var refreshToken = "";
 var user = "";
@@ -99,7 +99,7 @@ const GetYoutubeVideo = async (id) => {
     id: id,
     part: "snippet,contentDetails,statistics",
   });
-  console.log(res);
+  // console.log(res.data.items);
   return res.data.items;
 };
 
@@ -134,8 +134,9 @@ async function sendMail(user, object, text) {
   }
 }
 
-const isWorkflow = async (action, trigger, reaction, id) => {
-  if (action === actions[0]) {
+const isWorkflow = async (service, action, trigger, reaction, id) => {
+  var activated = 0;
+  if (service === services[0]) {
     trigger = parseInt(trigger) * 60000;
     var item = await Getcalendar();
     item.forEach(function (items) {
@@ -156,23 +157,32 @@ const isWorkflow = async (action, trigger, reaction, id) => {
       }
     });
   }
-  if (action === actions[1]) {
+  if (service === services[1]) {
     var item = await GetYoutubeVideo(id);
     item.forEach(function (items) {
       trigger = parseInt(trigger);
+      console.log(items.statistics);
       const img = items.snippet.thumbnails.high;
-      const views = parseInt(items.statistics.viewCount);
-      if (views >= trigger) {
+      if (action === "likes") {
+        const likes = items.statistics.likeCount;
+        if (likes >= trigger) activated = 1;
+      }
+      if (action === "views") {
+        const views = parseInt(items.statistics.viewCount);
+        if (views >= trigger) activated = 1;
+      }
+      if (activated == 1) {
         if (reaction === "gmail") {
           console.log("OK");
           console.log(items.snippet.title);
           sendMail(
             user,
-            items.snippet.title + " Reached " + trigger + " views !",
+            items.snippet.title + " Reached " + trigger + " " + action,
             items.snippet.title +
               " Reached " +
               trigger +
-              " views !" +
+              " " +
+              action +
               '<br/> <img style="width:250px;" src="' +
               items.snippet.thumbnails.high.url +
               '" />'
@@ -187,7 +197,13 @@ const isWorkflow = async (action, trigger, reaction, id) => {
 
 router.post("/set_workflow", async function (req, res) {
   console.log(req.body);
-  isWorkflow(req.body.action, req.body.trigger, req.body.reaction, req.body.id);
+  isWorkflow(
+    req.body.service,
+    req.body.action,
+    req.body.trigger,
+    req.body.reaction,
+    req.body.id
+  );
 });
 
 module.exports = router;

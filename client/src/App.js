@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 
 function App() {
+  const [service, setService] = useState("");
   const [action, setAction] = useState("");
   const [trigger, setTrigger] = useState("");
   const [reaction, setReaction] = useState("");
@@ -25,8 +26,9 @@ function App() {
   const set_workflow = async () => {
     console.log(
       JSON.stringify({
-        trigger,
+        service,
         action,
+        trigger,
         reaction,
         id,
       })
@@ -37,8 +39,9 @@ function App() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        trigger,
+        service,
         action,
+        trigger,
         reaction,
         id,
       }),
@@ -50,6 +53,13 @@ function App() {
       <h1>Google</h1>
       <button onClick={createGoogleAuthLink}>Login</button>
       <>
+        <input
+          type="text"
+          placeholder="Service"
+          name="Service"
+          onChange={(e) => setService(e.target.value)}
+          required
+        />
         <input
           type="text"
           name="Action"
