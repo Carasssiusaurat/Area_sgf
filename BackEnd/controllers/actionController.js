@@ -7,9 +7,8 @@ const newAction = (req, res) => {
             args: arguments
         });
         new_action.save((err, data) => {
-            if (err) {
+            if (err)
                 return res.json({Error: err})
-            };
             return res.json(data);
         });
     };
