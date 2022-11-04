@@ -11,6 +11,7 @@ const SCOPES = ["user-read-currently-playing", "user-read-playback-state", "user
 const SpotifyStrategy = require('passport-spotify').Strategy;
 
 class Spotify {
+  Service_id = "ec13a340-8eb5-59da-a8b3-8c1cbe2b67e1";
   user_infos = "";
 
   GetUser = async () => {
@@ -214,14 +215,6 @@ passport.use(
 
 var SpotifyToken = '';
 
-passport.serializeUser(function (user, done) {
-  done(null, user);
-});
-
-passport.deserializeUser(function (obj, done) {
-  done(null, obj);
-})
-
 router.get('/auth', passport.authenticate('spotify', {scope: SCOPES, showDialog: true}));
 
 router.get('/auth/callback',
@@ -237,7 +230,9 @@ router.get('/getSpotifyToken', (req, res) => {
   res.send(SpotifyToken);
 });
 
+service_id/action_id
 router.get('/get_current_song', function(req, res) {
+  action_id = "get_ee458a99-c8d4-57b4-901b-dfa389824a38";
   my_spotify.Getcurrentsong().then((data) => {
     res.json(data);
     console.log(data);
@@ -253,6 +248,7 @@ router.get('/get_devices', async function(req, res) {
 });
 
 router.get('/change_song', function(req, res) {
+  reaction_id = "a8572e2e-9008-5ed2-ade1-0528a4caff8a";
   my_spotify.changeSong(req).then((data) => {
     res.json(data);
     console.log(data);
@@ -272,6 +268,7 @@ router.post('/set_workflow', async function(req, res) {
 });
 
 router.post('/Add_item_to_playlist', async function(req, res) {
+  reaction_id = "99af9313-0b2c-57a6-850a-e3e886ec31fb";
   const data = await my_spotify.AddItemToPlaylist(req);
   res.json(data);
 });
