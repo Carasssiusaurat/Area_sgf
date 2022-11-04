@@ -12,7 +12,7 @@ router.delete('/service', serviceController.delAllservice)
 
 router.get('/service/:id', serviceController.getservice)
 
-router.put('/service/:id', serviceController.modservice)
+router.put('/service/:id', serviceController.updateservice)
 
 router.delete('/service/:id', serviceController.delOneservice)
 

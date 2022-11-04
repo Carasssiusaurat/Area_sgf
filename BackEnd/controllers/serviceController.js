@@ -81,7 +81,7 @@ const delOneservice = (req, res) => {
     });
 }
 
-const updateService = (req, res) => {
+const updateservice = (req, res) => {
     const base_action_id = req.body.action_id.split(',');
     const base_reaction_id = req.body.react_id.split(',');
     const servName = req.body.servName;
@@ -101,7 +101,7 @@ const updateService = (req, res) => {
 }
 
 module.exports = {
-    updateService
+    updateservice,
     newservice,
     getservices,
     delAllservice,

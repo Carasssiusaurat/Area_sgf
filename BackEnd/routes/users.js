@@ -7,7 +7,6 @@ const serviceController = require('../controllers/serviceController');
 const actionController =  require('../controllers/actionController')
 const reactionController =  require('../controllers/reactionController')
 const areaController =  require('../controllers/areaController')
-const { newService, getService, getAllService, deleteService, updateService} = require('../controllers/serviceController');
 const { protect } = require('../middleware/authMiddleware');
 
 //admin
@@ -35,11 +34,11 @@ router.delete('/user/:uid/service', userController.delAllservice)
 router.post('/login', userController.login)
 
 //(put past this point into own files:
-router.post('/service', protect, newService)
-router.get('/services', protect, getAllService)
-router.get('/service', protect, getService)
-router.delete('/service', protect, deleteService)
-router.patch('/service', protect, updateService)
+router.post('/service', protect, serviceController.newservice)
+router.get('/services', protect, serviceController.getservices)
+router.get('/service', protect, serviceController.getservice)
+router.delete('/service', protect, serviceController.delAllservice)
+router.patch('/service', protect, serviceController.updateservice)
 
 
 router.post('/action', protect, actionController.newAction)

@@ -99,8 +99,6 @@ const login = asyncHandler(async (req, res) => {
     }).catch(err => res.status(500).json({err}));
 })
 
-//if service_to_add is in user_to_update.services return service already used
-//else add service_to_add id's, set actif to true, and set token to user's token to user_to_update.services
 const addservice = async (req, res) => {
     const user_to_update = await Users.findOne({_id: req.params.id});
     const service_to_add = await Services.findOne({name: req.body.name});
@@ -109,7 +107,7 @@ const addservice = async (req, res) => {
     console.log(user_to_update.services)
     console.log(service_to_add._id)
     try {
-        if (user_to_update.services.some((item) => item._service_id == service_to_add._service_id))
+        if (user_to_update.services.some(service => service.id == service_to_add._id))
             return res.status(200).json({message: "Service already used"});
         user_to_update.services.push({_id: service_to_add._id, actif: true, token: 'TOKEN'});
         user_to_update.save();
