@@ -24,6 +24,8 @@ router.put('/user/:uid/service/:sid', userController.modservice)
 
 router.delete('/user/:uid/service/:sid', userController.delOneservice)
 
+router.delete('/user/:uid/service', userController.delAllservice)
+
 router.post('/login', userController.login)
 
 module.exports = router;

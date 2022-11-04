@@ -90,33 +90,21 @@ const login = (req, res) => {
     }).catch(err => res.status(500).json({err}));
 }
 
-// try {
-//     const user_to_update = await Users.findOne({_id: req.params.id});
-//     user_to_update.username = req.body.username
-//     user_to_update.save();
-//     return res.status(200).json({message: "User updated"});
-// } catch (err) {
-//     console.log("moduser", err)
-//     return res.status(500).json({ "error": 'internal error' });
-// }
-
+//if service_to_add is in user_to_update.services return service already used
+//else add service_to_add id's, set actif to true, and set token to user's token to user_to_update.services
 const addservice = async (req, res) => {
+    const user_to_update = await Users.findOne({_id: req.params.id});
+    const service_to_add = await Services.findOne({name: req.body.name});
+    if (!user_to_update || !service_to_add)
+        return res.status(404).json({Error: "not found"})
+    console.log(user_to_update.services)
+    console.log(service_to_add._id)
     try {
-        const user_to_update = await Users.findOne({_id: req.params.id});
-            try {
-                const service_to_add = Services.findOne({name: req.body.name}, (err, data) => {
-                    if (err)
-                        return res.json({Error: err});
-                    if (!data)
-                        return res.json({message: "Service doesn't exist !"});
-                    user_to_update.services.push({_service_id: data._id, actif: true});
-                    user_to_update.save();
-                    return res.json(data);
-                });
-            } catch (err) {
-                console.log("addservice", err)
-                return res.status(500).json({ "error": 'internal error' });
-            }
+        if (user_to_update.services.some((item) => item._service_id == service_to_add._service_id))
+            return res.status(200).json({message: "Service already used"});
+        user_to_update.services.push({_id: service_to_add._id, actif: true, token: 'TOKEN'});
+        user_to_update.save();
+        return res.status(200).json({message: "Service added"});
     } catch (err) {
         console.log("addservice", err)
         return res.status(500).json({ "error": 'internal error' });
@@ -147,6 +135,17 @@ const delOneservice = (req, res) => {
     });
 }
 
+const delAllservice = async (req, res) => {
+    try {
+        const user_to_update = await Users.findOne({_id: req.params.uid});
+        user_to_update.services = [];
+        user_to_update.save();
+        return res.status(200).json({message: "User updated"});
+    } catch (err) {
+        console.log("delAllservice", err)
+    }
+}
+
 module.exports = {
     newuser,
     getuser,
@@ -157,5 +156,6 @@ module.exports = {
     delOneuser,
     addservice,
     modservice,
-    delOneservice
+    delOneservice,
+    delAllservice
 };
