@@ -99,7 +99,7 @@ const updateArea = (req, res) => {
     }
     const action_id = [...new Set(base_action_id)];
     const reaction_id = [...new Set(base_reaction_id)];
-    Service.updateOne({_id: req.body.id}, {$set: {"action_id": action_id, "reaction_id": reaction_id}}, (err, data) => {
+    Areas.updateOne({_id: req.body.id}, {$set: {"action_id": action_id, "reaction_id": reaction_id}}, (err, data) => {
         if (err) {
             res.status(400)
             return res.json({Error: err});}
@@ -112,7 +112,7 @@ const updateAreaState = (req, res) => {
         res.status(400)
         throw new Error('missing field : cannot update area')
     }
-    Service.updateOne({_id: req.body.id}, {$set: {"actif": req.body.state}}, (err, data) => {
+    Areas.updateOne({_id: req.body.id}, {$set: {"actif": req.body.state}}, (err, data) => {
         if (err) {
             res.status(400)
             return res.json({Error: err});}
@@ -125,7 +125,7 @@ const deleteArea = (req, res) => {
         res.status(400)
         return res.send("del Area error: incomplete or erroneous request")
     }
-    Service.deleteOne({_id:req.body.id}, (err, data) => {
+    Areas.deleteOne({_id:req.body.id}, (err, data) => {
         if (err) {
             return res.json({Error: err});
         }

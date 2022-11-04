@@ -20,7 +20,18 @@ const getAction = (req, res) => {
         return res.send("get Action error: incomplete or erroneous request")
     }
 
-    Service.findOne({_id:req.body.id}, (err, data) => {
+    Action.findOne({_id:req.body.id}, (err, data) => {
+        if (err)
+            return res.json({Error: err});
+        if (!data) {
+            res.status(404)
+            return res.send("Action not found")}
+        return res.json(data);
+    });
+}
+
+const getAllAction = (req, res) => {
+    Action.find({}, (err, data) => {
         if (err)
             return res.json({Error: err});
         if (!data) {
@@ -35,7 +46,7 @@ const deleteAction = (req, res) => {
         res.status(400)
         return res.send("del Action error: incomplete or erroneous request")
     }
-    Service.deleteOne({_id:req.body.id}, (err, data) => {
+    Action.deleteOne({_id:req.body.id}, (err, data) => {
         if (err) {
             return res.json({Error: err});
         }
@@ -51,7 +62,7 @@ const updateAction = (req, res) => {
         res.status(400)
         throw new Error('missing field : cannot update Action')
     }
-    Service.updateOne({_id:req.body.id}, {$set: {"args": arguments}}, (err, data) => {
+    Action.updateOne({_id:req.body.id}, {$set: {"args": arguments}}, (err, data) => {
         if (err) {
             res.status(400)
             return res.json({Error: err});}
@@ -62,8 +73,8 @@ const updateAction = (req, res) => {
 
 module.exports = {
     newAction,
-    getAction,//from ID
-    //getAllAction,//from AREA! not here! make more sense that way
+    getAction,
+    getAllAction,
     deleteAction,
     updateAction
 }

@@ -21,7 +21,7 @@ const getReaction = (req, res) => {
         return res.send("get Reaction error: incomplete or erroneous request")
     }
 
-    Service.findOne({_id: req.body.id}, (err, data) => {
+    Reaction.findOne({_id: req.body.id}, (err, data) => {
         if (err)
             return res.json({Error: err});
         if (!data) {
@@ -36,7 +36,7 @@ const deleteReaction = (req, res) => {
         res.status(400)
         return res.send("del Reaction error: incomplete or erroneous request")
     }
-    Service.deleteOne({_id :req.body.id}, (err, data) => {
+    Reaction.deleteOne({_id :req.body.id}, (err, data) => {
         if (err) {
             return res.json({Error: err});
         }
@@ -52,7 +52,7 @@ const updateReaction = (req, res) => {
         res.status(400)
         throw new Error('missing field : cannot update Reaction')
     }
-    Service.updateOne({_id:req.body.id}, {$set: {"args": arguments}}, (err, data) => {
+    Reaction.updateOne({_id:req.body.id}, {$set: {"args": arguments}}, (err, data) => {
         if (err) {
             res.status(400)
             return res.json({Error: err});}
