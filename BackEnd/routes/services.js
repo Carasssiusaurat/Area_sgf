@@ -6,7 +6,7 @@ const { protect } = require('../middleware/authMiddleware');
 
 const serviceController = require('../controllers/serviceController');
 
-router.get('/service', protect, serviceController.getservices)
+router.get('/service', protect, serviceController.getAllservice)
 
 router.post('/service', protect, upload.none(), serviceController.newservice)
 

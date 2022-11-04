@@ -3,6 +3,7 @@ const Service = require('../model/Services');
 const newservice = (req, res) => {
     const base_action_id = req.body.action_id.split(',');
     const base_reaction_id = req.body.react_id.split(',');
+    const logo = req.body.logo_url;
     const service_name = req.body.service_name;
 
     if(!base_action_id || !base_reaction_id || !service_name) {
@@ -17,7 +18,8 @@ const newservice = (req, res) => {
         const new_service = new Service({
             action_id: action_id,
             reaction_id: reaction_id,
-            name: service_name
+            name: service_name,
+            img_url: logo
         });
         new_service.save((err, data) => {
             if (err)
@@ -34,8 +36,8 @@ const newservice = (req, res) => {
     })
 }
 
-const getservices = (req, res) => {
-    Services.find({}, (err, data) => {
+const getAllservice = (req, res) => {
+    Service.find({}, (err, data) => {
         if (err)
             return res.json({Error: err});
         return res.json(data);
@@ -59,7 +61,7 @@ const getservice = (req, res) => {
 }
 
 const delAllservice = (req, res) => {
-    Services.deleteMany({}, (err, data) => {
+    Service.deleteMany({}, (err, data) => {
         if (err)
             return res.json({Error: err});
         return res.json(data);
@@ -102,7 +104,7 @@ const updateservice = (req, res) => {
 module.exports = {
     updateservice,
     newservice,
-    getservices,
+    getAllservice,
     delAllservice,
     getservice,
     delOneservice,
