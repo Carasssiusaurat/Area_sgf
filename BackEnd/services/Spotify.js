@@ -230,7 +230,6 @@ router.get('/getSpotifyToken', (req, res) => {
   res.send(SpotifyToken);
 });
 
-service_id/action_id
 router.get('/get_current_song', function(req, res) {
   action_id = "get_ee458a99-c8d4-57b4-901b-dfa389824a38";
   my_spotify.Getcurrentsong().then((data) => {

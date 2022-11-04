@@ -10,34 +10,42 @@ app.use(cors());
 app.use(express.json());
 
 var users = [
-    {
-        username: "user1",
-        email: "user1@mail.com",
-        password: "user1",
-        token: "token1",
-        services: [
-            {
-                name: "",
-                token: ""
-            }
-        ]
-    }
+  {
+    username: "user1",
+    email: "user1@mail.com",
+    password: "user1",
+    token: "token1",
+    services: [
+      {
+        name: "",
+        token: ""
+      }
+    ]
+  }
 ];
 
+passport.serializeUser(function (user, done) {
+  done(null, user);
+});
+  
+passport.deserializeUser(function (obj, done) {
+  done(null, obj);
+})
+
 app.use(session({
-    secret: 'keyboard cat',
-    resave: true,
-    saveUninitialized: true,
+  secret: 'keyboard cat',
+  resave: true,
+  saveUninitialized: true,
 }))
 
 app.post('/', function(req, res) {
-    users.push(req.body);
-    res.json({ "message": "User Succesfully added" });
-    res.end()
+  users.push(req.body);
+  res.json({ "message": "User Succesfully added" });
+  res.end()
 })
 
 app.get('/', function(req, res) {
-    usr_info = req.body;
+  usr_info = req.body;
 
     for (var i = 0; i < users.length; i++) {
         if (usr_info.username == users[i].username) {
