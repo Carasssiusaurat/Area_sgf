@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-// const { serviceSchema } = require('./Services');
 
 const service = new Schema({
     _service_id: mongoose.SchemaTypes.ObjectId,
@@ -12,7 +11,8 @@ const userSchema = new Schema({
     username: String,
     password: String,
     areas: [mongoose.SchemaTypes.ObjectId],
-    services: [service]
+    services: [service],
+    role: ['user', 'admin']
 });
 
 module.exports = mongoose.model('Users', userSchema);

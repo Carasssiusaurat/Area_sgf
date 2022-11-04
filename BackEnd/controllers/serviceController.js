@@ -1,10 +1,6 @@
-const Users = require('../model/Users');
 const Service = require('../model/Services');
-const express = require('express');
-const routes = express.Router();
-const bcrypt = require('bcryptjs');
 
-const newService = (req, res) => {
+const newservice = (req, res) => {
     const base_action_id = req.body.action_id.split(',');
     const base_reaction_id = req.body.react_id.split(',');
     const servName = req.body.servName;
@@ -39,15 +35,15 @@ const newService = (req, res) => {
     })
 }
 
-const getAllService = (req, res) => {
-    Service.find({}, (err, data) => {
+const getservices = (req, res) => {
+    Services.find({}, (err, data) => {
         if (err)
             return res.json({Error: err});
         return res.json(data);
     });
 }
 
-const getService = (req, res) => {
+const getservice = (req, res) => {
     if (!req.body.name) {
         res.status(400)
         return res.send("get service error: incomplete or erroneous request")
@@ -63,9 +59,15 @@ const getService = (req, res) => {
     });
 }
 
-//should ask:remove according to service id or name?
-//later more convient user side, as should be no need to ask db for services id again?
-const deleteService = (req, res) => {
+const delAllservice = (req, res) => {
+    Services.deleteMany({}, (err, data) => {
+        if (err)
+            return res.json({Error: err});
+        return res.json(data);
+    });
+}
+
+const delOneservice = (req, res) => {
     if (!req.body.name) {
         res.status(400)
         return res.send("del service error: incomplete or erroneous request")
@@ -99,9 +101,10 @@ const updateService = (req, res) => {
 }
 
 module.exports = {
-    newService,
-    getService,
-    getAllService,
-    deleteService,
     updateService
+    newservice,
+    getservices,
+    delAllservice,
+    getservice,
+    delOneservice,
 }
