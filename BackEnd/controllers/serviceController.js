@@ -3,22 +3,21 @@ const Service = require('../model/Services');
 const newservice = (req, res) => {
     const base_action_id = req.body.action_id.split(',');
     const base_reaction_id = req.body.react_id.split(',');
-    const servName = req.body.servName;
+    const service_name = req.body.service_name;
 
-
-    if(!base_action_id || !base_reaction_id || !servName) {
+    if(!base_action_id || !base_reaction_id || !service_name) {
         res.status(400)
         throw new Error('missing field : cannot add service')
     }
     const action_id = [...new Set(base_action_id)];
     const reaction_id = [...new Set(base_reaction_id)];
 
-    Service.findOne({name: servName}, (err, data) => {
+    Service.findOne({name: service_name}, (err, data) => {
         if (!data) {
         const new_service = new Service({
             action_id: action_id,
             reaction_id: reaction_id,
-            name: servName
+            name: service_name
         });
         new_service.save((err, data) => {
             if (err)
@@ -44,12 +43,12 @@ const getservices = (req, res) => {
 }
 
 const getservice = (req, res) => {
-    if (!req.body.name) {
+    if (!req.params.name) {
         res.status(400)
         return res.send("get service error: incomplete or erroneous request")
     }
 
-    Service.findOne({name:req.body.name}, (err, data) => {
+    Service.findOne({name: req.params.name}, (err, data) => {
         if (err)
             return res.json({Error: err});
         if (!data) {
@@ -68,11 +67,11 @@ const delAllservice = (req, res) => {
 }
 
 const delOneservice = (req, res) => {
-    if (!req.body.name) {
+    if (!req.params.name) {
         res.status(400)
         return res.send("del service error: incomplete or erroneous request")
     }
-    Service.deleteOne({name:req.body.name}, (err, data) => {
+    Service.deleteOne({name:req.params.name}, (err, data) => {
         if (err) {
             return res.json({Error: err});
         }
@@ -84,15 +83,15 @@ const delOneservice = (req, res) => {
 const updateservice = (req, res) => {
     const base_action_id = req.body.action_id.split(',');
     const base_reaction_id = req.body.react_id.split(',');
-    const servName = req.body.servName;
+    const service_name = req.params.name;
 
-    if (!base_action_id || !base_reaction_id || !servName) {
+    if (!base_action_id || !base_reaction_id || !service_name) {
         res.status(400)
         throw new Error('missing field : cannot update service')
     }
     const action_id = [...new Set(base_action_id)];
     const reaction_id = [...new Set(base_reaction_id)];
-    Service.updateOne({name:servName}, {$set: {"action_id": action_id, "reaction_id": reaction_id}}, (err, data) => {
+    Service.updateOne({name: service_name}, {$set: {"action_id": action_id, "reaction_id": reaction_id}}, (err, data) => {
         if (err) {
             res.status(400)
             return res.json({Error: err});}

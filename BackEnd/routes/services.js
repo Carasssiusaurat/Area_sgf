@@ -2,19 +2,21 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const upload = multer();
+const { protect } = require('../middleware/authMiddleware');
+
 const serviceController = require('../controllers/serviceController');
 
-router.get('/service', serviceController.getservices)
+router.get('/service', protect, serviceController.getservices)
 
-router.post('/service', upload.none(), serviceController.newservice)
+router.post('/service', protect, upload.none(), serviceController.newservice)
 
-router.delete('/service', serviceController.delAllservice)
+router.delete('/service', protect, serviceController.delAllservice)
 
-router.get('/service/:id', serviceController.getservice)
+router.get('/service/:name', protect, serviceController.getservice)
 
-router.put('/service/:id', serviceController.updateservice)
+router.put('/service/:name', protect, serviceController.updateservice)
 
-router.delete('/service/:id', serviceController.delOneservice)
+router.delete('/service/:name', protect, serviceController.delOneservice)
 
 // router.post('/service/:id/action', serviceController.addaction)
 

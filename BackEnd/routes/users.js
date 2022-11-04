@@ -3,62 +3,30 @@ const router = express.Router();
 const multer = require('multer');
 const upload = multer();
 const userController = require('../controllers/userController');
-const serviceController = require('../controllers/serviceController');
-const actionController =  require('../controllers/actionController')
-const reactionController =  require('../controllers/reactionController')
-const areaController =  require('../controllers/areaController')
 const { protect } = require('../middleware/authMiddleware');
 
 //admin
-router.get('/user', userController.getusers)
+router.get('/user', protect, userController.getusers)
 
-router.post('/user', upload.none(), userController.newuser)
+router.post('/user', protect, upload.none(), userController.newuser)
 
 //admin -> verif jwt -> verif que role == 'admin'
-router.delete('/user', userController.delAlluser)
+router.delete('/user', protect, userController.delAlluser)
 
-router.get('/user/:id', userController.getuser)
+router.get('/user/:id', protect, userController.getuser)
 
-router.put('/user/:id', userController.moduser)
+router.put('/user/:id', protect, userController.moduser)
 
-router.delete('/user/:id', userController.delOneuser)
+router.delete('/user/:id', protect, userController.delOneuser)
 
-router.put('/user/:id/service', userController.addservice)
+router.put('/user/:id/service', protect, userController.addservice)
 
-router.put('/user/:uid/service/:sid', userController.modservice)
+router.put('/user/:uid/service/:sid', protect, userController.modservice)
 
-router.delete('/user/:uid/service/:sid', userController.delOneservice)
+router.delete('/user/:uid/service/:sid', protect, userController.delOneservice)
 
-router.delete('/user/:uid/service', userController.delAllservice)
+router.delete('/user/:uid/service', protect, userController.delAllservice)
 
 router.post('/login', userController.login)
-
-//(put past this point into own files:
-router.post('/service', protect, serviceController.newservice)
-router.get('/services', protect, serviceController.getservices)
-router.get('/service', protect, serviceController.getservice)
-router.delete('/service', protect, serviceController.delAllservice)
-router.patch('/service', protect, serviceController.updateservice)
-
-
-router.post('/action', protect, actionController.newAction)
-router.get('/action', protect, actionController.getAction)
-router.delete('/action', protect, actionController.deleteAction)
-router.patch('/action', protect, actionController.updateAction)
-
-router.post('/reaction', protect, reactionController.newReaction)
-router.get('/reaction', protect, reactionController.getReaction)
-router.delete('/reaction', protect, reactionController.deleteReaction)
-router.patch('/reaction', protect, reactionController.updateReaction)
-
-router.post('/area', protect, areaController.newArea)
-router.get('/area/Act', protect, areaController.getAreaAct)
-router.get('/area/React', protect, areaController.getAreaReact)
-router.get('/area', protect, areaController.getArea)
-router.get('/area', protect, areaController.getAllArea)
-router.delete('/area', protect, areaController.deleteArea)
-router.patch('/area', protect, areaController.updateArea)
-router.patch('/area/state', protect, areaController.updateAreaState)
-
 
 module.exports = router;
