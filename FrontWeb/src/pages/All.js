@@ -1,12 +1,13 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Navigation from "../components/Navigation";
-import Services from "../components/Services";
+import AllServices from "../components/AllServices";
+import Card from "../components/Card";
 
 const All = () => {
   return (
     <div>
       <Navigation></Navigation>
-      <Services></Services>
+      <AllServices></AllServices>
     </div>
   );
 };

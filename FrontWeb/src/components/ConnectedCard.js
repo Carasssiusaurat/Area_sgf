@@ -1,21 +1,19 @@
 import React, { useEffect, useState } from "react";
 
-const Card = ({ name, img_url }) => {
-  const EnableService = async () => {
+const ConnectedCard = ({ name, img_url, id }) => {
+  const DisableService = async () => {
     const res = await fetch(
-      "http://localhost:8080/user/" + sessionStorage.getItem("id") + "/service",
+      "http://localhost:8080/user/" +
+        sessionStorage.getItem("id") +
+        "/service/" +
+        id,
       {
-        method: "PUT",
+        method: "DELETE",
         headers: {
           Authorization: "Bearer " + sessionStorage.getItem("token"),
-          "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          name: name,
-        }),
       }
     );
-    console.log(sessionStorage.getItem("token"));
   };
   return (
     <li className="card">
@@ -28,11 +26,11 @@ const Card = ({ name, img_url }) => {
       </div>
       <div className="infos">
         <h2>Connected since:</h2>
-        <button onClick={EnableService}>Enable</button>
+        <button onClick={DisableService}>Disable</button>
         <div className="separator"></div>
       </div>
     </li>
   );
 };
 
-export default Card;
+export default ConnectedCard;

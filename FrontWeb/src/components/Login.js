@@ -1,41 +1,20 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Home from "../pages/Home";
 
-const Auth = ({ Text }) => {
+const Login_user = () => {
   const [mail, setMail] = useState([]);
   const [password, setPassword] = useState([]);
-  const [already_exist_error, setAlready] = useState([]);
+  const [Invalid_credentials, setInvalidCredentials] = useState([]);
   const navigate = useNavigate();
 
-  const register = async () => {
-    setAlready("");
+  const login = async () => {
+    setInvalidCredentials("");
     if (mail.length === 0 || password.length === 0) {
-      setAlready("Invalid credentials");
+      setInvalidCredentials("Invalid credentials");
       return;
     }
-    try {
-      const res = await fetch("http://localhost:8080/user", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: mail,
-          password: password,
-        }),
-      });
-      const response = await res.json();
-      console.log(response.message);
-      if (response.message === "user already exists")
-        setAlready("User already exists");
-      else getToken();
-    } catch (error) {
-      throw new Error("Issue with Register", error.message);
-    }
-  };
-
-  const getToken = async () => {
     try {
       const res = await fetch("http://localhost:8080/login", {
         method: "POST",
@@ -48,10 +27,18 @@ const Auth = ({ Text }) => {
         }),
       });
       const response = await res.json();
-      sessionStorage.setItem("token", response.token);
-      navigate("/home");
+      if (response.message === "username doesnt exist")
+        setInvalidCredentials("Username doesnt exist");
+      else if (response.message === "password incorrect")
+        setInvalidCredentials("Password incorrect");
+      else {
+        sessionStorage.setItem("token", response.token);
+        sessionStorage.setItem("id", response.userId);
+        console.log(sessionStorage.getItem("token"));
+        navigate("/home");
+      }
     } catch (error) {
-      throw new Error("Issue with Token", error.message);
+      throw new Error("Issue with Register", error.message);
     }
   };
 
@@ -75,15 +62,15 @@ const Auth = ({ Text }) => {
         />
       </div>
       <div className="already-exist">
-        <h1>{already_exist_error}</h1>
+        <h1>{Invalid_credentials}</h1>
       </div>
       <div className="login"></div>
-      <a class="button" onClick={register}>
-        Sign Up
+      <a class="button" onClick={login}>
+        Login
       </a>
       <h2 class="hr-lines"> OR </h2>
     </div>
   );
 };
 
-export default Auth;
+export default Login_user;
