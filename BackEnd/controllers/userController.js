@@ -104,8 +104,6 @@ const addservice = async (req, res) => {
     const service_to_add = await Services.findOne({name: req.body.name});
     if (!user_to_update || !service_to_add)
         return res.status(404).json({Error: "not found"})
-    console.log(user_to_update.services)
-    console.log(service_to_add._id)
     try {
         if (user_to_update.services.some(service => service.id == service_to_add._id))
             return res.status(200).json({message: "Service already used"});

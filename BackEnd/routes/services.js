@@ -14,9 +14,15 @@ router.delete('/service', protect, serviceController.delAllservice)
 
 router.get('/service/:name', protect, serviceController.getservice)
 
+router.get('service/:id', protect, serviceController.getservicebyid)
+
 router.put('/service/:name', protect, serviceController.updateservice)
 
+router.put('/service/:id', protect, serviceController.updateservicebyid)
+
 router.delete('/service/:name', protect, serviceController.delOneservice)
+
+router.delete('/service/:id', protect, serviceController.delOneservicebyid)
 
 // router.post('/service/:id/action', serviceController.addaction)
 

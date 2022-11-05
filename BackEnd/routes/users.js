@@ -21,7 +21,7 @@ router.delete('/user/:id', protect, userController.delOneuser)
 
 router.put('/user/:id/service', protect, userController.addservice)
 
-router.put('/user/:uid/service/:sid', protect, userController.modservice)
+router.put('/user/:uid/service/:sid', protect, upload.none(), userController.modservice)
 
 router.delete('/user/:uid/service/:sid', protect, userController.delOneservice)
 

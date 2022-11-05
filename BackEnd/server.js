@@ -4,6 +4,8 @@ const mongoose = require('mongoose');
 const connectDB = require('./config/dbConn');
 const PORT = process.env.PORT || 8080;
 const bodyParser = require('body-parser');
+const IP = require('ip');
+const Services = require('./model/Services');
 const userRoutes = require('./routes/users');
 const serviceRoutes = require('./routes/services');
 const actionRoutes = require('./routes/actions');
@@ -33,6 +35,24 @@ connectDB();
 mongoose.connection.once('open', () => {
     console.log('connected to MongoDB');
 })
+
+app.use('/about.json', async (req, res) => {
+    const host = IP.address();
+    const current_time = new Date().getTime();
+    const services_not_filtered = await Services.find();
+    const services = services_not_filtered.map(function(service) {
+        return {
+            name: service.name,
+            actions: service.action_id,
+            reactions: service.reaction_id
+        }
+    });
+    console.log(services);
+    res.json({
+        "Clients": {"host": host},
+        "Server": {"current_time": current_time, services}
+    });
+});
 
 app.use('/', userRoutes);
 
