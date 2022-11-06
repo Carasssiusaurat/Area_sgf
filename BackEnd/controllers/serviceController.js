@@ -118,6 +118,10 @@ const updateservice = (req, res) => {
   );
 };
 
+const connectservice = (req, res) => {
+  
+};
+
 module.exports = {
   updateservice,
   newservice,
@@ -126,4 +130,5 @@ module.exports = {
   getservice,
   getservicebyid,
   delOneservice,
+  connectservice,
 };

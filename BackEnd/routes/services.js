@@ -14,6 +14,8 @@ router.delete("/service", protect, serviceController.delAllservice);
 
 router.get("/service/:id", protect, serviceController.getservicebyid);
 
+router.get("/service/:id/connect", protect, serviceController.connectservice);
+
 router.get("/service/:name", protect, serviceController.getservice);
 
 router.put("/service/:name", protect, serviceController.updateservice);

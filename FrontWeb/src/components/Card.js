@@ -28,7 +28,7 @@ const Card = ({ name, img_url }) => {
       </div>
       <div className="infos">
         <h2>Connected since:</h2>
-        <button onClick={EnableService}>Enable</button>
+        <button onClick={EnableService}>Connect</button>
         <div className="separator"></div>
       </div>
     </li>
