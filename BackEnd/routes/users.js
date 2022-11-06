@@ -3,15 +3,16 @@ const router = express.Router();
 const multer = require("multer");
 const upload = multer();
 const userController = require("../controllers/userController");
-const { protect } = require("../middleware/authMiddleware");
+const { protect, admin } = require("../middleware/authMiddleware");
 
 //admin
-router.get("/user", userController.getusers);
+router.get("/user", admin, userController.getusers);
 
+//register
 router.post("/user", upload.none(), userController.newuser);
 
-//admin -> verif jwt -> verif que role == 'admin'
-router.delete("/user", protect, userController.delAlluser);
+//admin
+router.delete("/user", admin, userController.delAlluser);
 
 router.get("/user/:id", protect, userController.getuser);
 
