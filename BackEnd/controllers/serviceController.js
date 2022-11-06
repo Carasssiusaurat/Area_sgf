@@ -159,5 +159,5 @@ module.exports = {
     delOneservice,
     getservicebyid,
     updateservicebyid,
-
+    delOneservicebyid
 }
