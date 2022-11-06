@@ -33,7 +33,7 @@ class GetServicesId extends React.Component {
   render() {
     const { isLoaded, items } = this.state;
 
-    if (!isLoaded) return <div>Loading...</div>;
+    if (!isLoaded) return;
 
     return (
       <div className="test">
