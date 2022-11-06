@@ -74,7 +74,7 @@ const getservice = (req, res) => {
 };
 
 const delAllservice = (req, res) => {
-  Services.deleteMany({}, (err, data) => {
+  Service.deleteMany({}, (err, data) => {
     if (err) return res.json({ Error: err });
     return res.json(data);
   });
@@ -118,10 +118,6 @@ const updateservice = (req, res) => {
   );
 };
 
-const connectservice = (req, res) => {
-  
-};
-
 module.exports = {
   updateservice,
   newservice,
@@ -130,5 +126,4 @@ module.exports = {
   getservice,
   getservicebyid,
   delOneservice,
-  connectservice,
 };

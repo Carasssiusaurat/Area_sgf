@@ -3,6 +3,11 @@ const Services = require("../model/Services");
 const asyncHandler = require("express-async-handler");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { Spotify } = require("../services/Spotify")
+
+const classService = [
+  {"name": "Spotify", "class": Spotify},
+];
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -115,10 +120,14 @@ const addservice = async (req, res) => {
       )
     )
       return res.status(200).json({ message: "Service already used" });
+    const new_service = classService.find(service => service.name == service_to_add.name);
+    if (!new_service)
+      return res.status(404).json({ message: "class not found" });
+    const service_token = new_service.class.getToken();
     user_to_update.services.push({
       _id: service_to_add._id,
       actif: true,
-      token: "TOKEN",
+      token: service_token,
     });
     user_to_update.save();
     return res.status(200).json({ message: "Service added" });
@@ -127,6 +136,29 @@ const addservice = async (req, res) => {
     return res.status(500).json({ error: "internal error" });
   }
 };
+
+// const connectservice = async (req, res) => {
+//   const user_to_update = await Users.findOne({ _id: req.params.uid });
+//   const service_to_add = await Services.findOne({ _id: req.params.sid });
+//   if (!user_to_update || !service_to_add)
+//     return res.status(404).json({ Error: "not found" });
+//   // Services.findOne({ _id: req.params.id }, (err, data) => {
+//   //   if (err) return res.json({ Error: err });
+//   //   if (!data) {
+//   //     res.status(404);
+//   //     return res.send("service not found");
+//   //   }
+//   //   const service = classService.find((service) => service.name === data.name);
+//   //   if (!service) {
+//   //     res.status(404);
+//   //     return res.send("class not found");
+//   //   }
+//   //   service.class.connect().then((url) => {
+//   //     res.status(200);
+//   //     return res.json(url);
+//   //   });
+//   // });
+// };
 
 const modservice = (req, res) => {
   Users.findOne({ _id: req.params.uid }, (err, data) => {
@@ -169,6 +201,7 @@ module.exports = {
   delAlluser,
   delOneuser,
   addservice,
+  connectservice,
   modservice,
   delOneservice,
   delAllservice,
