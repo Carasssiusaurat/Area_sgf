@@ -156,7 +156,6 @@ module.exports = {
     getuser,
     getusers,
     moduser,
-    login,
     delAlluser,
     delOneuser,
     addservice,
