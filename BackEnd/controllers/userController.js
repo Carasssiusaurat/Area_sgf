@@ -3,11 +3,6 @@ const Services = require("../model/Services");
 const asyncHandler = require("express-async-handler");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { Spotify } = require("../services/Spotify")
-
-const classService = [
-  {"name": "Spotify", "class": Spotify},
-];
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -105,12 +100,45 @@ const login = asyncHandler(async (req, res) => {
     .catch((err) => res.status(500).json({ err }));
 });
 
-const addservice = async (req, res) => {
+const addservice_copy = async (usr_id, service_id, token) => {
+  var response = "";
+  const user_to_update = await Users.findOne({ _id: usr_id });
+  const service_to_add = await Services.findOne({ _id: service_id });
+  // console.log(user_to_update);
+  // console.log(service_to_add);
+  if (!user_to_update)
+    return {status: 404, message: "User not found"};
+  if (!service_to_add)
+    return {status: 404, message: "Service not found"};
+  console.log(user_to_update.services.filter((service) => service.id === service_to_add._id.toString()));
+  console.log(service_to_add._id.toString());
+  try {
+    if (user_to_update.services.filter(service => service.id === service_to_add._id.toString()).length > 0) {
+      response = {status: 300, message: "Service already used"};
+      return response;
+    }
+    user_to_update.services.push({
+      _id: service_to_add._id,
+      actif: true,
+      token: token,
+    });
+    user_to_update.save();
+    response =  {status: 200, message: "Service added"};
+  } catch (err) {
+    console.log("addservice", err);
+    response = {status: 500, message: "Internal error"};
+  }
+  return response;
+};
+
+const addservice = async (req, res, next) => {
   console.log(req.body);
   const user_to_update = await Users.findOne({ _id: req.params.id });
-  const service_to_add = await Services.findOne({ name: req.body.name });
-  if (!user_to_update || !service_to_add)
-    return res.status(404).json({ Error: "not found" });
+  const service_to_add = await Services.findOne({ _id: req.body.id });
+  if (!user_to_update)
+    return res.status(404).json({ Error: "User not found" });
+  if (!service_to_add)
+    return res.status(404).json({ Error: "Service not found" });
   console.log(user_to_update.services);
   console.log(service_to_add._id);
   try {
@@ -119,15 +147,10 @@ const addservice = async (req, res) => {
         (service) => service.id == service_to_add._id
       )
     )
-      return res.status(200).json({ message: "Service already used" });
-    const new_service = classService.find(service => service.name == service_to_add.name);
-    if (!new_service)
-      return res.status(404).json({ message: "class not found" });
-    const service_token = new_service.class.getToken();
+    return res.status(200).json({ message: "Service already used" });
     user_to_update.services.push({
       _id: service_to_add._id,
       actif: true,
-      token: service_token,
     });
     user_to_update.save();
     return res.status(200).json({ message: "Service added" });
@@ -193,6 +216,7 @@ const delAllservice = async (req, res) => {
 };
 
 module.exports = {
+  addservice_copy,
   newuser,
   getuser,
   getusers,
@@ -201,7 +225,7 @@ module.exports = {
   delAlluser,
   delOneuser,
   addservice,
-  connectservice,
+//  connectservice,
   modservice,
   delOneservice,
   delAllservice,

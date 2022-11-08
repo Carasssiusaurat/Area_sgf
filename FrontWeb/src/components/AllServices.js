@@ -20,7 +20,7 @@ const AllServices = () => {
   return (
     <>
       {response.map((service, index) => (
-        <Card key={index} name={service.name} img_url={service.img_url} />
+        <Card key={index} name={service.name} img_url={service.img_url} url={service.connection_url} service_id={service._id}/>
       ))}
     </>
   );

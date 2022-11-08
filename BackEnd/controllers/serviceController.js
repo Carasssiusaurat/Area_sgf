@@ -5,6 +5,7 @@ const newservice = (req, res) => {
   const base_reaction_id = req.body.react_id.split(",");
   const service_name = req.body.service_name;
   const logo = req.body.logo_url;
+  const connection_url = req.body.connection_url;
 
   if (!base_action_id || !base_reaction_id || !service_name) {
     res.status(400);
@@ -20,6 +21,7 @@ const newservice = (req, res) => {
         reaction_id: reaction_id,
         name: service_name,
         img_url: logo,
+        connection_url: connection_url,
       });
       new_service.save((err, data) => {
         if (err) return res.json({ Error: err });
@@ -98,8 +100,10 @@ const updateservice = (req, res) => {
   const base_action_id = req.body.action_id.split(",");
   const base_reaction_id = req.body.react_id.split(",");
   const service_name = req.params.name;
+  const logo = req.body.logo_url;
+  const connection_url = req.body.connection_url;
 
-  if (!base_action_id || !base_reaction_id || !service_name) {
+  if (!base_action_id || !base_reaction_id || !service_name || !logo || !connection_url) {
     res.status(400);
     throw new Error("missing field : cannot update service");
   }
@@ -107,7 +111,7 @@ const updateservice = (req, res) => {
   const reaction_id = [...new Set(base_reaction_id)];
   Service.updateOne(
     { name: service_name },
-    { $set: { action_id: action_id, reaction_id: reaction_id } },
+    { $set: { action_id: action_id, reaction_id: reaction_id , img_url: logo, connection_url: connection_url} },
     (err, data) => {
       if (err) {
         res.status(400);
