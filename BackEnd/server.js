@@ -11,8 +11,9 @@ const reactionRoutes = require("./routes/reactions");
 const areaRoutes = require("./routes/areas");
 const cors = require("cors");
 const app = express();
-const session = require('express-session');
-const spotifyrouter = require('./services/Spotify.js').router;
+const session = require("express-session");
+const spotifyrouter = require("./services/Spotify.js").router;
+const googleRoutes = require("./services/google");
 
 app.use(cors());
 
@@ -31,11 +32,13 @@ app.use(cors());
 
 app.use(express.json());
 
-app.use(session({
-  secret: 'keyboard cat',
-  resave: true,
-  saveUninitialized: true,
-}))
+app.use(
+  session({
+    secret: "keyboard cat",
+    resave: true,
+    saveUninitialized: true,
+  })
+);
 
 // connect to MongoDB
 connectDB();
@@ -55,6 +58,8 @@ app.use("/", reactionRoutes);
 app.use("/", areaRoutes);
 
 app.use("/spotify", spotifyrouter);
+
+app.use("/service/Google", googleRoutes);
 
 app.listen(PORT, () => {
   console.log(`server is running on port : ${PORT}`);
