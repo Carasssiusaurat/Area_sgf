@@ -29,7 +29,6 @@ const getArea = (req, res) => {
         res.status(400)
         return res.send("get Area error: incomplete or erroneous request")
     }
-
     Areas.findOne({_id:req.params.id}, (err, data) => {
         if (err)
             return res.json({Error: err});
@@ -46,7 +45,7 @@ const getAllArea = (req, res) => {
             return res.json({Error: err});
         if (!data) {
             res.status(404)
-            return res.send("no Area found for user")}
+            return res.send("no Area found")}
         return res.json(data);
     });
 }
@@ -78,7 +77,6 @@ const getAreaReact = (req, res) => {
 const updateArea = (req, res) => {
     const base_action_id = req.body.action_id.split(',');
     const base_reaction_id = req.body.react_id.split(',');
-
     if (!req.params.id || !base_action_id || !base_reaction_id) {
         res.status(400)
         throw new Error('missing field : cannot update area')

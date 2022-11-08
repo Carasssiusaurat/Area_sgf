@@ -15,11 +15,8 @@ const newAction = (req, res) => {
 }
 
 const getAction = (req, res) => {
-    if (!req.params.id) {
-        res.status(400)
-        return res.send("get Action error: incomplete or erroneous request")
-    }
-
+    if (!req.params.id)
+        return res.status(400).send("get Action error: incomplete or erroneous request")
     Action.findOne({_id:req.params.id}, (err, data) => {
         if (err)
             return res.json({Error: err});

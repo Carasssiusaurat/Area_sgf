@@ -2,16 +2,17 @@ const passport = require('passport');
 const express = require('express');
 const Router = require('express').Router;
 const axios = require('axios');
-const router = Router();
+const router = express.Router();
 const fs = require('fs');
+const { Interface } = require('readline');
 require('dotenv').config();
-
+const {addservice_copy} = require('../controllers/userController');
 const SCOPES = ["user-read-currently-playing", "user-read-playback-state", "user-modify-playback-state"]
 const SpotifyStrategy = require('passport-spotify').Strategy;
 const actual_device = '';
 let devices = [];
 
-class Spotify {
+class my_Spotify {
   Getcurrentsong = async () => {
     await axios.get('https://api.spotify.com/v1/me/player/currently-playing', {
       headers: {
@@ -122,20 +123,7 @@ class Spotify {
   }
 }
 
-const my_spotify = new Spotify();
-
-passport.use(
-  new SpotifyStrategy(
-    {
-      clientID: process.env.SPOTIFY_CLIENT_ID,
-      clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-      callbackURL: 'http://localhost:3000/spotify/auth/callback'
-    },
-    function(accessToken, refreshToken, expires_in, profile, done) {
-      return done(null, {accessToken});
-    }
-  )
-);
+const my_spotify = new my_Spotify();
 
 var SpotifyToken = ''
 
@@ -162,21 +150,49 @@ passport.deserializeUser(function (obj, done) {
   done(null, obj);
 })
 
-router.get('/auth', passport.authenticate('spotify', {scope: SCOPES, showDialog: true}));
+passport.use(
+  new SpotifyStrategy(
+    {
+      clientID: process.env.SPOTIFY_CLIENT_ID,
+      clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
+      callbackURL: 'http://localhost:8080/spotify/auth/callback',
+      passReqToCallback: true
+    },
+    function(req, accessToken, refreshToken, expires_in, profile, done) {
+      console.log(req.query.state)
+      return done(null, {accessToken});
+    }
+  )
+);
+
+const oui = async (req, res, next) => {
+  //console.log("user id = " + req.query.token + "server id = " + req.query.service_id);
+  passport.authenticate('spotify', {scope: SCOPES, showDialog: true, state: "token=" + req.query.token + ",serviceid=" + req.query.service_id})(req, res, next);
+}
+
+router.get('/auth', oui);
+
 
 router.get('/auth/callback',
   passport.authenticate('spotify', { failureRedirect: '/login' }),
-  function(req, res) {
+  async function (req, res) {
+    const user_id = req.query.state.split(",")[0].split("=")[1];
+    const service_id = req.query.state.split(",")[1].split("=")[1];
+    console.log("user id = " + user_id + " server id = " + service_id);
+    console.log("pute pute pute pute pute pute pute ")
     SpotifyToken = req.user.accessToken;
     console.log('token: '+ req.user.accessToken);
-    
-    //res.redirect('http://localhost:3001/spotify');
+    response = await addservice_copy(user_id, service_id, req.user.accessToken);
+    console.log(response);
+    if (response.status != 200) {
+      console.log("error");
+      console.log(response.message)
+    }
+    console.log("service added");
+    res.redirect('http://localhost:8081/home');
+    return req.user.accessToken;
   }
 );
-
-router.get('/getSpotifyToken', (req, res) => {
-  res.send(SpotifyToken);
-});
 
 router.get('/get_current_song', function(req, res) {
   my_spotify.Getcurrentsong().then((data) => {
@@ -212,4 +228,4 @@ router.post('/set_workflow', async function(req, res) {
   my_spotify.isWorkflow(trigger, reaction);
 });
 
-module.exports = router;
+module.exports = {router, my_Spotify};
