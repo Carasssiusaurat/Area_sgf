@@ -160,29 +160,6 @@ const addservice = async (req, res, next) => {
   }
 };
 
-// const connectservice = async (req, res) => {
-//   const user_to_update = await Users.findOne({ _id: req.params.uid });
-//   const service_to_add = await Services.findOne({ _id: req.params.sid });
-//   if (!user_to_update || !service_to_add)
-//     return res.status(404).json({ Error: "not found" });
-//   // Services.findOne({ _id: req.params.id }, (err, data) => {
-//   //   if (err) return res.json({ Error: err });
-//   //   if (!data) {
-//   //     res.status(404);
-//   //     return res.send("service not found");
-//   //   }
-//   //   const service = classService.find((service) => service.name === data.name);
-//   //   if (!service) {
-//   //     res.status(404);
-//   //     return res.send("class not found");
-//   //   }
-//   //   service.class.connect().then((url) => {
-//   //     res.status(200);
-//   //     return res.json(url);
-//   //   });
-//   // });
-// };
-
 const modservice = (req, res) => {
   Users.findOne({ _id: req.params.uid }, (err, data) => {
     if (err) return res.json({ Error: err });

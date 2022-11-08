@@ -96,6 +96,20 @@ const delOneservice = (req, res) => {
   });
 };
 
+const delOneservicebyid = (req, res) => {
+  if (!req.params.id) {
+      res.status(400)
+      return res.send("del service error: incomplete or erroneous request")
+  }
+  Service.deleteOne({name:req.params.id}, (err, data) => {
+      if (err) {
+          return res.json({Error: err});
+      }
+      res.status(200)
+      return res.json(data);
+  });
+}
+
 const updateservice = (req, res) => {
   const base_action_id = req.body.action_id.split(",");
   const base_reaction_id = req.body.react_id.split(",");
@@ -122,6 +136,24 @@ const updateservice = (req, res) => {
   );
 };
 
+const updateservicebyid = (req, res) => {
+  const base_action_id = req.body.action_id.split(',');
+  const base_reaction_id = req.body.react_id.split(',');
+  const service_id = req.params.id;
+
+  if (!base_action_id || !base_reaction_id || !service_id) {
+      res.status(400)
+      throw new Error('missing field : cannot update service')
+  }
+  const action_id = [...new Set(base_action_id)];
+  const reaction_id = [...new Set(base_reaction_id)];
+  Service.updateOne({name: service_id}, {$set: {"action_id": action_id, "reaction_id": reaction_id}}, (err, data) => {
+      if (err) {
+          res.status(400)
+          return res.json({Error: err});}
+      return res.json(data);
+  });
+}
 module.exports = {
   updateservice,
   newservice,
@@ -130,4 +162,6 @@ module.exports = {
   getservice,
   getservicebyid,
   delOneservice,
+  delOneservicebyid,
+  updateservicebyid,
 };
