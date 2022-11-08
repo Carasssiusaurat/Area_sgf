@@ -154,6 +154,31 @@ const updateservicebyid = (req, res) => {
       return res.json(data);
   });
 }
+
+const getActions = async (req, res) => {
+  if (!req.params.id) {
+      return res.status(400).send('missing field : cannot get service actions')
+  }
+  const service = await Service.findOne({_id: req.params.id});
+  if (!service) {
+      return res.status(404).send('service not found')
+  }
+  return res.json(service.action_id);
+};
+
+const getReactions = async (req, res) => {
+  if (!req.params.id) {
+      res.status(400)
+      throw new Error('missing field : cannot get service reactions')
+  }
+  const service = await Service.findOne({name: req.params.id});
+  if (!service) {
+      res.status(404)
+      throw new Error('service not found')
+  }
+  return res.json(service.reaction_id);
+};
+
 module.exports = {
   updateservice,
   newservice,
@@ -164,4 +189,6 @@ module.exports = {
   delOneservice,
   delOneservicebyid,
   updateservicebyid,
+  getActions,
+  getReactions,
 };

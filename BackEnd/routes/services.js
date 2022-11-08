@@ -23,6 +23,10 @@ router.delete("/service/:name", admin, serviceController.delOneservice);
 
 router.delete("/service/:id", admin, serviceController.delOneservicebyid);
 
+router.get('/service/:id/actions', protect, serviceController.getActions);
+
+router.get('/service/:id/reactions', protect, serviceController.getReactions);
+
 // router.post('/service/:id/action', serviceController.addaction)
 
 // router.post('/service/:id/reaction', serviceController.addreaction)
