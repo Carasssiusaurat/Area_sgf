@@ -50,12 +50,14 @@ const getservice = async (req, res) => {
     if (!req.params.id) {
         return res.status(400).send("get service error: incomplete or erroneous request")
     }
-    const servicebyid = await Services.findOne({id: req.params.id});
+    // console.log(req.params.id)
+    const servicebyid = await Services.findOne({_id: req.params.id});
+    // console.log(servicebyid)
     if (!servicebyid) {
-        const servicebyname = await Services.findOne({name: req.params.id});
-        if (!servicebyname)
+        // const servicebyname = await Services.findOne({name: req.params.id});
+        // if (!servicebyname)
             return res.status(404).send("get service error: service not found")
-        return res.json(servicebyname);
+        // return res.json(servicebyname);
     }
     return res.json(servicebyid);
 }
