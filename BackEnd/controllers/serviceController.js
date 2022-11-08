@@ -1,25 +1,27 @@
-const Service = require('../model/Services');
+const { isValidObjectId } = require('mongoose');
+const Services = require('../model/Services');
 
 const newservice = (req, res) => {
     const base_action_id = req.body.action_id.split(',');
     const base_reaction_id = req.body.react_id.split(',');
     const logo = req.body.logo_url;
+    const connection = req.body.connection_url;
     const service_name = req.body.service_name;
 
     if(!base_action_id || !base_reaction_id || !service_name) {
-        res.status(400)
-        throw new Error('missing field : cannot add service')
+        return res.status(400).send('missing field : cannot add service')
     }
     const action_id = [...new Set(base_action_id)];
     const reaction_id = [...new Set(base_reaction_id)];
 
-    Service.findOne({name: service_name}, (err, data) => {
+    Services.findOne({name: service_name}, (err, data) => {
         if (!data) {
-        const new_service = new Service({
+        const new_service = new Services({
             action_id: action_id,
             reaction_id: reaction_id,
             name: service_name,
-            img_url: logo
+            img_url: logo,
+            connection_url: connection
         });
         new_service.save((err, data) => {
             if (err)
@@ -37,118 +39,80 @@ const newservice = (req, res) => {
 }
 
 const getAllservice = (req, res) => {
-    Service.find({}, (err, data) => {
+    Services.find({}, (err, data) => {
         if (err)
             return res.json({Error: err});
         return res.json(data);
     });
 }
 
-const getservice = (req, res) => {
-    if (!req.params.name) {
-        res.status(400)
-        return res.send("get service error: incomplete or erroneous request")
-    }
-
-    Service.findOne({name: req.params.name}, (err, data) => {
-        if (err)
-            return res.json({Error: err});
-        if (!data) {
-            res.status(404)
-            return res.send("service not found")}
-        return res.json(data);
-    });
-}
-
-const getservicebyid = (req, res) => {
+const getservice = async (req, res) => {
     if (!req.params.id) {
-        res.status(400)
-        return res.send("get service error: incomplete or erroneous request")
+        return res.status(400).send("get service error: incomplete or erroneous request")
     }
-
-    Service.findOne({name: req.params.id}, (err, data) => {
-        if (err)
-            return res.json({Error: err});
-        if (!data) {
-            res.status(404)
-            return res.send("service not found")}
-        return res.json(data);
-    });
+    const servicebyid = await Services.findOne({id: req.params.id});
+    if (!servicebyid) {
+        const servicebyname = await Services.findOne({name: req.params.id});
+        if (!servicebyname)
+            return res.status(404).send("get service error: service not found")
+        return res.json(servicebyname);
+    }
+    return res.json(servicebyid);
 }
 
 const delAllservice = (req, res) => {
-    Service.deleteMany({}, (err, data) => {
-        if (err)
-            return res.json({Error: err});
-        return res.json(data);
-    });
+    Services.deleteMany({})
 }
 
-const delOneservice = (req, res) => {
-    if (!req.params.name) {
-        res.status(400)
-        return res.send("del service error: incomplete or erroneous request")
-    }
-    Service.deleteOne({name:req.params.name}, (err, data) => {
-        if (err) {
-            return res.json({Error: err});
-        }
-        res.status(200)
-        return res.json(data);
-    });
-}
-
-const delOneservicebyid = (req, res) => {
-    if (!req.params.id) {
-        res.status(400)
-        return res.send("del service error: incomplete or erroneous request")
-    }
-    Service.deleteOne({name:req.params.id}, (err, data) => {
-        if (err) {
-            return res.json({Error: err});
-        }
-        res.status(200)
-        return res.json(data);
-    });
+//delete service by name or by id
+const delOneservice = async (req, res) => {
+    if (!req.params.id)
+        return res.status(400).send("del service error: incomplete or erroneous request")
+    const servicetoremove = isValidObjectId(req.params.id) ? await Services.findByIdAndDelete(req.params.id) : await Services.findOneAndDelete({name: req.params.id});
+    if (!servicetoremove)
+        return res.status(404).send("del service error: service not found")
+    servicetoremove.remove();
+    return res.json(servicetoremove);
 }
 
 const updateservice = (req, res) => {
     const base_action_id = req.body.action_id.split(',');
-    const base_reaction_id = req.body.react_id.split(',');
-    const service_name = req.params.name;
+    const base_reaction_id = req.body.reaction_id.split(',');
+    const service_name = req.params.id;
 
     if (!base_action_id || !base_reaction_id || !service_name) {
-        res.status(400)
-        throw new Error('missing field : cannot update service')
+        return res.status(400).send('missing field : cannot update service')
     }
     const action_id = [...new Set(base_action_id)];
     const reaction_id = [...new Set(base_reaction_id)];
-    Service.updateOne({name: service_name}, {$set: {"action_id": action_id, "reaction_id": reaction_id}}, (err, data) => {
+    Services.updateOne({_id: service_name}, {$set: {"action_id": action_id, "reaction_id": reaction_id}}, (err, data) => {
         if (err) {
-            res.status(400)
-            return res.json({Error: err});}
+            return res.status(400).json({Error: err});}
         return res.json(data);
     });
 }
 
-const updateservicebyid = (req, res) => {
-    const base_action_id = req.body.action_id.split(',');
-    const base_reaction_id = req.body.react_id.split(',');
-    const service_id = req.params.id;
-
-    if (!base_action_id || !base_reaction_id || !service_id) {
-        res.status(400)
-        throw new Error('missing field : cannot update service')
+const getActions = async (req, res) => {
+    if (!req.params.id) {
+        return res.status(400).send('missing field : cannot get service actions')
     }
-    const action_id = [...new Set(base_action_id)];
-    const reaction_id = [...new Set(base_reaction_id)];
-    Service.updateOne({name: service_id}, {$set: {"action_id": action_id, "reaction_id": reaction_id}}, (err, data) => {
-        if (err) {
-            res.status(400)
-            return res.json({Error: err});}
-        return res.json(data);
-    });
-}
+    const service = await Services.findOne({_id: req.params.id});
+    if (!service) {
+        return res.status(404).send('service not found')
+    }
+    return res.json(service.action_id);
+};
+
+const getReactions = async (req, res) => {
+    if (!req.params.id) {
+        return res.status(400).send('missing field : cannot get service reactions')
+    }
+    const service = await Services.findOne({_id: req.params.id});
+    if (!service) {
+        return res.status(404).send('service not found')
+    }
+    return res.json(service.reaction_id);
+};
 
 module.exports = {
     updateservice,
@@ -157,7 +121,6 @@ module.exports = {
     delAllservice,
     getservice,
     delOneservice,
-    getservicebyid,
-    updateservicebyid,
-    delOneservicebyid
+    getActions,
+    getReactions
 }

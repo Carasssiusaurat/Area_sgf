@@ -16,12 +16,12 @@ const newReaction = (req, res) => {
 }
 
 const getReaction = (req, res) => {
-    if (!req.body.id) {
+    if (!req.params.id) {
         res.status(400)
         return res.send("get Reaction error: incomplete or erroneous request")
     }
 
-    Reaction.findOne({_id: req.body.id}, (err, data) => {
+    Reaction.findOne({_id: req.params.id}, (err, data) => {
         if (err)
             return res.json({Error: err});
         if (!data) {
@@ -32,11 +32,11 @@ const getReaction = (req, res) => {
 }
 
 const deleteReaction = (req, res) => {
-    if (!req.body.id) {
+    if (!req.params.id) {
         res.status(400)
         return res.send("del Reaction error: incomplete or erroneous request")
     }
-    Reaction.deleteOne({_id :req.body.id}, (err, data) => {
+    Reaction.deleteOne({_id :req.params.id}, (err, data) => {
         if (err) {
             return res.json({Error: err});
         }
@@ -48,11 +48,11 @@ const deleteReaction = (req, res) => {
 const updateReaction = (req, res) => {
     const arguments = req.body.arguments;
 
-    if (!req.body.id || !arguments) {
+    if (!req.params.id || !arguments) {
         res.status(400)
         throw new Error('missing field : cannot update Reaction')
     }
-    Reaction.updateOne({_id:req.body.id}, {$set: {"args": arguments}}, (err, data) => {
+    Reaction.updateOne({_id:req.params.id}, {$set: {"args": arguments}}, (err, data) => {
         if (err) {
             res.status(400)
             return res.json({Error: err});}
@@ -60,10 +60,25 @@ const updateReaction = (req, res) => {
     });
 }
 
+const getAllReaction = (req, res) => {
+    Reaction.find({}, (err, data) => {
+        if (err)
+            return res.json({Error: err});
+        if (!data)
+            return res.status(404).send("Reaction not found")
+        return res.json(data);
+    });
+};
+
+const deleteAllReaction = (req, res) => {
+    Reaction.deleteMany({});
+};
+
 module.exports = {
     newReaction,
-    getReaction,//from ID
-    //getAllAction,//from AREA! not here! make more sense that way
+    getReaction,
+    getAllReaction,
     deleteReaction,
+    deleteAllReaction,
     updateReaction
 }

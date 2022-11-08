@@ -107,8 +107,9 @@ const addservice = async (req, res) => {
     try {
         if (user_to_update.services.some(service => service.id == service_to_add._id))
             return res.status(200).json({message: "Service already used"});
-        user_to_update.services.push({_id: service_to_add._id, actif: true, token: 'TOKEN'});
-        user_to_update.save();
+        user_to_update.services.push({_id: service_to_add._id, actif: true, _token: 'TOKEN'});
+        user_to_update.save();  
+        console.log(user_to_update)
         return res.status(200).json({message: "Service added"});
     } catch (err) {
         console.log("addservice", err)
@@ -116,6 +117,7 @@ const addservice = async (req, res) => {
     }
 }
 
+//nique sa mere ca crash ici
 const modservice = (req, res) => {
     Users.findOne({_id: req.params.uid}, (err, data) => {
         if (err)
@@ -134,8 +136,8 @@ const delOneservice = (req, res) => {
             return res.json({Error: err});
         if (!data)
             return res.json({message: "User doesn't exist !"});
-        data.service.splice(req.params.sid, 1);
-        data.save()
+        data.services.splice(req.params.sid, 1);
+        data.save();
         return res.json(data);
     });
 }
@@ -151,6 +153,23 @@ const delAllservice = async (req, res) => {
     }
 }
 
+const updatestate = async (req, res) => {
+    if (!req.params.uid || !req.params.sid)
+        return res.status(400).send('missing fields')
+    const user_to_update = await Users.findOne({_id: req.params.uid});
+    try {
+        if (user_to_update.services.filter(service => service._id == req.params.sid)) {
+            console.log()
+            user_to_update.services.filter(service => service._id == req.params.sid)[0].actif = !user_to_update.services.filter(service => service._id == req.params.sid)[0].actif
+            user_to_update.save();
+            return res.status(200).json({message: "User updated"});
+        }
+        return res.status(404).json({message: "Service not found"});
+    } catch (err) {
+        return res.status(500).json({ "error": 'internal error' });
+    }
+};
+
 module.exports = {
     newuser,
     getuser,
@@ -161,5 +180,7 @@ module.exports = {
     addservice,
     modservice,
     delOneservice,
-    delAllservice
+    delAllservice,
+    login,
+    updatestate
 };

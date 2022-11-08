@@ -6,6 +6,7 @@ const serviceSchema = new Schema({
     img_url: String,
     action_id: [mongoose.SchemaTypes.ObjectId],
     reaction_id: [mongoose.SchemaTypes.ObjectId],
+    connection_url: String,
 });
 
 module.exports = mongoose.model('Services', serviceSchema);

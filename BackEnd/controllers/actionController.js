@@ -15,12 +15,12 @@ const newAction = (req, res) => {
 }
 
 const getAction = (req, res) => {
-    if (!req.body.id) {
+    if (!req.params.id) {
         res.status(400)
         return res.send("get Action error: incomplete or erroneous request")
     }
 
-    Action.findOne({_id:req.body.id}, (err, data) => {
+    Action.findOne({_id:req.params.id}, (err, data) => {
         if (err)
             return res.json({Error: err});
         if (!data) {
@@ -42,11 +42,11 @@ const getAllAction = (req, res) => {
 }
 
 const deleteAction = (req, res) => {
-    if (!req.body.id) {
+    if (!req.params.id) {
         res.status(400)
         return res.send("del Action error: incomplete or erroneous request")
     }
-    Action.deleteOne({_id:req.body.id}, (err, data) => {
+    Action.deleteOne({_id:req.params.id}, (err, data) => {
         if (err) {
             return res.json({Error: err});
         }
@@ -58,11 +58,11 @@ const deleteAction = (req, res) => {
 const updateAction = (req, res) => {
     const arguments = req.body.arguments;
 
-    if (!req.body.id || !arguments) {
+    if (!req.params.id || !arguments) {
         res.status(400)
         throw new Error('missing field : cannot update Action')
     }
-    Action.updateOne({_id:req.body.id}, {$set: {"args": arguments}}, (err, data) => {
+    Action.updateOne({_id:req.params.id}, {$set: {"args": arguments}}, (err, data) => {
         if (err) {
             res.status(400)
             return res.json({Error: err});}
@@ -70,11 +70,15 @@ const updateAction = (req, res) => {
     });
 }
 
+const deleteAllAction = (req, res) => {
+    Action.deleteMany({});
+};
 
 module.exports = {
     newAction,
     getAction,
     getAllAction,
     deleteAction,
+    deleteAllAction,
     updateAction
 }
