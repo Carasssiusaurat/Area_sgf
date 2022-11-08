@@ -105,17 +105,44 @@ const addservice = async (req, res) => {
     if (!user_to_update || !service_to_add)
         return res.status(404).json({Error: "not found"})
     try {
-        if (user_to_update.services.some(service => service.id == service_to_add._id))
+        if (user_to_update.services.filter(service => service.id === service_to_add._id.toString()).length > 0)
             return res.status(200).json({message: "Service already used"});
+        console.log(service_to_add._id);
         user_to_update.services.push({_id: service_to_add._id, actif: true, _token: 'TOKEN'});
-        user_to_update.save();  
-        console.log(user_to_update)
+        user_to_update.save();
         return res.status(200).json({message: "Service added"});
     } catch (err) {
         console.log("addservice", err)
         return res.status(500).json({ "error": 'internal error' });
     }
 }
+
+const addservice_copy = async (usr_id, service_id, token) => {
+    var response = "";
+    const user_to_update = await Users.findOne({ _id: usr_id });
+    const service_to_add = await Services.findOne({ _id: service_id });
+    if (!user_to_update)
+      return {status: 404, message: "User not found"};
+    if (!service_to_add)
+      return {status: 404, message: "Service not found"};
+    try {
+      if (user_to_update.services.filter(service => service.id === service_to_add._id.toString()).length > 0) {
+        response = {status: 300, message: "Service already used"};
+        return response;
+      }
+      user_to_update.services.push({
+        _id: service_to_add._id,
+        actif: true,
+        token: token,
+      });
+      user_to_update.save();
+      response =  {status: 200, message: "Service added"};
+    } catch (err) {
+      console.log("addservice", err);
+      response = {status: 500, message: "Internal error"};
+    }
+    return response;
+};
 
 //nique sa mere ca crash ici
 const modservice = (req, res) => {
@@ -130,16 +157,18 @@ const modservice = (req, res) => {
     });
 }
 
-const delOneservice = (req, res) => {
-    Users.findOne({_id: req.params.uid}, (err, data) => {
-        if (err)
-            return res.json({Error: err});
-        if (!data)
-            return res.json({message: "User doesn't exist !"});
-        data.services.splice(req.params.sid, 1);
-        data.save();
-        return res.json(data);
-    });
+const delOneservice = async (req, res) => {
+    const user_to_update = await Users.findOne({_id: req.params.uid})
+    if (!user_to_update)
+        return res.status(404).json({Error: "not found"})
+    try {
+        user_to_update.services = user_to_update.services.filter(service => service.id !== req.params.sid);
+        user_to_update.save();
+        return res.status(200).json({message: "Service deleted"});
+    } catch (err) {
+        console.log("delOneservice", err)
+        return res.status(500).json({ "error": 'internal error' });
+    }
 }
 
 const delAllservice = async (req, res) => {
@@ -182,5 +211,6 @@ module.exports = {
     delOneservice,
     delAllservice,
     login,
-    updatestate
+    updatestate,
+    addservice_copy
 };
