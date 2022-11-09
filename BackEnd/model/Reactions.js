@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 const reactionSchema = new Schema({
     name: String,
-    descritpion: String,
+    description: String,
     args: [String]
 });
 

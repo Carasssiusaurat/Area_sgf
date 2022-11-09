@@ -100,6 +100,8 @@ const login = asyncHandler(async (req, res) => {
 })
 
 const addservice = async (req, res) => {
+    if (!req.params.id)
+        return res.status(400).send('missing field : cannot get service reactions')
     const user_to_update = await Users.findOne({_id: req.params.id});
     const service_to_add = await Services.findOne({name: req.body.name});
     if (!user_to_update || !service_to_add)
@@ -136,7 +138,7 @@ const addservice_copy = async (usr_id, service_id, token) => {
         token: token,
       });
       user_to_update.save();
-      response =  {status: 200, message: "Service added"};
+      response = {status: 200, message: "Service added"};
     } catch (err) {
       console.log("addservice", err);
       response = {status: 500, message: "Internal error"};
@@ -145,17 +147,17 @@ const addservice_copy = async (usr_id, service_id, token) => {
 };
 
 //nique sa mere ca crash ici
-const modservice = (req, res) => {
-    Users.findOne({_id: req.params.uid}, (err, data) => {
-        if (err)
-            return res.json({Error: err});
-        if (!data)
-            return res.json({message: "User doesn't exist !"});
-        data.service[req.params.sid].actif = req.body.actif;
-        data.save()
-        return res.json(data);
-    });
-}
+// const modservice = (req, res) => {
+//     Users.findOne({_id: req.params.uid}, (err, data) => {
+//         if (err)
+//             return res.json({Error: err});
+//         if (!data)
+//             return res.json({message: "User doesn't exist !"});
+//         data.service[req.params.sid].actif = req.body.actif;
+//         data.save()
+//         return res.json(data);
+//     });
+// }
 
 const delOneservice = async (req, res) => {
     const user_to_update = await Users.findOne({_id: req.params.uid})
@@ -207,7 +209,6 @@ module.exports = {
     delAlluser,
     delOneuser,
     addservice,
-    modservice,
     delOneservice,
     delAllservice,
     login,

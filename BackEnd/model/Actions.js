@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 const actionSchema = new Schema({
     name: String,
-    descritpion: String,
+    description: String,
     args: [String]
 });
 
