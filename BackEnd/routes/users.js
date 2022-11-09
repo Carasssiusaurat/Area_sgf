@@ -14,7 +14,8 @@ router.delete('/user/:id', admin, userController.delOneuser)
 router.put('/user/:id/service', protect, userController.addservice)
 router.put('/user/:uid/service/:sid/status', protect, userController.updatestate)
 router.delete('/user/:uid/service/:sid', protect, userController.delOneservice)
-router.delete('/user/:uid/service', protect, userController.delAllservice)
+router.delete('/user/:id/service', protect, userController.delAllservice)
+router.get('/user/:id/area', protect, userController.getuserarea)
 router.post('/login', userController.login)
 
 module.exports = router;

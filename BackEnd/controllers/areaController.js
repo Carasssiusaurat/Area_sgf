@@ -1,8 +1,12 @@
 const Areas = require('../model/Areas');
+const Actions = require('../model/Actions');
+const Reactions = require('../model/Reactions');
 
 const newArea = (req, res) => {
+    // console.log(req.body)
+    // return res.status(200).json({message: "Area created"});
     const base_action_id = req.body.action_id.split(',');
-    const base_reaction_id = req.body.react_id.split(',');
+    const base_reaction_id = req.body.reaction_id.split(',');
     if (base_action_id && base_reaction_id && req.body.user_id) {
         const act_id = [...new Set(base_action_id)];
         const react_id = [...new Set(base_reaction_id)];
@@ -13,15 +17,10 @@ const newArea = (req, res) => {
             reaction_id: react_id,
             actif: true
         });
-        new_area.save((err, data) => {
-            if (err) {
-                return res.json({Error: err})
-            };
-            return res.json(data);
-        });
-    };
-    res.status(400)
-    return res.send("could not create area: field missing")
+        new_area.save();
+        return res.status(200).json({message: "Area created"});
+    }
+    return res.status(400).send("could not create area: field missing")
 }
 
 const getArea = (req, res) => {
@@ -50,28 +49,29 @@ const getAllArea = (req, res) => {
     });
 }
 
-const getAreaAct = (req, res) => {
+const getAreaAct = async (req, res) => {
     if (!req.params.id)
         return res.status(400).send("get Area error: incomplete or erroneous request")
-    Areas.findOne({_id:req.params.id}, {"action_id": 1}, (err, data) => {
-        if (err)
-            return res.json({Error: err});
-        if (!data)
-            return res.status(404).send("Area not found")
-        return res.json(data);
-    });
+    const area = await Areas.findById(req.params.id);
+    if (!area)
+        return res.status(404).send("Area not found")
+    console.log(area.action_id)
+    const action = await Actions.find({"_id":area.action_id});
+    if (!action)
+        return res.status(404).send("Action not found")
+    return res.status(200).json(action);
 }
 
-const getAreaReact = (req, res) => {
+const getAreaReact = async (req, res) => {
     if (!req.params.id)
         return res.status(400).send("get Area error: incomplete or erroneous request")
-    Areas.findOne({_id:req.params.id}, {"reaction_id": 1}, (err, data) => {
-        if (err)
-            return res.json({Error: err});
-        if (!data)
-            return res.status(404).send("Area not found")
-        return res.json(data);
-    });
+    const area = await Areas.findById(req.params.id);
+    if (!area)
+        return res.status(404).send("Area not found")
+    const reaction = await Reactions.findById(area.reaction_id);
+    if (!reaction)
+        return res.status(404).send("Reaction not found")
+    return res.status(200).json(reaction);
 }
 
 const updateArea = (req, res) => {
@@ -106,22 +106,28 @@ const updateAreaState = async (req, res) => {
     }
 }
 
-const delArea = (req, res) => {
-    if (!req.params.id) {
-        res.status(400)
-        return res.send("del Area error: incomplete or erroneous request")
-    }
-    Areas.deleteOne({_id:req.params.id}, (err, data) => {
-        if (err) {
-            return res.json({Error: err});
+const delOneArea = (req, res) => {
+    try {
+        if (!req.params.id) {
+            res.status(400)
+            return res.send("del Area error: incomplete or erroneous request")
         }
-        res.status(200)
-        return res.json(data);
-    });
+        Areas.deleteOne({_id:req.params.id}, (err, data) => {
+            if (err)
+                return res.json({Error: err});
+            res.status(200)
+            return res.json(data);
+        });
+    } catch (err) {
+        return res.status(500).send('internal error');
+    }
 }
 
-const delAllArea = (req, res) => {
-    Areas.deleteMany({})
+const delAllArea = async (req, res) => {
+    const area_deleted = await Areas.deleteMany({})
+    if (area_deleted.deletedCount === 0)
+        return res.status(404).send("no Area found")
+    return res.status(200).json({message: "All Area deleted"});
 }
 
 module.exports = {
@@ -130,7 +136,7 @@ module.exports = {
     getAreaAct,
     getAreaReact,
     getAllArea,
-    delArea,
+    delOneArea,
     delAllArea,
     updateArea,
     updateAreaState,

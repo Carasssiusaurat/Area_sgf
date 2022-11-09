@@ -1,10 +1,13 @@
 const IP = require('ip');
 const Services = require('../model/Services');
+const Actions = require('../model/Actions')
+const Reactions = require('../model/Reactions')
 
 const getAboutJson = async (req, res) => {
     const host = IP.address();
     const ip = (req.headers['x-forwarded-for'] || req.connection.remoteAddress);
-    console.log(ip);
+    console.log(host)
+    console.log(ip)
     const current_time = new Date().getTime();
     const services_not_filtered = await Services.find();
     const services = services_not_filtered.map(function(service) {
@@ -14,9 +17,8 @@ const getAboutJson = async (req, res) => {
             reactions: service.reaction_id
         }
     });
-    // console.log(services);
     res.json({
-        "Clients": {"host": host},
+        "Clients": {"host": ip},
         "Server": {"current_time": current_time, services}
     });
 };

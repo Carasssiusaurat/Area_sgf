@@ -1,5 +1,6 @@
 const Users = require('../model/Users');
 const Services = require('../model/Services');
+const Areas = require('../model/Areas');
 const asyncHandler = require('express-async-handler');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -175,7 +176,7 @@ const delOneservice = async (req, res) => {
 
 const delAllservice = async (req, res) => {
     try {
-        const user_to_update = await Users.findOne({_id: req.params.uid});
+        const user_to_update = await Users.findOne({_id: req.params.id});
         user_to_update.services = [];
         user_to_update.save();
         return res.status(200).json({message: "User updated"});
@@ -201,6 +202,15 @@ const updatestate = async (req, res) => {
     }
 };
 
+const getuserarea = async (req, res) => {
+    if (!req.params.id)
+        return res.status(400).send('missing field : cannot get user area')
+    const user_to_get = await Areas.find({user_id: req.params.id});
+    if (!user_to_get)
+        return res.status(404).json({Error: "not found"})
+    return res.status(200).json(user_to_get);
+};
+
 module.exports = {
     newuser,
     getuser,
@@ -213,5 +223,6 @@ module.exports = {
     delAllservice,
     login,
     updatestate,
-    addservice_copy
+    addservice_copy,
+    getuserarea,
 };
