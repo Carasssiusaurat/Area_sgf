@@ -4,15 +4,12 @@ const Actions = require('../model/Actions')
 const Reactions = require('../model/Reactions')
 
 const getAboutJson = async (req, res) => {
-    console.log(IP.address())
-    const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress);
+    const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress).split(':')[3];
     const current_time = new Date().getTime();
     const service = await Services.find();
     const services = await Promise.all(service.map(async (serv) => {
         const actions = await Actions.find({_id: serv.action_id});
         const reactions = await Reactions.find({_id: serv.reaction_id});
-        // console.log(actions)
-        // console.log(reactions)
         return {
             name: serv.name,
             actions: actions.map(action => {
