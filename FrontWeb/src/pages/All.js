@@ -6,6 +6,7 @@ import { Navigate } from "react-router-dom";
 const All = () => {
   return (
     <div>
+      {sessionStorage.removeItem("id_select")}
       {sessionStorage.getItem("token") === null ? (
         <Navigate to="/" />
       ) : (

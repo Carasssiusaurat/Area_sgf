@@ -6,6 +6,7 @@ import Register from "./pages/Register";
 import Home from "./pages/Home";
 import All from "./pages/All";
 import Workspace from "./pages/Workspace";
+import Action_selected from "./pages/Action_selected";
 
 const App = () => {
   return (
@@ -16,6 +17,7 @@ const App = () => {
         <Route path="/home" element={<Home />} />
         <Route path="/all" element={<All />} />
         <Route path="/Workspace" element={<Workspace />} />
+        <Route path="/Workspace/Action_Selected" element={<Workspace />} />
       </Routes>
     </BrowserRouter>
   );

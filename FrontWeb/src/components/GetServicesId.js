@@ -37,7 +37,15 @@ class GetServicesId extends React.Component {
 
     return (
       <div className="test">
-        <GetServicesData id={items} page={this.props.page}></GetServicesData>
+        {/* {console.log(this.props.page)} */}
+        {sessionStorage.getItem("id_select") === null ? (
+          <GetServicesData id={items} page={this.props.page}></GetServicesData>
+        ) : (
+          <GetServicesData
+            id={sessionStorage.getItem("id_select")}
+            page={this.props.page}
+          ></GetServicesData>
+        )}
       </div>
     );
   }

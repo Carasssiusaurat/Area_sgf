@@ -49,6 +49,8 @@ const Auth = ({ Text }) => {
       });
       const response = await res.json();
       sessionStorage.setItem("token", response.token);
+      sessionStorage.setItem("id", response.userId);
+      console.log(sessionStorage.getItem("token"));
       navigate("/home");
     } catch (error) {
       throw new Error("Issue with Token", error.message);

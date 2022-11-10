@@ -1,27 +1,27 @@
 const Reaction = require('../model/Reactions');
 
-const newReaction = (req, res) => {
-    if (req.body.args) {
-        const arguments = req.body.args
+const newReaction = async (req, res) => {
+    const reaction = await Reaction.findOne({name: req.body.name})
+    if (!reaction) {
+        if (!req.body.name || !req.body.args || !req.body.description)
+            return res.status(400).send("missing field : cannot create Reaction")
         const new_reaction = new Reaction({
-            args: arguments
+            name: req.body.name,
+            description: req.body.description,
+            args: req.body.args,
         });
-        new_reaction.save((err, data) => {
-            if (err) {
-                return res.json({Error: err})
-            };
-            return res.json(data);
-        });
-    };
+        new_reaction.save();
+        return res.json(new_reaction);
+    }
+    return res.status(400).send("Reaction already exists");
 }
 
 const getReaction = (req, res) => {
-    if (!req.body.id) {
+    if (!req.params.id) {
         res.status(400)
         return res.send("get Reaction error: incomplete or erroneous request")
     }
-
-    Reaction.findOne({_id: req.body.id}, (err, data) => {
+    Reaction.findOne({_id: req.params.id}, (err, data) => {
         if (err)
             return res.json({Error: err});
         if (!data) {
@@ -32,11 +32,11 @@ const getReaction = (req, res) => {
 }
 
 const deleteReaction = (req, res) => {
-    if (!req.body.id) {
+    if (!req.params.id) {
         res.status(400)
         return res.send("del Reaction error: incomplete or erroneous request")
     }
-    Reaction.deleteOne({_id :req.body.id}, (err, data) => {
+    Reaction.deleteOne({_id :req.params.id}, (err, data) => {
         if (err) {
             return res.json({Error: err});
         }
@@ -46,13 +46,14 @@ const deleteReaction = (req, res) => {
 }
 
 const updateReaction = (req, res) => {
-    const arguments = req.body.arguments;
-
-    if (!req.body.id || !arguments) {
+    const arguments = req.body.args;
+    const name = req.body.name;
+    const description = req.body.description;
+    if (!req.params.id || !arguments || !name || !description) {
         res.status(400)
         throw new Error('missing field : cannot update Reaction')
     }
-    Reaction.updateOne({_id:req.body.id}, {$set: {"args": arguments}}, (err, data) => {
+    Reaction.updateOne({_id:req.params.id}, {$set: {"args": arguments, "name": name, "description": description}}, (err, data) => {
         if (err) {
             res.status(400)
             return res.json({Error: err});}
@@ -60,10 +61,28 @@ const updateReaction = (req, res) => {
     });
 }
 
+const getAllReaction = (req, res) => {
+    Reaction.find({}, (err, data) => {
+        if (err)
+            return res.json({Error: err});
+        if (!data)
+            return res.status(404).send("Reaction not found")
+        return res.json(data);
+    });
+};
+
+const deleteAllReaction = async (req, res) => {
+    const reactions = await Reaction.deleteMany({});
+    if (reactions.deletedCount === 0)
+        return res.status(404).send("No Reaction to delete");
+    return res.status(200).send("All Reaction deleted");
+};
+
 module.exports = {
     newReaction,
-    getReaction,//from ID
-    //getAllAction,//from AREA! not here! make more sense that way
+    getReaction,
+    getAllReaction,
     deleteReaction,
+    deleteAllReaction,
     updateReaction
 }
