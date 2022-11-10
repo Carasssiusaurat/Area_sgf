@@ -147,19 +147,6 @@ const addservice_copy = async (usr_id, service_id, token) => {
     return response;
 };
 
-//nique sa mere ca crash ici
-// const modservice = (req, res) => {
-//     Users.findOne({_id: req.params.uid}, (err, data) => {
-//         if (err)
-//             return res.json({Error: err});
-//         if (!data)
-//             return res.json({message: "User doesn't exist !"});
-//         data.service[req.params.sid].actif = req.body.actif;
-//         data.save()
-//         return res.json(data);
-//     });
-// }
-
 const delOneservice = async (req, res) => {
     const user_to_update = await Users.findOne({_id: req.params.uid})
     if (!user_to_update)

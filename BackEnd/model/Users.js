@@ -10,7 +10,6 @@ const service = new Schema({
 const userSchema = new Schema({
     username: String,
     password: String,
-    areas: [mongoose.SchemaTypes.ObjectId],
     services: [service],
     role: {
         type: String,

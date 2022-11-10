@@ -3,18 +3,12 @@ const Actions = require('../model/Actions');
 const Reactions = require('../model/Reactions');
 
 const newArea = (req, res) => {
-    // console.log(req.body)
-    // return res.status(200).json({message: "Area created"});
-    const base_action_id = req.body.action_id.split(',');
-    const base_reaction_id = req.body.reaction_id.split(',');
-    if (base_action_id && base_reaction_id && req.body.user_id) {
-        const act_id = [...new Set(base_action_id)];
-        const react_id = [...new Set(base_reaction_id)];
-
+    if (req.body.action_id && req.body.reaction_id && req.body.action_arg && req.body.reaction_arg && req.body.user_id && req.body.name) {
         const new_area = new Areas({
+            name: req.body.name,
             user_id: req.body.user_id,
-            action_id: act_id,
-            reaction_id: react_id,
+            action: {_id: req.body.action_id, args: req.body.action_arg},
+            reaction: {_id: req.body.reaction_id, args: req.body.reaction_arg},
             actif: true
         });
         new_area.save();
@@ -24,7 +18,7 @@ const newArea = (req, res) => {
 }
 
 const getArea = (req, res) => {
-    if (!req.params.id) {
+    if (!req.params.id || req.params.id == ":id") {
         res.status(400)
         return res.send("get Area error: incomplete or erroneous request")
     }
@@ -50,45 +44,48 @@ const getAllArea = (req, res) => {
 }
 
 const getAreaAct = async (req, res) => {
-    if (!req.params.id)
+    if (!req.params.id || req.params.id == ":id")
         return res.status(400).send("get Area error: incomplete or erroneous request")
     const area = await Areas.findById(req.params.id);
     if (!area)
         return res.status(404).send("Area not found")
-    console.log(area.action_id)
-    const action = await Actions.find({"_id":area.action_id});
+    const action = await Actions.find({"_id":area.action._id});
     if (!action)
         return res.status(404).send("Action not found")
     return res.status(200).json(action);
 }
 
 const getAreaReact = async (req, res) => {
-    if (!req.params.id)
+    if (!req.params.id || req.params.id == ":id")
         return res.status(400).send("get Area error: incomplete or erroneous request")
     const area = await Areas.findById(req.params.id);
     if (!area)
         return res.status(404).send("Area not found")
-    const reaction = await Reactions.findById(area.reaction_id);
+    const reaction = await Reactions.findById(area.reaction._id);
     if (!reaction)
         return res.status(404).send("Reaction not found")
     return res.status(200).json(reaction);
 }
 
-const updateArea = (req, res) => {
-    const base_action_id = req.body.action_id.split(',');
-    const base_reaction_id = req.body.react_id.split(',');
-    if (!req.params.id || !base_action_id || !base_reaction_id) {
+const updateArea = async (req, res) => {
+    if (!req.params.id || !req.body.action_id || !req.body.reaction_id || !req.body.action_arg || !req.body.reaction_arg || !req.body.name) {
         res.status(400)
         throw new Error('missing field : cannot update area')
     }
-    const action_id = [...new Set(base_action_id)];
-    const reaction_id = [...new Set(base_reaction_id)];
-    Areas.updateOne({_id: req.params.id}, {$set: {"action_id": action_id, "reaction_id": reaction_id}}, (err, data) => {
-        if (err) {
-            res.status(400)
-            return res.json({Error: err});}
-        return res.json(data);
-    });
+    const area_to_update = await Areas.findOne({_id: req.params.id});
+    if (!area_to_update)
+        return res.status(404).send("Area not found")
+    try {
+        area_to_update.name = req.body.name
+        area_to_update.action._id = req.body.action_id
+        area_to_update.action.args = req.body.action_arg
+        area_to_update.reaction._id = req.body.reaction_id
+        area_to_update.reaction.args = req.body.reaction_arg
+        area_to_update.save();
+        return res.status(200).json({message: "Area updated"});
+    } catch (err) {
+        return res.status(400).send("could not update area")
+    }
 }
 
 const updateAreaState = async (req, res) => {
