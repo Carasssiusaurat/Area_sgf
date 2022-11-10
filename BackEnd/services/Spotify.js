@@ -12,49 +12,9 @@ const SpotifyStrategy = require('passport-spotify').Strategy;
 const actual_device = '';
 let devices = [];
 
-class my_Spotify {
-  Getcurrentsong = async () => {
-    await axios.get('https://api.spotify.com/v1/me/player/currently-playing', {
-      headers: {
-        Authorization: `Bearer ${SpotifyToken}`,
-        'Content-Type': 'application/json'
-      }
-    }).then((response) => {
-      let artists = [];
-      //actual_artist = response.item.artists[0].name;
-      for (let i = 0; i < response.data.item.artists.length; i++) {
-        artists.push(response.data.item.artists[i].name);
-      }
-      console.log({"song_name": response.data.item.name, "artist_name": artists, "album_name": response.data.item.album.name});
-      return {"song_name": response.data.item.name, "artist_name": artists, "album_name": response.data.item.album.name};
-    }).catch((error) => {
-      return {"code_error": error.response.data};
-    });
-  }
-  
-  GetDevices = async () => {
-    console.log("Getting devices");
-    await axios.get('https://api.spotify.com/v1/me/player/devices', {
-      headers: {  
-        Authorization: `Bearer ${SpotifyToken}`,
-        'Content-Type': 'application/json'
-      }
-    })
-    .then((response) => {
-      //fs.writeFileSync('response.json', JSON.stringify(response));
-      //console.log(response.data.devices);
-      devices = response.data;
-      //console.log(devices);
-      console.log(devices);
-      return devices;
-    }).catch((error) => {
-      console.log("error");
-      console.log("token =" + SpotifyToken);
-      console.log(error);
-      fs.writeFileSync('devices_error.json', JSON.stringify(error));
-      return {"status": "error"};
-    });
-  }
+class Spotify {
+  Service_id = "ec13a340-8eb5-59da-a8b3-8c1cbe2b67e1";
+  user_infos = "";
 
   ChangeDevice = async (device) => {
     if (devices.length() > 1) {
@@ -67,63 +27,201 @@ class my_Spotify {
       });
     }
   }
-
-  changeSong = async (song) => {
-    const {data} = await axios.put('https://api.spotify.com/v1/me/player/play?device_id=' + actual_device, 
-      {
-        uris: [song.songid]
-        //"context_uri": "spotify:album:6R8nBTTPwlP7iur0wV3oLq",
-        //"offset": {
-        //  "position": 4
-        //},
-        //"position_ms": 0,
-      },
-      {
-        headers: {
-          Accept: 'application/json',
-          Authorization: `Bearer ${SpotifyToken}`,
-          'Content-Type': 'application/json'
-        },
-      }
-    );
-    console.log(data); 
-  }
-  
-  searchArtist = async (name, type, artist, effect, filename) => {
-    const {data} = await axios.get('https://api.spotify.com/v1/search', {
-      headers: {
-        Authorization: `Bearer ${SpotifyToken}`
-      },
-      params: {
-        q: name,
-        type: type,
-        market: 'FR',
-        limit: 5
-      }
-    });
-    if (type == 'artist') {
-      console.log(data.artists.items);
-    } else {
-      for (var i = 0; i < data.tracks.items.length; i++) {
-        if (data.tracks.items[i].artists[0].name.toLowerCase() === artist && data.tracks.items[i].name.toLowerCase() === name) {
-          effect.songid = data.tracks.items[i].uri;
-          effect.artistid = data.tracks.items[i].artists[0].uri;
-          fs.writeFileSync(filename + '.json', JSON.stringify(data.tracks.items[i]));
-        }
-      }
-    }
-  }
-  
-  isWorkflow = async (trigger, reaction) => {
-    var data = await Getcurrentsong();
-    console.log(data, trigger);
-    if (data.songid === trigger.songid && data.artistid === trigger.artistid) {
-      changeSong(reaction);
-    }
-  }
 }
 
-const my_spotify = new my_Spotify();
+const GetcurrentSong = async (token) => {
+  const data = await axios.get('https://api.spotify.com/v1/me/player/currently-playing', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  }).then((response) => {
+    let artists = [];
+    //actual_artist = response.item.artists[0].name;
+    for (let i = 0; i < response.data.item.artists.length; i++) {
+      artists.push(response.data.item.artists[i].name);
+    }
+    return {"song_name": response.data.item.name, "artist_name": artists, "album_name": response.data.item.album.name};
+  }).catch((error) => {
+    return {"code_error": error.response.data};
+  });
+  return data;
+}
+
+const ImListeningASong = async (args, Token) => {
+  console.log("ImListeningASong");
+  //const Song = await GetcurrentSong();
+  //console.log(Song);
+}
+
+const is_artist = (artist_name, artists_list) => {
+  for (let i = 0; i < artists_list.length; i++) {
+    if (artist_name.toLowerCase() == artists_list[i].name.toLowerCase()) {
+      return true;
+    }
+  }
+  return false;
+}
+
+const searchArtist = async (uri) => {
+  const data = await axios.get('https://api.spotify.com/v1/search', {
+    headers: {
+      Authorization: `Bearer ${SpotifyToken}`
+    },
+    params: {
+      q: uri.body.song_name,
+      type: 'track',
+      market: 'FR',
+      limit: 5
+    }
+  }).then((response) => {
+    for (let i = 0; i < response.data.tracks.items.length; i++) {
+      if (response.data.tracks.items[i].name.toLowerCase() == uri.body.song_name.toLowerCase() && is_artist(uri.body.artist_name, response.data.tracks.items[i].artists)) {
+        return {"track_uri": response.data.tracks.items[i].uri, "status": "success"};
+      }
+    }
+  }).catch((error) => {
+    return {"status": "error"};
+  });
+  return data;
+}
+
+const GetDevices = async () => {
+  const data = await axios.get('https://api.spotify.com/v1/me/player/devices', {
+    headers: {  
+      Authorization: `Bearer ${SpotifyToken}`,
+      'Content-Type': 'application/json'
+    }
+  }).then((response) => {
+    for (let i = 0; i < response.data.devices.length; i++) {
+      if (response.data.devices[i].is_active == true) {
+        return {"actual_device": response.data.devices[i].id, "status": "success"};
+      }
+    }
+    return;
+  }).catch((error) => {
+    return {"status": "error"};
+  });
+  return data;
+}
+
+const ChangeSong = async (req) => {
+  var uri = await searchArtist(req)
+  var device = await GetDevices();
+  if (device.status == "error" || uri.status == "error") {
+    return {"status": "error"};
+  }
+  console.log("track_uri = " + uri.track_uri, "device = " + device.actual_device);
+  const data = await axios.put('https://api.spotify.com/v1/me/player/play?device_id=' + device.actual_device, 
+    {
+      uris: [uri.track_uri]
+    },
+    {
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${SpotifyToken}`,
+        'Content-Type': 'application/json'
+      },
+    }
+  ).then((response) => {
+    return {"status": "success"};
+  }).catch((error) => {
+    return {"code_error": error.response.data.error.status};
+  });
+  return data;
+}
+
+const AddSongToPlaylist = async (req) => {
+  const playlist = await SearchPlaylist(req);
+  const track = await searchArtist(req);
+  if (playlist.status == "error" || track.status == "error") {
+    return {"status": "error"};
+  }
+  const data = await axios.post('https://api.spotify.com/v1/playlists/' + playlist.playlist_id + '/tracks', {
+    uris: [track.track_uri]
+  }, 
+  {
+    headers: {
+      Authorization: `Bearer ${SpotifyToken}`,
+      'Content-Type': 'application/json'
+    }
+  }).then((response) => {
+    return {"status": "success"};
+  }).catch((error) => {
+    return {"code_error": error.response.data.error.status};
+  });
+}
+
+const GetUser = async () => {
+  const response = await axios.get('https://api.spotify.com/v1/me', {
+    headers: {
+      Authorization: `Bearer ${SpotifyToken}`,
+      'Content-Type': 'application/json'
+    }
+  }).then((response) => {
+    return {"status": "success", "data": response.data};
+  }).catch((error) => {
+    return {"status": "error"};
+  });
+  return response;
+}
+
+const CreatePlaylist = async (req) => {
+  var user = await GetUser();
+  if (user.status == "error") {
+    return {"status": "error", "code_error": user.code_error};
+  }
+  const data = await axios.post('https://api.spotify.com/v1/users/' + user.id + '/playlists', {
+    name: req.body.playlist_name,
+    description: req.body.playlist_name,
+    public: false
+  },
+  {
+    headers: {
+      Authorization: `Bearer ${SpotifyToken}`
+    }
+  }).then((response) => {
+    return {"playlist_id": response.data.id, "status": "success"};
+  }).catch((error) => {
+    return {"status": "error"};
+  });
+  return data;
+}
+
+const SearchPlaylist = async (req) => {
+  const data = await axios.get('https://api.spotify.com/v1/me/playlists', {
+    headers: {
+      Authorization: `Bearer ${SpotifyToken}`
+    },
+    query: {
+      limit: 50
+    }
+  }).then((response) => {
+    for (let i = 0; i < response.data.items.length; i++) {
+      if (response.data.items[i].name == req.body.playlist_name) {
+        return {"playlist_id": response.data.items[i].id, "status": "success"};
+      }
+    }
+    return CreatePlaylist(req);
+  }).catch((error) => {
+    return {"status": "error"};
+  });
+  return data;
+}
+
+const test_yazebi = async (req, res) => {
+  console.log("test yazebi");
+}
+
+const actions = [
+  {"636ba1c921531a915d2085d0": ImListeningASong},
+  {'636b7b97882dbfabe1822d0c': test_yazebi},
+];
+
+const reactions = [
+  {"636ba32f21531a915d2085d4": ChangeSong},
+  {"636ba45eec84f1ac23b7b424": AddSongToPlaylist}
+];
 
 var SpotifyToken = ''
 
@@ -195,7 +293,7 @@ router.get('/auth/callback',
 );
 
 router.get('/get_current_song', function(req, res) {
-  my_spotify.Getcurrentsong().then((data) => {
+  Getcurrentsong().then((data) => {
     res.json(data);
     console.log(data);
   }).catch((error) => {
@@ -203,6 +301,17 @@ router.get('/get_current_song', function(req, res) {
     console.log(error);
   });
 });
+
+router.get('/test_spotify_actions', async function(req, res) {
+  console.log("test spotify actions");
+  for (let i = 0; i < actions.length; i++) {
+    if (actions[i][req.body.action_id]) {
+      const data = await actions[i][req.body.action_id](req.body.args, req.body.token);
+      //res.json(data);
+      //console.log(data);
+    }
+  }
+})
 
 router.get('/get_devices', async function(req, res) {
   const data = await my_spotify.GetDevices();
@@ -228,4 +337,4 @@ router.post('/set_workflow', async function(req, res) {
   my_spotify.isWorkflow(trigger, reaction);
 });
 
-module.exports = {router, my_Spotify};
+module.exports = {router};
