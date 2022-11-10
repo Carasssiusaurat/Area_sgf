@@ -211,6 +211,16 @@ const getuserarea = async (req, res) => {
     return res.status(200).json(user_to_get);
 };
 
+const getservices = async (req, res) => {
+    if (!req.params.id)
+        return res.status(400).send('missing field : cannot get user area')
+    const user_to_get = await Users.findById(req.params.id);
+    if (!user_to_get)
+        return res.status(404).json({Error: "User not found"})
+    const services = await Services.find({_id: {$in: user_to_get.services.map(service => service._id)}});
+    return res.status(200).json(services);
+};
+
 module.exports = {
     newuser,
     getuser,
@@ -225,4 +235,5 @@ module.exports = {
     updatestate,
     addservice_copy,
     getuserarea,
+    getservices
 };
