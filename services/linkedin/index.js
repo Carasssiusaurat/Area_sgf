@@ -6,6 +6,10 @@ var session = require('express-session');
 const { application } = require("express");
 let LinkedIn;
 
+
+
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(session({ secret: 'SECRET' }));
 
 passport.serializeUser(function(user, done) {
@@ -24,6 +28,7 @@ passport.use(new LinkedInStrategy({
     sessions : false,
   }, function(accessToken, refreshToken, profile, done) {
     process.nextTick(function () {  
+      console.log(profile);
       LinkedIn = new Linkedin(accessToken, profile.id);
       return done(null, profile);
     });
@@ -80,6 +85,15 @@ app.get('/linkedin/send',
     return res;
   });
 
+
+  app.get('/linkedin/send',
+  function(req, res){
+    LinkedIn.send_message("Test message pour Arthur");
+    res.redirect("/");
+    return res;
+  });
+
+
 app.listen(3000, () => {
     console.log('Serveur en écoute sur le port 3000');
 });
@@ -91,7 +105,7 @@ app.get('/auth/linkedin',
   });
 
 
-  app.get('/auth/linkedin/callback', passport.authenticate('linkedin', {
+app.get('/auth/linkedin/callback', passport.authenticate('linkedin', {
     successRedirect: '/',
     failureRedirect: '/login'
   }));
