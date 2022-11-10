@@ -1,11 +1,10 @@
 var express = require('express');
 var passport = require('passport');
 var GitHubStrategy = require('passport-github2').Strategy;
-var GITHUB_CLIENT_ID = "9068800ddbf3fc24a235";
-var GITHUB_CLIENT_SECRET = "55ec6d8dea94231496e06d502a672b922a0358a4";
 var session = require('express-session');
 const fetch = require("node-fetch");
 const { raw } = require('express');
+const { use } = require('passport');
 let github;
 const app = express();
 
@@ -24,15 +23,6 @@ passport.deserializeUser(function(user, done) {
     done(null, user);
 });
 
-
-async function functiontest(link) {
-    var reponse = await fetch(link);
-
-    if (reponse.status == 200)
-        return await reponse.json();
-    return null;
-}
-
 passport.use(new GitHubStrategy({
     clientID: GITHUB_CLIENT_ID,
     clientSecret: GITHUB_CLIENT_SECRET,
@@ -46,12 +36,11 @@ passport.use(new GitHubStrategy({
 ));
 
 app.get('/auth/github',
-  passport.authenticate('github', { scope: [ 'user:email' ] }));
+  passport.authenticate('github', { scope: [ 'user:email', 'public_repo', 'repo', 'read:user', 'user:follow' ] }));
 
 app.get('/auth/github/callback', 
   passport.authenticate('github', { failureRedirect: '/login' }),
   function(req, res) {
-    // Successful authentication, redirect home.
     res.redirect('/');
   });
 
@@ -61,7 +50,7 @@ class Github{
         this.accessToken = accessToken
     }
 
-    async receive_followers()
+    async receive_followers(userName)
     {
       const rawResponse = await fetch('https://api.github.com/user/followers', {
         method: 'GET',
@@ -70,52 +59,83 @@ class Github{
         }
       });
       const content = await rawResponse.json();
+      for (var i = 0; i != content.done; i++) {
+        if (content.user === userName)
+          return true;
+      };
       console.log(content);
-      return true;
+      return false;
     }
 
-    async create_repo(repoMaster, repoName, json_call)
+    async check_following(userName)
     {
-      const rawResponse = await fetch('https://api.github.com/repos/${repoMaster}/${repoName}/forks', {
+      const rawResponse = await fetch('https://api.github.com/user/following/' + userName, {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Bearer ' + this.accessToken,
+        }
+      });
+      if (rawResponse.status === 204)
+        return true;
+      else if (rawResponse.status === 404)
+        return false;
+    }
+
+    async receive_following(userName)
+    {
+      const rawResponse = await fetch('https://api.github.com/user/following', {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Bearer ' + this.accessToken,
+        }
+      });
+      const content = await rawResponse.json();
+      for (var i = 0; i != content.done; i++) {
+        if (content.user === userName)
+          return true;
+      };
+      console.log(content);
+      return false;
+    }
+
+    async fork_repo(repoMaster, repoName)
+    {
+      console.log(this.accessToken)
+      const rawResponse = await fetch('https://api.github.com/repos/' + repoMaster +'/' + repoName + '/forks', {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer ' + this.accessToken,
         },
-        body: json_call
       });
-      const content = await rawResponse.json();
+      const content = await rawResponse.json();z
       return true
     }
 
     async follow_user(userName)
     {
-      const rawResponse = await fetch('https://api.github.com/user/following/${userName}', {
-        method: 'POST',
+      const rawResponse = await fetch('https://api.github.com/user/following/' + userName, {
+        method: 'PUT',
         headers: {
           'Authorization': 'Bearer ' + this.accessToken,
         }
       });
-      const content = await rawResponse.json();
-      console.log(content);
       return true;
     }
 
     async unfollow_user(userName)
     {
-      const rawResponse = await fetch('https://api.github.com/user/following/${userName}', {
+      const rawResponse = await fetch('https://api.github.com/user/following/' + userName, {
         method: 'DELETE',
         headers: {
           'Authorization': 'Bearer ' + this.accessToken,
         }
       });
-      const content = await rawResponse.json();
-      console.log(content);
       return true;
     }
 
     async create_issue(repoMaster, repoName)
     {
-      const rawResponse = await fetch('https://api.github.com/repos/${repoMaster}/${repoName}/issues', {
+      const rawResponse = await fetch('https://api.github.com/repos/' + repoMaster +'/' + repoName + '/issues', {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer ' + this.accessToken,
@@ -124,7 +144,6 @@ class Github{
         body: 'this is not normal'
       });
       const content = await rawResponse.json();
-      console.log(content);
       return true;
     }
 }
@@ -136,8 +155,44 @@ app.get('/github/followers',
     return res;
   });
 
+  app.get('/github/following',
+  function(req, res){
+    github.receive_following("Codrux2200").then(function(data) {console.log(data)});
+    res.redirect("/");
+    return res;
+  });
 
-// new Github(accessToken, pseudo).getNames().then(function(data) {
-//     for (let i = 0; i < data.length; i ++)
-//         console.log(data[i]);
-// })/
+  app.get('/github/repo/fork',
+  function(req, res){
+    github.fork_repo("Codrux2200", "DS").then(function(data) {console.log(data)});
+    res.redirect("/");
+    return res;
+  });
+  
+  app.get('/github/repo/issues',
+  function(req, res){
+    github.create_issue("Codrux2200", "DS").then(function(data) {console.log(data)});
+    res.redirect("/");
+    return res;
+  });
+
+app.get('/github/user/follow',
+function(req, res){
+  github.follow_user("Codrux2200").then(function(data) {console.log(data)});
+  res.redirect("/");
+  return res;
+});
+
+app.get('/github/user/unfollow',
+function(req, res){
+  github.unfollow_user("Codrux2200").then(function(data) {console.log(data)});
+  res.redirect("/");
+  return res;
+});
+
+app.get('/github/following/check',
+function(req, res){
+  github.check_following("Codrux2200").then(function(data) {console.log(data)});
+  res.redirect("/");
+  return res;
+});
