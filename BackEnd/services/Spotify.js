@@ -37,21 +37,40 @@ const GetcurrentSong = async (token) => {
     }
   }).then((response) => {
     let artists = [];
+    //console.log(response);
+    if (response.data === '') {
+      console.log("No song playing");
+      return {"status": "fail"};
+    }
     //actual_artist = response.item.artists[0].name;
     for (let i = 0; i < response.data.item.artists.length; i++) {
       artists.push(response.data.item.artists[i].name);
     }
-    return {"song_name": response.data.item.name, "artist_name": artists, "album_name": response.data.item.album.name};
+    return {"status": "success", "song_name": response.data.item.name, "artist_name": artists, "album_name": response.data.item.album.name};
   }).catch((error) => {
-    return {"code_error": error.response.data};
+    console.log(error);
+    return {"status": "error"};
   });
   return data;
 }
 
 const ImListeningASong = async (args, Token) => {
-  console.log("ImListeningASong");
-  //const Song = await GetcurrentSong();
-  //console.log(Song);
+  const Song = await GetcurrentSong(Token);
+  if (Song.status === "error") {
+    return {"status": "error"};
+  } else if (Song.status === "fail") {
+    return {"status": "fail"};
+  }
+  console.log("args length = " + args.length);
+  if (Song.song_name.toLowerCase() == args[1].toLowerCase()) {
+    for (let i = 0; i < Song.artist_name.length; i++) {
+      if (Song.artist_name[i].toLowerCase() == args[3].toLowerCase()) {
+        console.log("Is this song")
+        return {"status": "success"};
+      }
+    }
+  }
+  return {"status": "fail"};
 }
 
 const is_artist = (artist_name, artists_list) => {
@@ -304,10 +323,11 @@ router.get('/get_current_song', function(req, res) {
 
 router.get('/test_spotify_actions', async function(req, res) {
   console.log("test spotify actions");
+  console.log(req.body.token);
   for (let i = 0; i < actions.length; i++) {
     if (actions[i][req.body.action_id]) {
       const data = await actions[i][req.body.action_id](req.body.args, req.body.token);
-      //res.json(data);
+      res.json(data);
       //console.log(data);
     }
   }
@@ -326,15 +346,6 @@ router.get('/change_song', function(req, res) {
     res.json(error);
     console.log(error);
   });
-});
-
-router.post('/set_workflow', async function(req, res) {
-  console.log(req.body);
-  await Spotify.searchArtist(req.body.triggerInput, req.body.triggerType, req.body.artistTrigger, trigger, 'trigger');
-  await Spotify.searchArtist(req.body.reactionInput, req.body.reactionType, req.body.artistReaction, reaction, 'reaction');
-  console.log(trigger);
-  console.log(reaction);
-  my_spotify.isWorkflow(trigger, reaction);
 });
 
 module.exports = {router};
