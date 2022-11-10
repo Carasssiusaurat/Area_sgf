@@ -4,19 +4,31 @@ const Actions = require('../model/Actions')
 const Reactions = require('../model/Reactions')
 
 const getAboutJson = async (req, res) => {
-    const host = IP.address();
-    const ip = (req.headers['x-forwarded-for'] || req.connection.remoteAddress);
-    console.log(host)
-    console.log(ip)
+    console.log(IP.address())
+    const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress);
     const current_time = new Date().getTime();
-    const services_not_filtered = await Services.find();
-    const services = services_not_filtered.map(function(service) {
+    const service = await Services.find();
+    const services = await Promise.all(service.map(async (serv) => {
+        const actions = await Actions.find({_id: serv.action_id});
+        const reactions = await Reactions.find({_id: serv.reaction_id});
+        // console.log(actions)
+        // console.log(reactions)
         return {
-            name: service.name,
-            actions: service.action_id,
-            reactions: service.reaction_id
+            name: serv.name,
+            actions: actions.map(action => {
+                return {
+                    name: action.name,
+                    description: action.description
+                }
+            }),
+            reactions: reactions.map(reaction => {
+                return {
+                    name: reaction.name,
+                    description: reaction.description
+                }
+            })
         }
-    });
+    }));
     res.json({
         "Clients": {"host": ip},
         "Server": {"current_time": current_time, services}
