@@ -14,10 +14,22 @@ const reactions = [
   {"636ba45eec84f1ac23b7b424": AddSongToPlaylist}
 ];
 
-const getServiceToken = async (req, res) => {
+const getServiceActionToken = async (req, res) => {
   const area = await Areas.findOne({_id: req.params.id});
   const user = await Users.findOne({_id: area.user_id});
   const service = await Services.findOne({action_id: {$in: area.action._id}})
+  for (let i = 0; i < user.services.length; i++) {
+    if (user.services[i]._id.toString() == service._id.toString()) {
+      return res.json(user.services[i]._token);
+    }
+  }
+  return res.json("no token found");
+}
+
+const getServiceReactionToken = async (req, res) => {
+  const area = await Areas.findOne({_id: req.params.id});
+  const user = await Users.findOne({_id: area.user_id});
+  const service = await Services.findOne({reaction_id: {$in: area.reaction._id}})
   for (let i = 0; i < user.services.length; i++) {
     if (user.services[i]._id.toString() == service._id.toString()) {
       return res.json(user.services[i]._token);
@@ -34,4 +46,4 @@ const ExecuteAreas = async () => {
   }
 };
 
-module.exports = {getServiceToken};
+module.exports = {getServiceActionToken, getServiceReactionToken};
