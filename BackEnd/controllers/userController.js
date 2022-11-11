@@ -144,7 +144,7 @@ const addservice_copy = async (usr_id, service_id, token) => {
       user_to_update.services.push({
         _id: service_to_add._id,
         actif: true,
-        token: token,
+        _token: token,
       });
       user_to_update.save();
       response = {status: 200, message: "Service added"};
