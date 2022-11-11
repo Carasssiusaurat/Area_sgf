@@ -156,7 +156,7 @@ const addservice_copy = async (usr_id, service_id, token) => {
 };
 
 const delOneservice = async (req, res) => {
-    if (!req.params.id || req.params.id == ":id" || req.params.sid == ":sid" || !req.params.sid)
+    if (!req.params.uid || req.params.uid == ":id" || req.params.sid == ":sid" || !req.params.sid)
         return res.status(400).send('missing field : cannot get user')
     const user_to_update = await Users.findOne({_id: req.params.uid})
     if (!user_to_update)
