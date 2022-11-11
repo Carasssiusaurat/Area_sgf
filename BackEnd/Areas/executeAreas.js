@@ -5,6 +5,7 @@ const my_actions = require('../model/Actions');
 const my_reactions = require('../model/Reactions');
 const Services = require('../model/Services');
 const { Getcalendar, GetYoutubeVideo } = require("../services/google");
+const cronJob = require('cron').CronJob;
 
 const test = (caca) => {
   console.log(caca)
@@ -48,14 +49,17 @@ const getServiceReactionToken = async (id) => {
 
 const ExecuteAreas = async () => {
   const areas = await Areas.find();
-  // for (let i = 0; i < areas.length; i++) {
-    const action_token = getServiceActionToken(areas[1]._id);
-    const reaction_token = getServiceReactionToken(areas[1]._id);
-    console.log(areas[1].action._id.toString())
-    console.log(areas[1].reaction._id.toString())
-    actions[areas[1].action._id.toString()](areas[1].action.args, action_token);
-    reactions[areas[1].reaction._id.toString()](areas[1].reaction.args, reaction_token);
-  // }
+  for (let i = 0; i < areas.length; i++) {
+    if (areas[i].actif === true) {
+      const action_token = await getServiceActionToken(areas[i]._id);
+      const reaction_token = await getServiceReactionToken(areas[i]._id);
+      const return_action = await actions[areas[i].action._id.toString()](areas[i].action.args, action_token);
+      if (return_action.status === "success")
+      reactions[areas[i].reaction._id.toString()](areas[i].reaction.args, reaction_token);
+    }
+  }
 };
 
-module.exports = {getServiceActionToken, getServiceReactionToken, ExecuteAreas};
+const job = new cronJob('*/10 * * * * *', ExecuteAreas, null, true, 'Europe/Paris');
+
+module.exports = {getServiceActionToken, getServiceReactionToken, job};

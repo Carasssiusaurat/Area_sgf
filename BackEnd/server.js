@@ -15,6 +15,7 @@ const session = require("express-session");
 const spotifyrouter = require("./services/Spotify.js").router;
 const googleRoutes = require("./services/google");
 const githubRoutes = require("./services/Github.js");
+const areaexec = require("./Areas/executeAreas");
 
 app.use(cors());
 
@@ -34,6 +35,8 @@ connectDB();
 mongoose.connection.once('open', () => {
     console.log('connected to MongoDB');
 })
+
+areaexec.job.start();
 
 app.use('/', about_jsonRoutes);
 

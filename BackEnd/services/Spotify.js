@@ -19,7 +19,6 @@ const GetcurrentSong = async (token) => {
       'Content-Type': 'application/json'
     }
   }).then((response) => {
-    console.log("cacacacacacacacacac");
     let artists = [];
     //console.log(response);
     if (response.data === '') {
@@ -45,7 +44,6 @@ const ImListeningASong = async (args, Token) => {
   } else if (Song.status === "fail") {
     return {"status": "fail"};
   }
-  console.log("pdpdpdpdpdpdpdpdppdpdpdpdpdpdppdpdpdppdpd");
   if (Song.song_name.toLowerCase() == args[0].toLowerCase()) {
     for (let i = 0; i < Song.artist_name.length; i++) {
       if (Song.artist_name[i].toLowerCase() == args[1].toLowerCase()) {
