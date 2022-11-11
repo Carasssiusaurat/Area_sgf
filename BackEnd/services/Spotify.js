@@ -248,7 +248,7 @@ passport.use(
       passReqToCallback: true
     },
     function(req, accessToken, refreshToken, expires_in, profile, done) {
-//      console.log(req.query.state)
+      //console.log("refresh_token = " + refreshToken);
       return done(null, {accessToken});
     }
   )

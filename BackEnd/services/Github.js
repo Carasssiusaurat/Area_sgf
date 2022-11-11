@@ -8,7 +8,8 @@ const { use } = require('passport');
 let github;
 const app = express();
 const {addservice_copy} = require('../controllers/userController');
-
+const fs = require('fs');
+const axios = require('axios');
 
 app.use(session({ secret: 'SECRET', resave: true,
 saveUninitialized: true}));
@@ -63,37 +64,6 @@ class Github{
         this.accessToken = accessToken
     }
 
-    async receive_followers(userName)
-    {
-      const rawResponse = await fetch('https://api.github.com/user/followers', {
-        method: 'GET',
-        headers: {
-          'Authorization': 'Bearer ' + this.accessToken,
-        }
-      });
-      const content = await rawResponse.json();
-      for (var i = 0; i != content.done; i++) {
-        if (content.user === userName)
-          return true;
-      };
-      console.log(content);
-      return false;
-    }
-
-    async check_following(userName)
-    {
-      const rawResponse = await fetch('https://api.github.com/user/following/' + userName, {
-        method: 'GET',
-        headers: {
-          'Authorization': 'Bearer ' + this.accessToken,
-        }
-      });
-      if (rawResponse.status === 204)
-        return true;
-      else if (rawResponse.status === 404)
-        return false;
-    }
-
     async receive_following(userName)
     {
       const rawResponse = await fetch('https://api.github.com/user/following', {
@@ -103,6 +73,7 @@ class Github{
         }
       });
       const content = await rawResponse.json();
+      console.log(content);
       for (var i = 0; i != content.done; i++) {
         if (content.user === userName)
           return true;
@@ -161,12 +132,54 @@ class Github{
     }
 }
 
-app.get('/github/followers',
-  function(req, res){
-    github.receive_followers().then(function(data) {console.log(data)});
-    res.redirect("/");
-    return res;
+const receive_followers = async (userName, token) => {
+  const rawResponse = await fetch('https://api.github.com/user/followers', {
+    method: 'GET',
+    headers: {
+      'Authorization': 'Bearer ' + token,
+    }
   });
+  const content = await rawResponse.json();
+  fs.writeFileSync('followers.json', JSON.stringify(content));
+  for (var i = 0; i != content.length; i++) {
+    console.log(content[i].login);
+    if (content[i].login === userName)
+      return true;
+  };
+  return false;
+}
+
+const IsFollower = async (req, res) => {
+  const data = await receive_followers(req.body.args[0], req.body.token);
+
+  console.log(data);
+}
+
+const check_following = async (userName) =>{
+  const rawResponse = await axios.get('https://api.github.com/user/following/' + userName, {
+    headers: {
+      Authorization: 'Bearer ' + this.accessToken,
+    }
+  }).then((response) => {
+    console.log("groose pute");
+//    console.log(response);
+  }).catch((error) => {});
+  //console.log(rawResponse);
+  //if (rawResponse.status === 204)
+  //  return true;
+  //else if (rawResponse.status === 404)
+  //  return false;
+}
+
+const ImFollowing = async (req, res) => {
+  const data = await check_following(req.body.args[0]);
+
+  console.log(data);
+}
+
+app.get('/getfollowers', IsFollower);
+
+app.get('/imfollowing', ImFollowing);
 
   app.get('/github/following',
   function(req, res){
