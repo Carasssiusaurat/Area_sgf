@@ -57,12 +57,29 @@ const getuser = (req, res) => {
     });
 }
 
+const login = asyncHandler(async (req, res) => {
+    if (!req.body.username || !req.body.password)
+        return res.status(400).send('missing field : cannot login')
+    Users.findOne({username: req.body.username}).then(user => {
+        if (!user) {
+            return res.status(401).json({message: 'username doesnt exist'});
+        }
+        bcrypt.compare(req.body.password, user.password).then(valid => {
+            if (!valid) {
+                return res.status(401).json({message: 'password incorrect'});
+            }
+            res.status(200).json({userId: user._id, token: generateToken(user._id)});
+        }).catch(err => res.status(500).json({err}));
+    }).catch(err => res.status(500).json({err}));
+})
+
 const moduser = async (req, res) => {
-    if (!req.params.id || req.params.id == ":id")
-        return res.status(400).send('missing field : cannot get user')
+    if (!req.params.id || req.params.id == ":id" || !req.body.username || !req.body.password)
+        return res.status(400).send('missing field : cannot update user')
     try {
         const user_to_update = await Users.findOne({_id: req.params.id});
         user_to_update.username = req.body.username
+        user_to_update.password = bcrypt.hashSync(req.body.password, 10)
         user_to_update.save();
         return res.status(200).json({message: "User updated"});
     } catch (err) {
@@ -90,21 +107,6 @@ const delOneuser = (req, res) => {
         return res.json(data);
     });
 }
-
-const login = asyncHandler(async (req, res) => {
-    Users.findOne({username: req.body.username}).then(user => {
-        if (!user) {
-            return res.status(401).json({message: 'username doesnt exist'});
-        }
-        bcrypt.compare(req.body.password, user.password).then(valid => {
-            if (!valid) {
-                return res.status(401).json({message: 'password incorrect'});
-            }
-            res.status(200).json({userId: user._id, token: generateToken(user._id)});
-
-        }).catch(err => res.status(500).json({err}));
-    }).catch(err => res.status(500).json({err}));
-})
 
 const addservice = async (req, res) => {
     if (!req.params.id || req.params.id == ":id")
