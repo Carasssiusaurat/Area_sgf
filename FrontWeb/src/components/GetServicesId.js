@@ -42,6 +42,7 @@ class GetServicesId extends React.Component {
           <GetServicesData id={items} page={this.props.page}></GetServicesData>
         ) : (
           <GetServicesData
+            data={items}
             id={sessionStorage.getItem("id_select")}
             page={this.props.page}
           ></GetServicesData>

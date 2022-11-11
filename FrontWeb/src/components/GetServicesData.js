@@ -10,6 +10,7 @@ class GetServicesData extends React.Component {
     this.state = {
       items: [],
       area: [],
+      data: [],
       isLoaded: false,
     };
   }
@@ -100,16 +101,38 @@ class GetServicesData extends React.Component {
         .catch((err) => {
           console.log(err);
         });
+      for (let i = 0; i < this.props.data.services.length; i++) {
+        fetch(
+          "http://localhost:8080/user/" +
+            sessionStorage.getItem("id") +
+            "/service",
+          {
+            method: "GET",
+            headers: {
+              Authorization: "Bearer " + sessionStorage.getItem("token"),
+            },
+          }
+        )
+          .then((res) => res.json())
+          .then((json) => {
+            this.setState({
+              data: json,
+            });
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      }
     }
     console.log("YOUPIIIIIIIIIIIII");
     this.state.isLoaded = true;
   }
 
   render() {
-    const { isLoaded, items, area } = this.state;
+    const { isLoaded, items, area, data } = this.state;
 
     if (!this.state.isLoaded) return;
-    if (this.props.page === "2") console.log(this.props.page);
+    // if (this.props.page === "2") console.log(this.props.page);
 
     return (
       <div className="test">
@@ -129,7 +152,7 @@ class GetServicesData extends React.Component {
         )} */}
         {/* {console.log(this.props.page)} */}
         {/* {this.props.page == "2" ? console.log("OUI DE FOU") : null} */}
-        {console.log(items)}
+        {/* {console.log(items)} */}
         {/* {console.log(items[0].)} */}
         {this.props.page === "0"
           ? items.map((item, index) => (
@@ -149,6 +172,7 @@ class GetServicesData extends React.Component {
             id={items}
             page={this.props.page}
             area={area}
+            data={data}
           />
         ) : null}
       </div>
