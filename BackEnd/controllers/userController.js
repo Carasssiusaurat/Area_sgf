@@ -119,7 +119,7 @@ const addservice = async (req, res) => {
         if (user_to_update.services.filter(service => service.id === service_to_add._id.toString()).length > 0)
             return res.status(200).json({message: "Service already used"});
         console.log(service_to_add._id);
-        user_to_update.services.push({_id: service_to_add._id, actif: true, _token: 'TOKEN'});
+        user_to_update.services.push({_id: service_to_add._id, actif: true, access_token: 'TOKEN'});
         user_to_update.save();
         return res.status(200).json({message: "Service added"});
     } catch (err) {
@@ -144,7 +144,7 @@ const addservice_copy = async (usr_id, service_id, token) => {
       user_to_update.services.push({
         _id: service_to_add._id,
         actif: true,
-        _token: token,
+        access_token: token,
       });
       user_to_update.save();
       response = {status: 200, message: "Service added"};

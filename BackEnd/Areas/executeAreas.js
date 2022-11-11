@@ -29,7 +29,7 @@ const getServiceActionToken = async (id) => {
   const service = await Services.findOne({action_id: {$in: area.action._id}})
   for (let i = 0; i < user.services.length; i++) {
     if (user.services[i]._id.toString() == service._id.toString()) {
-      return (user.services[i]._token);
+      return (user.services[i].access_token);
     }
   }
   return (null);
@@ -41,7 +41,7 @@ const getServiceReactionToken = async (id) => {
   const service = await Services.findOne({reaction_id: {$in: area.reaction._id}})
   for (let i = 0; i < user.services.length; i++) {
     if (user.services[i]._id.toString() == service._id.toString()) {
-      return (user.services[i]._token);
+      return (user.services[i].access_token);
     }
   }
   return (null);

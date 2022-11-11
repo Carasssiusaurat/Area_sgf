@@ -3,7 +3,8 @@ const Schema = mongoose.Schema;
 
 const service = new Schema({
     _service_id: mongoose.SchemaTypes.ObjectId,
-    _token: String,
+    access_token: String,
+    refresh_token: String,
     actif: Boolean
 });
 
