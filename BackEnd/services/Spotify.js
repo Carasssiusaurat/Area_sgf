@@ -13,7 +13,6 @@ const actual_device = '';
 let devices = [];
 
 const GetcurrentSong = async (token) => {
-  console.log("token = " + token);
   const data = await axios.get('https://api.spotify.com/v1/me/player/currently-playing', {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -33,6 +32,7 @@ const GetcurrentSong = async (token) => {
     }
     return {"status": "success", "song_name": response.data.item.name, "artist_name": artists, "album_name": response.data.item.album.name};
   }).catch((error) => {
+    console.log(error);
     return {"status": "error"};
   });
   return data;
@@ -283,15 +283,15 @@ router.get('/auth/callback',
   }
 );
 
-router.get('/get_current_song', function(req, res) {
-  Getcurrentsong().then((data) => {
-    res.json(data);
-    console.log(data);
-  }).catch((error) => {
-    res.json(error);
-    console.log(error);
-  });
-});
+//router.get('/get_current_song', function(req, res) {
+//  Getcurrentsong().then((data) => {
+//    res.json(data);
+//    console.log(data);
+//  }).catch((error) => {
+//    res.json(error);
+//    console.log(error);
+//  });
+//});
 
 router.get('/test_spotify_actions', async function(req, res) {
   console.log("test spotify actions");
