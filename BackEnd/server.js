@@ -12,8 +12,8 @@ const about_jsonRoutes = require('./routes/about_json');
 const cors = require("cors");
 const app = express();
 const session = require("express-session");
-const spotifyrouter = require("./services/Spotify.js").router;
-const googleRoutes = require("./services/google");
+const spotifyroutes = require("./services/Spotify.js").router;
+const googleRoutes = require("./services/google").router;
 const githubRoutes = require("./services/Github.js");
 const areaexec = require("./Areas/executeAreas");
 
@@ -50,7 +50,7 @@ app.use('/', reactionRoutes);
 
 app.use('/', areaRoutes);
 
-app.use("/spotify", spotifyrouter);
+app.use("/spotify", spotifyroutes);
 
 app.use("/github", githubRoutes);
 
