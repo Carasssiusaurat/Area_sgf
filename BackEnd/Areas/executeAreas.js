@@ -4,6 +4,7 @@ const Users = require('../model/Users');
 const my_actions = require('../model/Actions');
 const my_reactions = require('../model/Reactions');
 const Services = require('../model/Services');
+const { Getcalendar, GetYoutubeVideo } = require("../services/google");
 
 const test = (caca) => {
   console.log(caca)
@@ -11,6 +12,8 @@ const test = (caca) => {
 
 const actions = {
   "636ba1c921531a915d2085d0": ImListeningASong,
+  "636bb8860ffcc9a4f64a70ca": Getcalendar,
+  "636bb9780ffcc9a4f64a70d2": GetYoutubeVideo,
 };
   
 

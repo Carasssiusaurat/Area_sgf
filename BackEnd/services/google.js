@@ -45,6 +45,14 @@ router.get("/auth", cors(), (req, res) => {
   res.redirect(data);
 });
 
+const send_accessToken = async (user_id, service_id) => {
+  console.log(accessToken);
+  response = await addservice_copy(user_id, service_id, refreshToken);
+  console.log(response);
+  console.log("service added");
+  return response;
+};
+
 router.get("/handleGoogleRedirect", async (req, res) => {
   const code = req.query.code;
   const user_id = req.query.state.split(",")[0].split("=")[1];
@@ -59,17 +67,15 @@ router.get("/handleGoogleRedirect", async (req, res) => {
     }
     accessToken = tokens.access_token;
     refreshToken = tokens.refresh_token;
+
     oauth2Client.setCredentials({ refresh_token: refreshToken });
-    Getmail();
+    const response = send_accessToken(user_id, service_id);
+    if (response.status != 200) {
+      console.log("error");
+      console.log(response.message);
+    }
+    res.redirect("http://localhost:8081/home");
   });
-  response = await addservice_copy(user_id, service_id, accessToken);
-  console.log(response);
-  if (response.status != 200) {
-    console.log("error");
-    console.log(response.message);
-  }
-  console.log("service added");
-  res.redirect("http://localhost:8081/home");
 });
 
 const Getmail = async () => {
@@ -106,13 +112,22 @@ router.post("/getValidToken", async (req, res) => {
   }
 });
 
-const Getcalendar = async () => {
+const Getcalendar = async (args, token) => {
+  oauth2Client.setCredentials({ refresh_token: token });
   const res = await calendar.events.list({
     auth: oauth2Client,
     calendarId: "primary",
   });
-  console.log(res.data);
-  return res.data.items;
+  trigger = parseInt(args[0]) * 60000;
+  res.data.items.forEach(function (items) {
+    const dateTime = new Date(items.start.dateTime);
+    const nowDate = new Date();
+    const diffTime = Math.abs(nowDate - dateTime);
+    if (diffTime <= trigger && nowDate < dateTime) {
+      return { status: "success" };
+    }
+  });
+  return { status: "fail" };
 };
 
 // const CreateDriveFile = async () => {
@@ -165,13 +180,26 @@ const GetFileData = async (message_id, attachment_id) => {
   // console.log(res.data.data);
   return base64url.decode(res.data.data);
 };
-const GetYoutubeVideo = async (id) => {
+const GetYoutubeVideo = async (args, token) => {
+  oauth2Client.setCredentials({ refresh_token: token });
   const res = await youtube.videos.list({
     auth: oauth2Client,
-    id: id,
+    id: args[0],
     part: "snippet,contentDetails,statistics",
   });
-  return res.data.items;
+  items;
+  res.data.items.forEach(function () {
+    trigger = parseInt(args[1]);
+    if (args[2] === "likes") {
+      const likes = items.statistics.likeCount;
+      if (likes >= trigger) return { status: "success" };
+    }
+    if (args[2] === "views") {
+      const views = parseInt(items.statistics.viewCount);
+      if (views >= trigger) return { status: "success" };
+    }
+  });
+  return { status: "fail" };
 };
 
 async function sendMail(user, object, text) {
@@ -215,16 +243,7 @@ const isWorkflow = async (service, action, trigger, reaction, id) => {
       const nowDate = new Date();
       const diffTime = Math.abs(nowDate - dateTime);
       if (diffTime <= trigger && nowDate < dateTime) {
-        if (reaction === "gmail") {
-          console.log("OK");
-          sendMail(
-            user,
-            items.summary + " in less than " + trigger / 60000 + " minutes.",
-            items.summary + " in less than " + trigger / 60000 + " minutes."
-          )
-            .then((result) => console.log("Email sent...", result))
-            .catch((error) => console.log(error.message));
-        }
+        console.log("ca marche");
       }
     });
   }
@@ -321,4 +340,4 @@ router.post("/set_workflow", async function (req, res) {
   );
 });
 
-module.exports = router;
+module.exports = { router, Getcalendar, GetYoutubeVideo };
