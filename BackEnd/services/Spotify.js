@@ -12,23 +12,6 @@ const SpotifyStrategy = require('passport-spotify').Strategy;
 const actual_device = '';
 let devices = [];
 
-class Spotify {
-  Service_id = "ec13a340-8eb5-59da-a8b3-8c1cbe2b67e1";
-  user_infos = "";
-
-  ChangeDevice = async (device) => {
-    if (devices.length() > 1) {
-      const {data} = await axios.put('https://api.spotify.com/v1/me/player', {
-        headers: {
-          Authorization: `Bearer ${SpotifyToken}`,
-          'Content-Type': 'application/json'
-        },
-        device_ids: [devices[1].id]
-      });
-    }
-  }
-}
-
 const GetcurrentSong = async (token) => {
   const data = await axios.get('https://api.spotify.com/v1/me/player/currently-playing', {
     headers: {
@@ -82,10 +65,10 @@ const is_artist = (artist_name, artists_list) => {
   return false;
 }
 
-const searchArtist = async (uri) => {
+const searchArtist = async (args, token) => {
   const data = await axios.get('https://api.spotify.com/v1/search', {
     headers: {
-      Authorization: `Bearer ${SpotifyToken}`
+      Authorization: `Bearer ${token}`
     },
     params: {
       q: args[0],
@@ -167,7 +150,7 @@ const AddSongToPlaylist = async (args, token) => {
   }, 
   {
     headers: {
-      Authorization: `Bearer ${SpotifyToken}`,
+      Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json'
     }
   }).then((response) => {
@@ -234,8 +217,6 @@ const SearchPlaylist = async (args, token) => {
   return data;
 }
 
-var SpotifyToken = ''
-
 var trigger = {
   "songid": "",
   "artistid": ""
@@ -288,7 +269,6 @@ router.get('/auth/callback',
     const user_id = req.query.state.split(",")[0].split("=")[1];
     const service_id = req.query.state.split(",")[1].split("=")[1];
     console.log("user id = " + user_id + " service id = " + service_id);
-    SpotifyToken = req.user.accessToken;
     console.log('token: '+ req.user.accessToken);
     response = await addservice_copy(user_id, service_id, req.user.accessToken);
     console.log(response);
