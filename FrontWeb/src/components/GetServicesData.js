@@ -11,6 +11,7 @@ class GetServicesData extends React.Component {
       items: [],
       area: [],
       data: [],
+      action_id: [],
       isLoaded: false,
     };
   }
@@ -19,30 +20,12 @@ class GetServicesData extends React.Component {
     // if (this.props.page === 2)
     //   id = this.props.id
     // else
-    if (this.props.page != "2") {
+    if (
+      this.props.page != "2" &&
+      this.props.page != "3" &&
+      this.props.page != "4"
+    ) {
       console.log("ALLO");
-      // if (this.props.id.services.length != 0) {
-      //   for (let i = 0; i < this.props.id.services.length; i++) {
-      //     fetch(
-      //       "http://localhost:8080/service/" + this.props.id.services[i]._id,
-      //       {
-      //         method: "GET",
-      //         headers: {
-      //           Authorization: "Bearer " + sessionStorage.getItem("token"),
-      //         },
-      //       }
-      //     )
-      //       .then((res) => res.json())
-      //       .then((json) => {
-      //         this.setState({
-      //           items: this.state.items.concat(json),
-      //         });
-      //       })
-      //       .catch((err) => {
-      //         console.log(err);
-      //       });
-      //   }
-      // }
       if (this.props.id.services.length != 0) {
         for (let i = 0; i < this.props.id.services.length; i++) {
           fetch(
@@ -124,36 +107,71 @@ class GetServicesData extends React.Component {
           });
       }
     }
+    if (this.props.page === "3") {
+      console.log("je suis dans getserviceData page 3");
+      fetch("http://localhost:8080/service/" + this.props.id, {
+        method: "GET",
+        headers: {
+          Authorization: "Bearer " + sessionStorage.getItem("token"),
+        },
+      })
+        .then((res) => res.json())
+        .then((json) => {
+          this.setState({
+            data: this.state.data.concat(json),
+          });
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+      fetch("http://localhost:8080/service/" + this.props.id + "/reaction", {
+        method: "GET",
+        headers: {
+          Authorization: "Bearer " + sessionStorage.getItem("token"),
+        },
+      })
+        .then((res) => res.json())
+        .then((json) => {
+          this.setState({
+            area: json,
+          });
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+      fetch(
+        "http://localhost:8080/service/" + sessionStorage.getItem("id_select"),
+        {
+          method: "GET",
+          headers: {
+            Authorization: "Bearer " + sessionStorage.getItem("token"),
+          },
+        }
+      )
+        .then((res) => res.json())
+        .then((json) => {
+          this.setState({
+            action_id: this.state.action_id.concat(json),
+          });
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+
     console.log("YOUPIIIIIIIIIIIII");
     this.state.isLoaded = true;
   }
 
   render() {
-    const { isLoaded, items, area, data } = this.state;
+    const { isLoaded, items, area, data, action_id } = this.state;
 
     if (!this.state.isLoaded) return;
     // if (this.props.page === "2") console.log(this.props.page);
 
     return (
       <div className="test">
-        {/* {console.log(this.props.page)}
-        {this.props.page === "0" ? (
-          items.map((item, index) => (
-            <ConnectedCard
-              name={item.name}
-              img_url={item.img_url}
-              id={this.props.id.services[index]._id}
-            />
-          ))
-        ) : this.props.page === "1" ? (
-          <List_Workspace items={items} id={this.props.id.services} />
-        ) : (
-          <List_Workspace items={this.props.page} id={this.props.id.services} />
-        )} */}
-        {/* {console.log(this.props.page)} */}
-        {/* {this.props.page == "2" ? console.log("OUI DE FOU") : null} */}
-        {/* {console.log(items)} */}
-        {/* {console.log(items[0].)} */}
+        {console.log(data)}
         {this.props.page === "0"
           ? items.map((item, index) => (
               <ConnectedCard
@@ -173,6 +191,16 @@ class GetServicesData extends React.Component {
             page={this.props.page}
             area={area}
             data={data}
+          />
+        ) : null}
+        {this.props.page === "3" ? (
+          <List_Workspace
+            // items={items}
+            id={items}
+            page={this.props.page}
+            area={area}
+            data={data}
+            action_id={action_id}
           />
         ) : null}
       </div>

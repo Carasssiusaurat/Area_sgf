@@ -40,13 +40,23 @@ class GetServicesId extends React.Component {
         {/* {console.log(this.props.page)} */}
         {sessionStorage.getItem("id_select") === null ? (
           <GetServicesData id={items} page={this.props.page}></GetServicesData>
-        ) : (
+        ) : null}
+        {sessionStorage.getItem("id_select_reaction") === null &&
+        sessionStorage.getItem("id_select") != null ? (
           <GetServicesData
             data={items}
             id={sessionStorage.getItem("id_select")}
             page={this.props.page}
           ></GetServicesData>
-        )}
+        ) : null}
+        {sessionStorage.getItem("id_select_reaction") != null &&
+        sessionStorage.getItem("id_select") != null ? (
+          <GetServicesData
+            data={items}
+            id={sessionStorage.getItem("id_select_reaction")}
+            page={this.props.page}
+          ></GetServicesData>
+        ) : null}
       </div>
     );
   }

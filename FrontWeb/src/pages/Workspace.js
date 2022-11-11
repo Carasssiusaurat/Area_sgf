@@ -15,9 +15,15 @@ const Workspace = () => {
       )}
       {sessionStorage.getItem("id_select") === null ? (
         <GetServicesId page="1"></GetServicesId>
-      ) : (
+      ) : null}
+      {sessionStorage.getItem("id_select_reaction") === null &&
+      sessionStorage.getItem("id_select") != null ? (
         <GetServicesId page="2"></GetServicesId>
-      )}
+      ) : null}
+      {sessionStorage.getItem("id_select_reaction") != null &&
+      sessionStorage.getItem("id_select") != null ? (
+        <GetServicesId page="3"></GetServicesId>
+      ) : null}
       {/* <List_Workspace></List_Workspace> */}
     </div>
   );

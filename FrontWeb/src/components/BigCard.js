@@ -19,19 +19,19 @@ const BigCard = ({ name, img_url, id, index, reaction, area }) => {
   };
 
   const ChangeValue = () => {
-    if (reaction != 1 && reaction != 2 && reaction != 900) {
+    if (reaction != 1 && reaction != 2 && reaction != 900 && reaction != 3) {
       sessionStorage.setItem("id_select", id);
       window.location.reload(false);
     } else {
       console.log("OUIN OUIN");
       sessionStorage.setItem("id_select_reaction", id);
-      setSelect(select + 1);
+      window.location.reload(false);
     }
   };
 
   const setMargin = () => {
     if (reaction === 1) reaction = 900;
-    if (reaction === 2) button_state = "remove";
+    if (reaction === 2 || reaction === 3) button_state = "remove";
   };
 
   useEffect(
@@ -44,9 +44,10 @@ const BigCard = ({ name, img_url, id, index, reaction, area }) => {
   );
   return (
     <div>
-      {reaction === 1 || reaction === 2 ? setMargin() : null}
+      {reaction === 1 || reaction === 2 || reaction === 3 ? setMargin() : null}
       <div className="divv" style={{ marginLeft: reaction + "px" }}>
-        {sessionStorage.getItem("id_select_reaction") === null ? (
+        {sessionStorage.getItem("id_select_reaction") === null ||
+        reaction === 3 ? (
           index === 3 || index === 6 ? (
             <div className="card-3">
               {console.log("Mince alors")}
@@ -79,53 +80,7 @@ const BigCard = ({ name, img_url, id, index, reaction, area }) => {
               </div>
             </div>
           )
-        ) : (
-          <li className="single-big-card">
-            <h1 className="selected-service">{name}</h1>
-            <img className="logo-img" src={img_url}></img>
-            <p className="description">
-              Le Lorem Ipsum est le faux texte standard de l'imprimerie depuis
-              les années 1500, quand un imprimeur anonyme assembla ensemble des
-              morceaux de texte pour réaliser un livre spécimen de polices de
-              texte. Il n'a pas fait que survivre cinq siècles, mais s'est aussi
-              adapté à la bureautique informatique, sans que son contenu n'en
-              soit modifié.
-            </p>
-            <div className="form-group">
-              <label>Action :</label>
-              <select
-                name="idaction"
-                id="idaction"
-                className="form-control"
-                value={action}
-                onChange={(e) => setAction(e.target.value)}
-              >
-                <option disabled selected>
-                  -- Select Action --
-                </option>
-                {area.map((item, index) => (
-                  <option value={index}>{item.name}</option>
-                ))}
-              </select>
-              <div className="list_args">
-                {area.length != 0
-                  ? area[action].args.map((arg, index) => (
-                      <input
-                        placeholder={arg}
-                        onChange={updateFieldChanged(index)}
-                      ></input>
-                    ))
-                  : null}
-              </div>
-              <div className="infos">
-                <a class="select" onClick={() => setIsSet(action_is_set + 1)}>
-                  Set Action
-                </a>
-              </div>
-              {console.log("Ligne 95" + action_is_set)}
-            </div>
-          </li>
-        )}
+        ) : null}
       </div>
     </div>
   );
