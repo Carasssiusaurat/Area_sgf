@@ -13,6 +13,7 @@ const actual_device = '';
 let devices = [];
 
 const GetcurrentSong = async (token) => {
+  console.log("token = " + token);
   const data = await axios.get('https://api.spotify.com/v1/me/player/currently-playing', {
     headers: {
       Authorization: `Bearer ${token}`,
