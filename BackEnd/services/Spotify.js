@@ -339,4 +339,4 @@ router.get('/change_song', function(req, res) {
   });
 });
 
-module.exports = {router};
+module.exports = {router, AddSongToPlaylist, ImListeningASong, ChangeSong};

@@ -5,45 +5,54 @@ const my_actions = require('../model/Actions');
 const my_reactions = require('../model/Reactions');
 const Services = require('../model/Services');
 
-const actions = [
-  {"636ba1c921531a915d2085d0": ImListeningASong},
-];
-  
-const reactions = [
-  {"636ba32f21531a915d2085d4": ChangeSong},
-  {"636ba45eec84f1ac23b7b424": AddSongToPlaylist}
-];
+const test = (caca) => {
+  console.log(caca)
+}
 
-const getServiceActionToken = async (req, res) => {
-  const area = await Areas.findOne({_id: req.params.id});
+const actions = {
+  "636ba1c921531a915d2085d0": ImListeningASong,
+};
+  
+
+const reactions = {
+  "636ba32f21531a915d2085d4": ChangeSong,
+  "636ba45eec84f1ac23b7b424": AddSongToPlaylist
+};
+
+const getServiceActionToken = async (id) => {
+  const area = await Areas.findOne({_id: id});
   const user = await Users.findOne({_id: area.user_id});
   const service = await Services.findOne({action_id: {$in: area.action._id}})
   for (let i = 0; i < user.services.length; i++) {
     if (user.services[i]._id.toString() == service._id.toString()) {
-      return res.json(user.services[i]._token);
+      return (user.services[i]._token);
     }
   }
-  return res.json("no token found");
+  return (null);
 }
 
-const getServiceReactionToken = async (req, res) => {
-  const area = await Areas.findOne({_id: req.params.id});
+const getServiceReactionToken = async (id) => {
+  const area = await Areas.findOne({_id: id});
   const user = await Users.findOne({_id: area.user_id});
   const service = await Services.findOne({reaction_id: {$in: area.reaction._id}})
   for (let i = 0; i < user.services.length; i++) {
     if (user.services[i]._id.toString() == service._id.toString()) {
-      return res.json(user.services[i]._token);
+      return (user.services[i]._token);
     }
   }
-  return res.json("no token found");
+  return (null);
 }
 
 const ExecuteAreas = async () => {
   const areas = await Areas.find();
-
-  for (var i = 0; i != areas.length; i++) {
-    // recup services id dans ta table d'actions avec l'action._id de l'area et comp avec services._service_id de la table de user avec user_id de l'area
-  }
+  // for (let i = 0; i < areas.length; i++) {
+    const action_token = getServiceActionToken(areas[1]._id);
+    const reaction_token = getServiceReactionToken(areas[1]._id);
+    console.log(areas[1].action._id.toString())
+    console.log(areas[1].reaction._id.toString())
+    actions[areas[1].action._id.toString()](areas[1].action.args, action_token);
+    reactions[areas[1].reaction._id.toString()](areas[1].reaction.args, reaction_token);
+  // }
 };
 
-module.exports = {getServiceActionToken, getServiceReactionToken};
+module.exports = {getServiceActionToken, getServiceReactionToken, ExecuteAreas};
