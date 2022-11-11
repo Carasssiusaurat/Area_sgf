@@ -85,6 +85,7 @@ const delOneuser = (req, res) => {
 }
 
 const login = asyncHandler(async (req, res) => {
+    console.log("JEN")
     Users.findOne({username: req.body.username}).then(user => {
         if (!user) {
             return res.status(401).json({message: 'username doesnt exist'});
