@@ -62,9 +62,9 @@ const ImListeningASong = async (args, Token) => {
     return {"status": "fail"};
   }
   console.log("args length = " + args.length);
-  if (Song.song_name.toLowerCase() == args[1].toLowerCase()) {
+  if (Song.song_name.toLowerCase() == args[0].toLowerCase()) {
     for (let i = 0; i < Song.artist_name.length; i++) {
-      if (Song.artist_name[i].toLowerCase() == args[3].toLowerCase()) {
+      if (Song.artist_name[i].toLowerCase() == args[1].toLowerCase()) {
         console.log("Is this song")
         return {"status": "success"};
       }
@@ -88,14 +88,14 @@ const searchArtist = async (uri) => {
       Authorization: `Bearer ${SpotifyToken}`
     },
     params: {
-      q: uri.body.song_name,
+      q: args[0],
       type: 'track',
       market: 'FR',
       limit: 5
     }
   }).then((response) => {
     for (let i = 0; i < response.data.tracks.items.length; i++) {
-      if (response.data.tracks.items[i].name.toLowerCase() == uri.body.song_name.toLowerCase() && is_artist(uri.body.artist_name, response.data.tracks.items[i].artists)) {
+      if (response.data.tracks.items[i].name.toLowerCase() == args[0].toLowerCase() && is_artist(args[1], response.data.tracks.items[i].artists)) {
         return {"track_uri": response.data.tracks.items[i].uri, "status": "success"};
       }
     }
@@ -105,13 +105,16 @@ const searchArtist = async (uri) => {
   return data;
 }
 
-const GetDevices = async () => {
+const GetDevices = async (token) => {
   const data = await axios.get('https://api.spotify.com/v1/me/player/devices', {
     headers: {  
-      Authorization: `Bearer ${SpotifyToken}`,
+      Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json'
     }
   }).then((response) => {
+    if (response.data.devices.length == 0) {
+      return {"status": "fail"};
+    }
     for (let i = 0; i < response.data.devices.length; i++) {
       if (response.data.devices[i].is_active == true) {
         return {"actual_device": response.data.devices[i].id, "status": "success"};
@@ -124,11 +127,14 @@ const GetDevices = async () => {
   return data;
 }
 
-const ChangeSong = async (req) => {
-  var uri = await searchArtist(req)
-  var device = await GetDevices();
+const ChangeSong = async (args, token) => {
+  var uri = await searchArtist(args, token);
+  var device = await GetDevices(token);
   if (device.status == "error" || uri.status == "error") {
     return {"status": "error"};
+  }
+  if (device.status == "fail") {
+    return {"status": "fail"};
   }
   console.log("track_uri = " + uri.track_uri, "device = " + device.actual_device);
   const data = await axios.put('https://api.spotify.com/v1/me/player/play?device_id=' + device.actual_device, 
@@ -138,7 +144,7 @@ const ChangeSong = async (req) => {
     {
       headers: {
         Accept: 'application/json',
-        Authorization: `Bearer ${SpotifyToken}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json'
       },
     }
@@ -150,9 +156,9 @@ const ChangeSong = async (req) => {
   return data;
 }
 
-const AddSongToPlaylist = async (req) => {
-  const playlist = await SearchPlaylist(req);
-  const track = await searchArtist(req);
+const AddSongToPlaylist = async (args, token) => {
+  const playlist = await SearchPlaylist(args, token);
+  const track = await searchArtist(args, token);
   if (playlist.status == "error" || track.status == "error") {
     return {"status": "error"};
   }
@@ -171,10 +177,10 @@ const AddSongToPlaylist = async (req) => {
   });
 }
 
-const GetUser = async () => {
+const GetUser = async (token) => {
   const response = await axios.get('https://api.spotify.com/v1/me', {
     headers: {
-      Authorization: `Bearer ${SpotifyToken}`,
+      Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json'
     }
   }).then((response) => {
@@ -185,19 +191,19 @@ const GetUser = async () => {
   return response;
 }
 
-const CreatePlaylist = async (req) => {
-  var user = await GetUser();
+const CreatePlaylist = async (args, token) => {
+  var user = await GetUser(token);
   if (user.status == "error") {
     return {"status": "error", "code_error": user.code_error};
   }
   const data = await axios.post('https://api.spotify.com/v1/users/' + user.id + '/playlists', {
-    name: req.body.playlist_name,
-    description: req.body.playlist_name,
+    name: args[2],
+    description: args[2],
     public: false
   },
   {
     headers: {
-      Authorization: `Bearer ${SpotifyToken}`
+      Authorization: `Bearer ${token}`
     }
   }).then((response) => {
     return {"playlist_id": response.data.id, "status": "success"};
@@ -207,21 +213,21 @@ const CreatePlaylist = async (req) => {
   return data;
 }
 
-const SearchPlaylist = async (req) => {
+const SearchPlaylist = async (args, token) => {
   const data = await axios.get('https://api.spotify.com/v1/me/playlists', {
     headers: {
-      Authorization: `Bearer ${SpotifyToken}`
+      Authorization: `Bearer ${token}`
     },
     query: {
       limit: 50
     }
   }).then((response) => {
     for (let i = 0; i < response.data.items.length; i++) {
-      if (response.data.items[i].name == req.body.playlist_name) {
+      if (response.data.items[i].name == args[2]) {
         return {"playlist_id": response.data.items[i].id, "status": "success"};
       }
     }
-    return CreatePlaylist(req);
+    return CreatePlaylist(args, token);
   }).catch((error) => {
     return {"status": "error"};
   });
