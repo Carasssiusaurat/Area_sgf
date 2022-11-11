@@ -7,13 +7,11 @@ const { raw } = require('express');
 const { use } = require('passport');
 let github;
 const app = express();
+const {addservice_copy} = require('../controllers/userController');
+
 
 app.use(session({ secret: 'SECRET', resave: true,
 saveUninitialized: true}));
-
-app.listen(8080, () => {
-  console.log('Serveur en écoute sur le port 8080');
-});
 
 passport.serializeUser(function(user, done) {
     done(null, user);
@@ -24,24 +22,39 @@ passport.deserializeUser(function(user, done) {
 });
 
 passport.use(new GitHubStrategy({
-    clientID: GITHUB_CLIENT_ID,
-    clientSecret: GITHUB_CLIENT_SECRET,
-    callbackURL: "http://127.0.0.1:8080/auth/github/callback"
+    clientID: process.env.GITHUB_CLIENT_ID,
+    clientSecret: process.env.GITHUB_CLIENT_SECRET,
+    callbackURL: "http://127.0.0.1:8080/github/auth/callback"
   },
   function(accessToken, refreshToken, profile, done) {
     github = new Github(accessToken, "jaredhanson");
-    console.log(profile);
-    return done(null, profile);
+    console.log("github token : " + accessToken);
+    return done(null, accessToken);
   }
 ));
 
-app.get('/auth/github',
-  passport.authenticate('github', { scope: [ 'user:email', 'public_repo', 'repo', 'read:user', 'user:follow' ] }));
+const github_auth = async (req, res, next) => {
+  const GITHUB_SCOPES = [ 'user:email', 'public_repo', 'repo', 'read:user', 'user:follow' ];
+  passport.authenticate('github', {scope: GITHUB_SCOPES, showDialog: true, state: "token=" + req.query.token + ",serviceid=" + req.query.service_id})(req, res, next); 
+}
 
-app.get('/auth/github/callback', 
+app.get('/auth', github_auth);
+
+app.get('/auth/callback', 
   passport.authenticate('github', { failureRedirect: '/login' }),
-  function(req, res) {
-    res.redirect('/');
+  async function(req, res) {
+    console.log(req.user);
+    const user_id = req.query.state.split(",")[0].split("=")[1];
+    const service_id = req.query.state.split(",")[1].split("=")[1];
+    console.log("user id = " + user_id + " service id = " + service_id);
+    response = await addservice_copy(user_id, service_id, req.user);
+    console.log(response);
+    if (response.status != 200) {
+      console.log("error");
+      console.log(response.message)
+    }
+    console.log("Github service added");
+    res.redirect('http://localhost:8081/home');
   });
 
 class Github{
@@ -196,3 +209,5 @@ function(req, res){
   res.redirect("/");
   return res;
 });
+
+module.exports = app;

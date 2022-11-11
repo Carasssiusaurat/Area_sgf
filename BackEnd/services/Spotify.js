@@ -276,7 +276,7 @@ passport.use(
       passReqToCallback: true
     },
     function(req, accessToken, refreshToken, expires_in, profile, done) {
-      console.log(req.query.state)
+//      console.log(req.query.state)
       return done(null, {accessToken});
     }
   )
@@ -295,8 +295,7 @@ router.get('/auth/callback',
   async function (req, res) {
     const user_id = req.query.state.split(",")[0].split("=")[1];
     const service_id = req.query.state.split(",")[1].split("=")[1];
-    console.log("user id = " + user_id + " server id = " + service_id);
-    console.log("pute pute pute pute pute pute pute ")
+    console.log("user id = " + user_id + " service id = " + service_id);
     SpotifyToken = req.user.accessToken;
     console.log('token: '+ req.user.accessToken);
     response = await addservice_copy(user_id, service_id, req.user.accessToken);
