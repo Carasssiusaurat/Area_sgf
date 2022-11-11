@@ -16,7 +16,7 @@ passport.use(
     {
     clientID: process.env.TWITCH_CLIENT_ID,
     clientSecret: process.env.TWITCH_CLIENT_SECRET,
-    callbackURL: "http://localhost:8080/auth/twitch/callback",
+    callbackURL: "http://localhost:8080/twitch/auth/callback",
     scope: SCOPES
     },
     function(accessToken, refreshToken, profile, done) {
@@ -136,7 +136,7 @@ router.get('/get_user_id', function(req, res) {
 
 var twitchToken = ''
 
-router.get('/auth/twitch/callback',
+router.get('/twitch/auth/callback',
   passport.authenticate('twitch', {failureRedirect: '/login'}),
   async function(req, res) {
   twitchToken = req.user.accessToken;
@@ -242,13 +242,6 @@ passport.deserializeUser(function (obj, done) {
   done(null, obj);
 })
   
-router.get('/auth/twitch', passport.authenticate('twitch'));
-  
-router.get("/login/fail", (req, res) => {
-  res.status(401).json({
-    success: false,
-    message: "authentification twitter fail"
-  })
-})
+router.get('/twitch/auth', passport.authenticate('twitch'));
 
 module.exports = router;
