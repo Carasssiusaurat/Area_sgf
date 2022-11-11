@@ -4,7 +4,7 @@ var DeezerStrategy = require('passport-deezer').Strategy;
 var session = require('express-session');
 var DEEZER_CLIENT_ID = "566922"
 var DEEZER_CLIENT_SECRET = "5e16e4dda75b642bb49b9531e4630391"
-import {fetch} from 'node-fetch';
+const fetch = require("node-fetch");
 const { raw } = require('express');
 const { use } = require('passport');
 let deezer;
