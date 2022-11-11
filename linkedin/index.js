@@ -3,7 +3,7 @@ const app = express();
 var LinkedInStrategy = require('passport-linkedin-oauth2').Strategy;
 var passport = require('passport');
 var session = require('express-session');
-const { application } = require("express");
+require('dotenv').config()
 let LinkedIn;
 
 
@@ -21,25 +21,31 @@ passport.serializeUser(function(user, done) {
   });
 
 passport.use(new LinkedInStrategy({
-    clientID: process.env.clientID,
-    clientSecret: process.env.clientSecret,
+    clientID: process.env.LINKEDIN_CLIENT_ID,
+    clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
     callbackURL: "http://127.0.0.1:3000/auth/linkedin/callback",
     scope: ['r_emailaddress', 'r_liteprofile', 'w_member_social'],
     sessions : false,
   }, function(accessToken, refreshToken, profile, done) {
-    process.nextTick(function () {  
-      console.log(profile);
-      LinkedIn = new Linkedin(accessToken, profile.id);
+    process.nextTick(function () {
+      LinkedIn = new Linkedin(accessToken, profile.id, JSON.parse(profile._raw).firstName.preferredLocale.country);
       return done(null, profile);
     });
   }));
 
 
 class Linkedin{
-  constructor(accessToken, id) {
+
+  constructor(accessToken, id, country) {
     this.accessToken = accessToken;
     this.id = id;
+    this.country = country;
   }
+
+  async send_localisation(){
+    return country;
+  }
+
   async send_message(text){
     let  json_call = `{
       "author": "` + "urn:li:person:" + this.id + `",
@@ -72,30 +78,28 @@ class Linkedin{
       body: json_call
     });
     const content = await rawResponse.json();
-    console.log(content);
-    return true;
+    if (content.message != null){
+      return true;
+    }
+    return false;
   }
 }
 
+app.get('/linkedin/country', 
+function(req, res){
+  let location = LinkedIn.send_localisation();
+  res.send(location);
+});
 
 app.get('/linkedin/send',
   function(req, res){
-    LinkedIn.send_message("Test message pour Arthur");
-    res.redirect("/");
-    return res;
+    LinkedIn.send_message(req.params["message"]);
+    res.send("true");
   });
 
 
-  app.get('/linkedin/send',
-  function(req, res){
-    LinkedIn.send_message("Test message pour Arthur");
-    res.redirect("/");
-    return res;
-  });
-
-
-app.listen(3000, () => {
-    console.log('Serveur en écoute sur le port 3000');
+app.listen(8080, () => {
+    console.log('Serveur en écoute sur le port 8080');
 });
 
 app.get('/auth/linkedin',
