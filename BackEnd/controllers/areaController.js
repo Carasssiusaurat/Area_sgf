@@ -7,7 +7,7 @@ const newArea = (req, res) => {
         const new_area = new Areas({
             name: req.body.name,
             user_id: req.body.user_id,
-            action: {_id: req.body.action_id, args: req.body.action_arg},
+            action: {_id: req.body.action_id, args: req.body.action_arg.split(',')},
             reaction: {_id: req.body.reaction_id, args: req.body.reaction_arg},
             actif: true
         });
