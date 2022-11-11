@@ -6,11 +6,11 @@ const Reactions = require('../model/Reactions');
 const newservice = (req, res) => {
     const base_action_id = req.body.action_id.split(',');
     const base_reaction_id = req.body.react_id.split(',');
-    const logo = req.body.logo_url;
     const connection = req.body.connection_url;
     const service_name = req.body.service_name;
+    const logo = req.body.logo_url;
 
-    if(!base_action_id || !base_reaction_id || !service_name) {
+    if(!base_action_id || !base_reaction_id || !service_name || !connection || !logo) {
         return res.status(400).send('missing field : cannot add service')
     }
     const action_id = [...new Set(base_action_id)];
@@ -49,9 +49,8 @@ const getAllservice = (req, res) => {
 }
 
 const getservice = async (req, res) => {
-    if (!req.params.id) {
+    if (!req.params.id || req.params.id == ":id")
         return res.status(400).send("get service error: incomplete or erroneous request")
-    }
     const service = isValidObjectId(req.params.id) ? await Services.findById(req.params.id) : await Services.findOne({name: req.params.id});
     if (!service) {
             return res.status(404).send("get service error: service not found")
@@ -64,8 +63,8 @@ const delAllservice = (req, res) => {
 }
 
 const delOneservice = async (req, res) => {
-    if (!req.params.id)
-        return res.status(400).send("del service error: incomplete or erroneous request")
+    if (!req.params.id || req.params.id == ":id")
+        return res.status(400).send("get service error: incomplete or erroneous request")
     const servicetoremove = isValidObjectId(req.params.id) ? await Services.findByIdAndDelete(req.params.id) : await Services.findOneAndDelete({name: req.params.id});
     if (!servicetoremove)
         return res.status(404).send("del service error: service not found")
@@ -74,16 +73,25 @@ const delOneservice = async (req, res) => {
 }
 
 const updateservice = (req, res) => {
+    if (!req.params.id || req.params.id == ":id")
+        return res.status(400).send("get service error: incomplete or erroneous request")
     const base_action_id = req.body.action_id.split(',');
     const base_reaction_id = req.body.reaction_id.split(',');
-    const service_name = req.params.id;
+    const logo = req.body.img_url;
+    const service_name = req.body.name;
+    const connection = req.body.connection_url;
 
-    if (!base_action_id || !base_reaction_id || !service_name) {
+    if (!base_action_id || !base_reaction_id || !service_name || !connection || !logo)
         return res.status(400).send('missing field : cannot update service')
-    }
     const action_id = [...new Set(base_action_id)];
     const reaction_id = [...new Set(base_reaction_id)];
-    Services.updateOne({_id: service_name}, {$set: {"action_id": action_id, "reaction_id": reaction_id}}, (err, data) => {
+    Services.updateOne({_id: req.params.id}, {$set: {
+        "action_id": action_id,
+        "reaction_id": reaction_id,
+        "connection_url": connection,
+        "img_url": logo,
+        "name": service_name
+    }}, (err, data) => {
         if (err) {
             return res.status(400).json({Error: err});}
         return res.json(data);
@@ -117,9 +125,8 @@ const getReactions = async (req, res) => {
 };
 
 const delActions = async (req, res) => {
-    if (!req.params.id) {
-        return res.status(400).send('missing field : cannot get service reactions')
-    }
+    if (!req.params.id || req.params.id == ":id")
+        return res.status(400).send("get service error: incomplete or erroneous request")
     const service = await Services.findOne({_id: req.params.id});
     if (!service) {
         return res.status(404).send('service not found')
@@ -130,9 +137,8 @@ const delActions = async (req, res) => {
 };
 
 const delReactions = async (req, res) => {
-    if (!req.params.id) {
-        return res.status(400).send('missing field : cannot get service reactions')
-    }
+    if (!req.params.id || req.params.id == ":id")
+        return res.status(400).send("get service error: incomplete or erroneous request")
     const service = await Services.findOne({_id: req.params.id});
     if (!service) {
         return res.status(404).send('service not found')
@@ -142,23 +148,20 @@ const delReactions = async (req, res) => {
     return res.json(service.reaction_id);};
 
 const delOneAction = async (req, res) => {
-    if (!req.params.id) {
-        return res.status(400).send('missing field : cannot get service reactions')
-    }
-    const service = await Services.findOne({_id: req.params.id});
-    if (!service) {
+    if (!req.params.sid || req.params.id == ":sid" || !req.params.aid || req.params.aid == ":aid")
+        return res.status(400).send("get service error: incomplete or erroneous request")
+    const service = await Services.findOne({_id: req.params.sid});
+    if (!service)
         return res.status(404).send('service not found')
-    }
-    service.action_id.slice(service.action_id.indexOf(req.params.aid), 1);
+    service.action_id = service.action_id.filter((id) => id != req.params.aid);
     service.save();
-    return res.json(service.reaction_id);
+    return res.json(service.action_id);
 };
 
 const delOneReaction = async (req, res) => {
-    if (!req.params.id) {
-        return res.status(400).send('missing field : cannot get service reactions')
-    }
-    const service = await Services.findOne({_id: req.params.id});
+    if (!req.params.sid || req.params.sid == ":sid" || !req.params.rid || req.params.rid == ":rid")
+        return res.status(400).send("get service error: incomplete or erroneous request")
+    const service = await Services.findOne({_id: req.params.sid});
     if (!service) {
         return res.status(404).send('service not found')
     }
@@ -168,8 +171,8 @@ const delOneReaction = async (req, res) => {
 };
 
 const addAction = async (req, res) => {
-    if (!req.params.id)
-        return res.status(400).send('missing field : cannot get service reactions')
+    if (!req.params.id || req.params.id == ":id")
+        return res.status(400).send("get service error: incomplete or erroneous request")
     const service_to_update = await Services.findOne({_id: req.params.id});
     const action_to_add = await Actions.findOne({name: req.body.name});
     if (!service_to_update || !action_to_add)
@@ -188,8 +191,8 @@ const addAction = async (req, res) => {
 };
 
 const addReaction = async (req, res) => {
-    if (!req.params.id)
-        return res.status(400).send('missing field : cannot get service reactions')
+    if (!req.params.id || req.params.id == ":id")
+        return res.status(400).send("get service error: incomplete or erroneous request")
     const service_to_update = await Services.findOne({_id: req.params.id});
     const reaction_to_add = await Reactions.findOne({name: req.body.name});
     if (!service_to_update || !reaction_to_add)

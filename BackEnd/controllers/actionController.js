@@ -18,7 +18,7 @@ const newAction = async (req, res) => {
 }
 
 const getAction = (req, res) => {
-    if (!req.params.id)
+    if (!req.params.id || !req.params.id == ":id")
         return res.status(400).send("get Action error: incomplete or erroneous request")
     Action.findOne({_id:req.params.id}, (err, data) => {
         if (err)
@@ -42,10 +42,8 @@ const getAllAction = (req, res) => {
 }
 
 const deleteAction = (req, res) => {
-    if (!req.params.id) {
-        res.status(400)
-        return res.send("del Action error: incomplete or erroneous request")
-    }
+    if (!req.params.id || !req.params.id == ":id")
+        return res.status(400).send("del Action error: incomplete or erroneous request")
     Action.deleteOne({_id:req.params.id}, (err, data) => {
         if (err) {
             return res.json({Error: err});
@@ -56,10 +54,12 @@ const deleteAction = (req, res) => {
 }
 
 const updateAction = (req, res) => {
+    if (!req.params.id || !req.params.id == ":id")
+        return res.status(400).send("mod Action error: incomplete or erroneous request")
     const arguments = req.body.args;
     const name = req.body.name;
     const description = req.body.description;
-    if (!req.params.id || !arguments || !name || !description) {
+    if (!arguments || !name || !description) {
         res.status(400)
         throw new Error('missing field : cannot update Action')
     }

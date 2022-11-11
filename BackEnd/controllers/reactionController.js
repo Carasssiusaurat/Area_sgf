@@ -17,10 +17,8 @@ const newReaction = async (req, res) => {
 }
 
 const getReaction = (req, res) => {
-    if (!req.params.id) {
-        res.status(400)
-        return res.send("get Reaction error: incomplete or erroneous request")
-    }
+    if (!req.params.id || req.params.id == ":id") 
+        return res.status(400).send("get Reaction error: incomplete or erroneous request")
     Reaction.findOne({_id: req.params.id}, (err, data) => {
         if (err)
             return res.json({Error: err});
@@ -32,10 +30,8 @@ const getReaction = (req, res) => {
 }
 
 const deleteReaction = (req, res) => {
-    if (!req.params.id) {
-        res.status(400)
-        return res.send("del Reaction error: incomplete or erroneous request")
-    }
+    if (!req.params.id || req.params.id == ":id") 
+        return res.status(400).send("del Reaction error: incomplete or erroneous request")
     Reaction.deleteOne({_id :req.params.id}, (err, data) => {
         if (err) {
             return res.json({Error: err});
@@ -46,10 +42,12 @@ const deleteReaction = (req, res) => {
 }
 
 const updateReaction = (req, res) => {
+    if (!req.params.id || req.params.id == ":id") 
+        return res.status(400).send("mod Reaction error: incomplete or erroneous request")
     const arguments = req.body.args;
     const name = req.body.name;
     const description = req.body.description;
-    if (!req.params.id || !arguments || !name || !description) {
+    if (!arguments || !name || !description) {
         res.status(400)
         throw new Error('missing field : cannot update Reaction')
     }

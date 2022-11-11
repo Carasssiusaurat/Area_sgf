@@ -6,11 +6,11 @@ const { protect, admin } = require('../middleware/authMiddleware');
 
 const serviceController = require('../controllers/serviceController');
 
-router.get('/service/:id', protect, serviceController.getservice)
 router.get('/service', protect, serviceController.getAllservice)
 router.post('/service', admin, upload.none(), serviceController.newservice)
-router.delete('/service/:id', admin, serviceController.delOneservice)
 router.delete('/service', admin, serviceController.delAllservice)
+router.get('/service/:id', protect, serviceController.getservice)
+router.delete('/service/:id', admin, serviceController.delOneservice)
 router.put('/service/:id', admin, serviceController.updateservice)
 router.put('/service/:id/action', admin, serviceController.addAction)
 router.get('/service/:id/action', protect, serviceController.getActions)

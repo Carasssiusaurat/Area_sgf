@@ -68,7 +68,9 @@ const getAreaReact = async (req, res) => {
 }
 
 const updateArea = async (req, res) => {
-    if (!req.params.id || !req.body.action_id || !req.body.reaction_id || !req.body.action_arg || !req.body.reaction_arg || !req.body.name) {
+    if (!req.params.id || req.params.id == ":id") 
+        return res.status(400).send("get Area error: incomplete or erroneous request")
+    if (!req.body.action_id || !req.body.reaction_id || !req.body.action_arg || !req.body.reaction_arg || !req.body.name) {
         res.status(400)
         throw new Error('missing field : cannot update area')
     }
@@ -89,8 +91,8 @@ const updateArea = async (req, res) => {
 }
 
 const updateAreaState = async (req, res) => {
-    if (!req.params.id)
-        return res.status(400).send('area id missing')
+    if (!req.params.id || req.params.id == ":id") 
+        return res.status(400).send("get Area error: incomplete or erroneous request")
     const area_to_update = await Areas.findOne({_id: req.params.id});
     try {
         if (area_to_update) {
@@ -104,11 +106,9 @@ const updateAreaState = async (req, res) => {
 }
 
 const delOneArea = (req, res) => {
+    if (!req.params.id || req.params.id == ":id") 
+        return res.status(400).send("get Area error: incomplete or erroneous request")
     try {
-        if (!req.params.id) {
-            res.status(400)
-            return res.send("del Area error: incomplete or erroneous request")
-        }
         Areas.deleteOne({_id:req.params.id}, (err, data) => {
             if (err)
                 return res.json({Error: err});

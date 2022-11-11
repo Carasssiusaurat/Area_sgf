@@ -46,6 +46,8 @@ const getusers = (req, res) => {
 }
 
 const getuser = (req, res) => {
+    if (!req.params.id || req.params.id == ":id")
+        return res.status(400).send('missing field : cannot get user')
     Users.findOne({_id: req.params.id}, (err, data) => {
         if (err)
             return res.json({Error: err});
@@ -56,6 +58,8 @@ const getuser = (req, res) => {
 }
 
 const moduser = async (req, res) => {
+    if (!req.params.id || req.params.id == ":id")
+        return res.status(400).send('missing field : cannot get user')
     try {
         const user_to_update = await Users.findOne({_id: req.params.id});
         user_to_update.username = req.body.username
@@ -76,6 +80,8 @@ const delAlluser = (req, res) => {
 }
 
 const delOneuser = (req, res) => {
+    if (!req.params.id || req.params.id == ":id")
+        return res.status(400).send('missing field : cannot get user')
     Users.deleteOne({_id: req.params.id}, (err, data) => {
         if (data.deleteCount == 0)
             return res.json({message: "User doesn't exist !"})
@@ -101,8 +107,8 @@ const login = asyncHandler(async (req, res) => {
 })
 
 const addservice = async (req, res) => {
-    if (!req.params.id)
-        return res.status(400).send('missing field : cannot get service reactions')
+    if (!req.params.id || req.params.id == ":id")
+        return res.status(400).send('missing field : cannot get user')
     const user_to_update = await Users.findOne({_id: req.params.id});
     const service_to_add = await Services.findOne({name: req.body.name});
     if (!user_to_update || !service_to_add)
@@ -148,6 +154,8 @@ const addservice_copy = async (usr_id, service_id, token) => {
 };
 
 const delOneservice = async (req, res) => {
+    if (!req.params.id || req.params.id == ":id" || req.params.sid == ":sid" || !req.params.sid)
+        return res.status(400).send('missing field : cannot get user')
     const user_to_update = await Users.findOne({_id: req.params.uid})
     if (!user_to_update)
         return res.status(404).json({Error: "not found"})
@@ -162,6 +170,8 @@ const delOneservice = async (req, res) => {
 }
 
 const delAllservice = async (req, res) => {
+    if (!req.params.id || req.params.id == ":id")
+        return res.status(400).send('missing field : cannot get user')
     try {
         const user_to_update = await Users.findOne({_id: req.params.id});
         user_to_update.services = [];
@@ -173,7 +183,7 @@ const delAllservice = async (req, res) => {
 }
 
 const updatestate = async (req, res) => {
-    if (!req.params.uid || !req.params.sid)
+    if (!req.params.uid || !req.params.sid || req.params.uid == ":uid" || req.params.sid == ":sid")
         return res.status(400).send('missing fields')
     const user_to_update = await Users.findOne({_id: req.params.uid});
     try {
@@ -190,8 +200,8 @@ const updatestate = async (req, res) => {
 };
 
 const getuserarea = async (req, res) => {
-    if (!req.params.id)
-        return res.status(400).send('missing field : cannot get user area')
+    if (!req.params.id || req.params.id == ":id")
+        return res.status(400).send('missing field : cannot get user')
     const user_to_get = await Areas.find({user_id: req.params.id});
     if (!user_to_get)
         return res.status(404).json({Error: "not found"})
@@ -199,8 +209,8 @@ const getuserarea = async (req, res) => {
 };
 
 const getservices = async (req, res) => {
-    if (!req.params.id)
-        return res.status(400).send('missing field : cannot get user area')
+    if (!req.params.id || req.params.id == ":id")
+        return res.status(400).send('missing field : cannot get user')
     const user_to_get = await Users.findById(req.params.id);
     if (!user_to_get)
         return res.status(404).json({Error: "User not found"})
