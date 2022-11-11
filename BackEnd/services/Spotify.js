@@ -228,20 +228,6 @@ const SearchPlaylist = async (req) => {
   return data;
 }
 
-const test_yazebi = async (req, res) => {
-  console.log("test yazebi");
-}
-
-const actions = [
-  {"636ba1c921531a915d2085d0": ImListeningASong},
-  {'636b7b97882dbfabe1822d0c': test_yazebi},
-];
-
-const reactions = [
-  {"636ba32f21531a915d2085d4": ChangeSong},
-  {"636ba45eec84f1ac23b7b424": AddSongToPlaylist}
-];
-
 var SpotifyToken = ''
 
 var trigger = {
@@ -282,12 +268,12 @@ passport.use(
   )
 );
 
-const oui = async (req, res, next) => {
+const SpotifyAuth = async (req, res, next) => {
   //console.log("user id = " + req.query.token + "server id = " + req.query.service_id);
   passport.authenticate('spotify', {scope: SCOPES, showDialog: true, state: "token=" + req.query.token + ",serviceid=" + req.query.service_id})(req, res, next);
 }
 
-router.get('/auth', oui);
+router.get('/auth', SpotifyAuth);
 
 
 router.get('/auth/callback',
