@@ -3,12 +3,11 @@ const express = require('express');
 const Router = require('express').Router;
 const axios = require('axios');
 const router = Router();
-const fs = require('fs');
-const { request } = require('http');
-const { response } = require('express');
-const e = require('express');
+//const fs = require('fs');
+//const { request } = require('http');
+//const { response } = require('express');
 const TwitchStrategy = require("passport-twitch-new").Strategy;
-const SCOPES = ["user:manage:whispers", "user:read:follows"]
+const SCOPES = ["user:manage:whispers", "user:read:follows", "moderator:manage:announcements", "channel:manage:raids", "channel:read:subscriptions", "channel:read:goals"]
 require('dotenv').config();
 
 passport.use(
@@ -39,6 +38,148 @@ UserIdFromName = async (token, username) => {
     res.send(err)
   }
 };
+
+twitchSubCount = async (req, res) => {
+  const usertoken = req.headers.authorization
+  const streamer_id = req.body.streamer_id
+  const subs = req.body.subs
+  try {
+  const data = await axios.get('https://api.twitch.tv/helix/subscriptions?broadcaster_id=' + streamer_id,{
+    headers: {
+      'Authorization': "Bearer " + usertoken,
+      'Client-ID': process.env.TWITCH_CLIENT_ID
+    }}
+  )
+  if (data.data.total >= subs) {
+    console.log(True)//TEMP RETURN
+  } else {
+    console.log(False)//TEMP RETURN
+  }
+  } catch(err) {
+    console.log(err)
+    res.send(err)
+  }
+  res.json(data.data.total)
+}
+
+twitchAnnouncement = async (req, res) => {
+  usertoken = req.headers.authorization
+  self_id = req.body.user_id
+  streamer_id = req.body.streamer_id
+  let color = "primary"
+  if (req.body.color) {
+    color = req.body.color
+  }
+  let body = {"message": req.body.message, "color": color}
+  try {
+  const data = await axios.post('https://api.twitch.tv/helix/chat/announcements?broadcaster_id=' + streamer_id + "&moderator_id=" + self_id,  body, {
+    headers: {
+      'Authorization': "Bearer " + usertoken,
+      'Client-ID': process.env.TWITCH_CLIENT_ID
+    }}
+  )
+  res.status(200).send("announcement request sent succesfully")
+  } catch(err) {
+    console.log(err)
+    res.send(err)
+  }
+}
+
+twitchStartRaid = async (req, res) => {
+  usertoken = req.headers.authorization
+  self_id = req.body.user_id
+  receiver = req.body.receiver_id
+  try {
+  const data = await axios.post('https://api.twitch.tv/helix/raids?from_broadcaster_id=' + self_id + "&to_broadcaster_id=" + receiver_id,{
+    headers: {
+      'Authorization': "Bearer " + usertoken,
+      'Client-ID': process.env.TWITCH_CLIENT_ID
+    }}
+  )
+  res.status(200).send("raid request successfull")
+  } catch(err) {
+    console.log(err)
+    res.send(err)
+  }
+}
+
+
+twitchSoundtrackIs = async (req, res) => {
+  let usertoken = req.headers.authorization
+  let streamer_id = req.body.streamer_id
+  let soundtrack = req.body.soudtrack
+  try {
+  const data = await axios.get('https://api.twitch.tv/helix/soundtrack/current_track?broadcaster_id=' + streamer_id, {
+    headers: {
+      'Authorization': "Bearer " + usertoken,
+      'Client-ID': process.env.TWITCH_CLIENT_ID
+    }}
+  )
+  if (data.data.data[0].track.title === soundtrack) {
+    console.log("TRUE")
+    res.status(200).send("soundtrack played is " + soundtrack)
+  } else {
+    console.log("FALSE")
+    res.status(200).send("soundtrack played isn't " + soundtrack + " but" + data.data.data[0].track.title)
+  }
+  } catch(err) {
+    console.log(err)
+    res.send(err)
+  }
+}
+
+twitchGoalReached = async (req, res) => {
+  let usertoken = req.headers.authorization
+  let streamer_id = req.body.streamer_id
+  let percent = req.body.percentage
+  try {
+  const data = await axios.get('https://api.twitch.tv/helix/goals?broadcaster_id=' + streamer_id, {
+    headers: {
+      'Authorization': "Bearer " + usertoken,
+      'Client-ID': process.env.TWITCH_CLIENT_ID
+    }}
+  )
+  infos = data.data.data[0]
+  if (infos) {
+    let goalpercent = infos.current_amount / infos.target_amount
+    if (percent <= goalpercent) {
+      console.log("TRUE")
+      res.status(200).send("goal is completed at " + goalpercent)
+    } else {
+      console.log("FALSE")
+      res.status(200).send("goal hasn't reached " + percent + " completion")
+    }
+  }
+  } catch(err) {
+    console.log(err)
+    res.send(err)
+  }
+}
+
+
+twitchLastPlayedIs = async (req, res) => {
+  let usertoken = req.headers.authorization
+  let streamer_id = req.body.streamer_id
+  let gamename = req.body.gameName
+  try {
+  const data = await axios.get('https://api.twitch.tv/helix/channels?broadcaster_id=' + streamer_id, {
+    headers: {
+      'Authorization': "Bearer " + usertoken,
+      'Client-ID': process.env.TWITCH_CLIENT_ID
+    }}
+  )
+  if (data.data.data[0].game_name === gamename) {
+    console.log("TRUE")
+    res.status(200).send("last game player truly is " + gamename)
+  } else {
+    console.log("FALSE")
+    res.status(200).send("last game played isn't " + gamename)
+  }
+  } catch(err) {
+    console.log(err)
+    res.send(err)
+  }
+}
 
 twitchWhisp = async (req, res) => {
   usertoken = req.headers.authorization
@@ -215,7 +356,6 @@ streamerIsStreaming = async (req, res) => {
       Authorization: usertoken,
       'Client-ID': process.env.TWITCH_CLIENT_ID
   }});
-    res.status(500).send("error processing request: empty return")
   let vals = data.data.data
   const streamer = vals.find(e => e.user_name === username)
   if(streamer.type === "live") {
