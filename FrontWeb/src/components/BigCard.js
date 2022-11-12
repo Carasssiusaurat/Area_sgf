@@ -50,7 +50,6 @@ const BigCard = ({ name, img_url, id, index, reaction, area }) => {
         reaction === 3 ? (
           index === 3 || index === 6 ? (
             <div className="card-3">
-              {console.log("Mince alors")}
               <div className="service-logo">
                 <div className="back"></div>
                 <img src={img_url} alt={name} text={name} />

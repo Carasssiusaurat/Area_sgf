@@ -1,5 +1,6 @@
 // import React from "react";
 import BigCard from "./BigCard";
+import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 
 const Workspace = ({ items, id, page, area, data, action_id }) => {
@@ -7,6 +8,7 @@ const Workspace = ({ items, id, page, area, data, action_id }) => {
   const [reaction, setReaction] = useState(0);
   const [action_is_set, setIsSet] = useState(0);
   const [args_value, setArguments] = useState([]);
+  const navigate = useNavigate();
 
   const Set_Area = async () => {
     const res = await fetch("http://localhost:8080/area", {
@@ -25,6 +27,7 @@ const Workspace = ({ items, id, page, area, data, action_id }) => {
       }),
     });
     console.log("action_id = " + sessionStorage.getItem("action_id"));
+    navigate("/My_Workflow");
   };
 
   useEffect(() => {

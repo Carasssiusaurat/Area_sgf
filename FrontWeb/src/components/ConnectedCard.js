@@ -14,6 +14,7 @@ const ConnectedCard = ({ name, img_url, id }) => {
         },
       }
     );
+    window.location.reload(false);
   };
   return (
     <li className="card">
