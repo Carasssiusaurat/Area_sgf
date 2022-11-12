@@ -118,7 +118,7 @@ const addservice = async (req, res) => {
     try {
         if (user_to_update.services.filter(service => service.id === service_to_add._id.toString()).length > 0)
             return res.status(200).json({message: "Service already used"});
-        user_to_update.services.push({_id: service_to_add._id, actif: true, access_token: 'TOKEN'});
+        user_to_update.services.push({_id: service_to_add._id, actif: true, access_token: 'ACCESS TOKEN', refresh_token: 'REFRESH TOKEN'});
         user_to_update.save();
         return res.status(200).json({message: "Service added"});
     } catch (err) {
@@ -127,7 +127,7 @@ const addservice = async (req, res) => {
     }
 }
 
-const addservice_copy = async (usr_id, service_id, token) => {
+const addservice_copy = async (usr_id, service_id, access_token, refresh_token) => {
     var response = "";
     const user_to_update = await Users.findOne({ _id: usr_id });
     const service_to_add = await Services.findOne({ _id: service_id });
@@ -143,7 +143,8 @@ const addservice_copy = async (usr_id, service_id, token) => {
       user_to_update.services.push({
         _id: service_to_add._id,
         actif: true,
-        access_token: token,
+        access_token: access_token,
+        refresh_token: refresh_token
       });
       user_to_update.save();
       response = {status: 200, message: "Service added"};

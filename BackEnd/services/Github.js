@@ -46,6 +46,9 @@ app.get('/auth/callback',
     const user_id = req.query.state.split(",")[0].split("=")[1];
     const service_id = req.query.state.split(",")[1].split("=")[1];
     console.log("user id = " + user_id + " service id = " + service_id);
+    console.log(req.user)
+    console.log(req.user.accessToken)
+    console.log(req.user.refreshToken)
     response = await addservice_copy(user_id, service_id, req.user);
     console.log(response);
     if (response.status != 200) {

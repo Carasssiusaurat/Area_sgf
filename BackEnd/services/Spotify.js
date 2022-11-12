@@ -9,6 +9,8 @@ require('dotenv').config();
 const {addservice_copy} = require('../controllers/userController');
 const SCOPES = ["user-read-currently-playing", "user-read-playback-state", "user-modify-playback-state"]
 const SpotifyStrategy = require('passport-spotify').Strategy;
+const refresh = require('passport-oauth2-refresh');
+const cronJob = require('cron').CronJob;
 const actual_device = '';
 let devices = [];
 
@@ -240,20 +242,20 @@ passport.deserializeUser(function (obj, done) {
   done(null, obj);
 })
 
-passport.use(
-  new SpotifyStrategy(
-    {
-      clientID: process.env.SPOTIFY_CLIENT_ID,
-      clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-      callbackURL: 'http://localhost:8080/spotify/auth/callback',
-      passReqToCallback: true
-    },
-    function(req, accessToken, refreshToken, expires_in, profile, done) {
-      //console.log("refresh_token = " + refreshToken);
-      return done(null, {accessToken});
-    }
-  )
-);
+const strategy = new SpotifyStrategy({
+    clientID: process.env.SPOTIFY_CLIENT_ID,
+    clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
+    callbackURL: 'http://localhost:8080/spotify/auth/callback',
+    passReqToCallback: true
+  },
+  function(req, accessToken, refreshToken, expires_in, profile, done) {
+    //console.log("refresh_token = " + refreshToken);
+    return done(null, {accessToken, refreshToken, expires_in, profile});
+  }
+)
+
+passport.use(strategy);
+refresh.use(strategy);
 
 const SpotifyAuth = async (req, res, next) => {
   //console.log("user id = " + req.query.token + "server id = " + req.query.service_id);
@@ -268,8 +270,8 @@ router.get('/auth/callback',
   async function (req, res) {
     const user_id = req.query.state.split(",")[0].split("=")[1];
     const service_id = req.query.state.split(",")[1].split("=")[1];
-    response = await addservice_copy(user_id, service_id, req.user.accessToken);
-    console.log(response);
+    console.log(req.user.expires_in)
+    response = await addservice_copy(user_id, service_id, req.user.accessToken, req.user.refreshToken);
     if (response.status != 200) {
       console.log("error");
       console.log(response.message)
@@ -279,6 +281,12 @@ router.get('/auth/callback',
     return req.user.accessToken;
   }
 );
+
+const getAccesToken_From_RefreshToken = async (refreshToken) => {}
+
+const job = new cronJob('*/5 * * * * *', getAccesToken_From_RefreshToken, null, true, 'Europe/Paris');
+
+job.start()
 
 //router.get('/get_current_song', function(req, res) {
 //  Getcurrentsong().then((data) => {

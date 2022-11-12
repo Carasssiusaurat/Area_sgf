@@ -47,7 +47,7 @@ router.get("/auth", cors(), (req, res) => {
 
 const send_accessToken = async (user_id, service_id) => {
   console.log(accessToken);
-  response = await addservice_copy(user_id, service_id, refreshToken);
+  response = await addservice_copy(user_id, service_id, accessToken, refreshToken);
   console.log(response);
   console.log("service added");
   return response;
