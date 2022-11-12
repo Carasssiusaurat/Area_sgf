@@ -46,10 +46,9 @@ router.get("/auth", cors(), (req, res) => {
 });
 
 const send_accessToken = async (user_id, service_id) => {
-  console.log(accessToken);
   response = await addservice_copy(user_id, service_id, accessToken, refreshToken);
-  console.log(response);
-  console.log("service added");
+  if (response.status === 200)
+    console.log("service added");
   return response;
 };
 
@@ -57,10 +56,8 @@ router.get("/handleGoogleRedirect", async (req, res) => {
   const code = req.query.code;
   const user_id = req.query.state.split(",")[0].split("=")[1];
   const service_id = req.query.state.split(",")[1].split("=")[1];
-  console.log("server 39 | code", code);
-  console.log("user id = " + user_id + " server id = " + service_id);
 
-  oauth2Client.getToken(code, (err, tokens) => {
+  oauth2Client.getToken(code, async (err, tokens) => {
     if (err) {
       console.log("server 43 | error", err);
       throw new Error("Issue with Login", err.message);
@@ -69,11 +66,9 @@ router.get("/handleGoogleRedirect", async (req, res) => {
     refreshToken = tokens.refresh_token;
 
     oauth2Client.setCredentials({ refresh_token: refreshToken });
-    const response = send_accessToken(user_id, service_id);
-    if (response.status != 200) {
+    const response = await send_accessToken(user_id, service_id);
+    if (response.status != 200)
       console.log("error");
-      console.log(response.message);
-    }
     res.redirect("http://localhost:8081/home");
   });
 });
