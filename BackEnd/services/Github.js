@@ -5,7 +5,6 @@ var session = require('express-session');
 const fetch = require("node-fetch");
 const { raw } = require('express');
 const { use } = require('passport');
-let github;
 const app = express();
 const {addservice_copy} = require('../controllers/userController');
 const fs = require('fs');
@@ -28,7 +27,6 @@ passport.use(new GitHubStrategy({
     callbackURL: "http://127.0.0.1:8080/github/auth/callback"
   },
   function(accessToken, refreshToken, profile, done) {
-    github = new Github(accessToken, "jaredhanson");
     console.log("github token : " + accessToken);
     return done(null, accessToken);
   }
@@ -58,18 +56,12 @@ app.get('/auth/callback',
     res.redirect('http://localhost:8081/home');
   });
 
-class Github{
-    constructor(accessToken, pseudo){
-        this.pseudo = pseudo;
-        this.accessToken = accessToken
-    }
-
-    async receive_following(userName)
+    const receive_following = async (userName, token) =>
     {
       const rawResponse = await fetch('https://api.github.com/user/following', {
         method: 'GET',
         headers: {
-          'Authorization': 'Bearer ' + this.accessToken,
+          'Authorization': 'Bearer ' + token,
         }
       });
       const content = await rawResponse.json();
@@ -82,72 +74,62 @@ class Github{
       return false;
     }
 
-    async fork_repo(repoMaster, repoName)
+    const fork_repo = async (repoName, token) =>
     {
-      console.log(this.accessToken)
-      const rawResponse = await fetch('https://api.github.com/repos/' + repoMaster +'/' + repoName + '/forks', {
+      const body_json =
+      {"name" : repoName};
+      //
+      const rawResponse = await fetch('https://api.github.com/user/repos', {
         method: 'POST',
         headers: {
-          'Authorization': 'Bearer ' + this.accessToken,
+          'Authorization': 'Bearer ' + token,
         },
+        body : JSON.stringify(body_json)
       });
-      const content = await rawResponse.json();z
+      const content = await rawResponse.json();
+      console.log(content);
       return true
     }
 
-    async follow_user(userName)
+    const follow_user = async(userName, token) =>
     {
       const rawResponse = await fetch('https://api.github.com/user/following/' + userName, {
         method: 'PUT',
         headers: {
-          'Authorization': 'Bearer ' + this.accessToken,
+          'Authorization': 'Bearer ' + token,
         }
       });
       return true;
     }
 
-    async unfollow_user(userName)
+    const unfollow_user = async (userName, token) =>
     {
       const rawResponse = await fetch('https://api.github.com/user/following/' + userName, {
         method: 'DELETE',
         headers: {
-          'Authorization': 'Bearer ' + this.accessToken,
+          'Authorization': 'Bearer ' + token,
         }
       });
       return true;
     }
 
-    async create_issue(repoMaster, repoName)
-    {
-      const rawResponse = await fetch('https://api.github.com/repos/' + repoMaster +'/' + repoName + '/issues', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer ' + this.accessToken,
-        },
-        title: 'Found a bug',
-        body: 'this is not normal'
-      });
-      const content = await rawResponse.json();
-      return true;
-    }
-}
 
-const receive_followers = async (userName, token) => {
-  const rawResponse = await fetch('https://api.github.com/user/followers', {
-    method: 'GET',
-    headers: {
-      'Authorization': 'Bearer ' + token,
-    }
-  });
-  const content = await rawResponse.json();
-  fs.writeFileSync('followers.json', JSON.stringify(content));
-  for (var i = 0; i != content.length; i++) {
-    console.log(content[i].login);
-    if (content[i].login === userName)
-      return true;
-  };
-  return false;
-}
+  const receive_followers = async (userName, token) => {
+    const rawResponse = await fetch('https://api.github.com/user/followers', {
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+      }
+    });
+    const content = await rawResponse.json();
+    fs.writeFileSync('followers.json', JSON.stringify(content));
+    for (var i = 0; i != content.length; i++) {
+      console.log(content[i].login);
+      if (content[i].login === userName)
+        return true;
+    };
+    return false;
+  }
 
 const IsFollower = async (req, res) => {
   const data = await receive_followers(req.body.args[0], req.body.token);
@@ -161,7 +143,6 @@ const check_following = async (userName) =>{
       Authorization: 'Bearer ' + this.accessToken,
     }
   }).then((response) => {
-    console.log("groose pute");
 //    console.log(response);
   }).catch((error) => {});
   //console.log(rawResponse);
@@ -173,7 +154,6 @@ const check_following = async (userName) =>{
 
 const ImFollowing = async (req, res) => {
   const data = await check_following(req.body.args[0]);
-
   console.log(data);
 }
 
@@ -183,42 +163,43 @@ app.get('/imfollowing', ImFollowing);
 
   app.get('/github/following',
   function(req, res){
-    github.receive_following(req.params['name']).then(function(data) {console.log(data)});
+    console.log(req.query.token);
+    receive_following(req.body.args[0], req.body.token).then(function(data) {console.log(data)});
     res.redirect("/");
     return res;
   });
 
-  app.get('/github/repo/fork',
+  app.get('/github/user/repos',
   function(req, res){
-    github.fork_repo(req.params['name'], req.params['repo']).then(function(data) {console.log(data)});
+    fork_repo(req.body.args[0], req.body.token).then(function(data) {console.log(data)});
     res.redirect("/");
     return res;
   });
   
   app.get('/github/repo/issues',
   function(req, res){
-    github.create_issue(req.params['name'], req.params['repo']).then(function(data) {console.log(data)});
+    create_issue(req.body.args[0], req.body.token).then(function(data) {console.log(data)});
     res.redirect("/");
     return res;
   });
 
 app.get('/github/user/follow',
 function(req, res){
-  github.follow_user(req.params['name']).then(function(data) {console.log(data)});
+  follow_user(req.body.args[0], req.query.token).then(function(data) {console.log(data)});
   res.redirect("/");
   return res;
 });
 
 app.get('/github/user/unfollow',
 function(req, res){
-  github.unfollow_user(req.params['name']).then(function(data) {console.log(data)});
+  unfollow_user(req.body.args[0], req.body.token).then(function(data) {console.log(data)});
   res.redirect("/");
   return res;
 });
 
 app.get('/github/following/check',
 function(req, res){
-  github.check_following(req.params['name']).then(function(data) {console.log(data)});
+  check_following(req.body.args[0], req.body.token).then(function(data) {console.log(data)});
   res.redirect("/");
   return res;
 });
