@@ -55,11 +55,11 @@ const ExecuteAreas = async () => {
       const reaction_token = await getServiceReactionToken(areas[i]._id);
       const return_action = await actions[areas[i].action._id.toString()](areas[i].action.args, action_token);
       if (return_action.status === "success")
-      reactions[areas[i].reaction._id.toString()](areas[i].reaction.args, reaction_token);
+        reactions[areas[i].reaction._id.toString()](areas[i].reaction.args, reaction_token);
     }
   }
 };
 
-const job = new cronJob('*/10 * * * * *', ExecuteAreas, null, true, 'Europe/Paris');
+const job = new cronJob('*/5 * * * * *', ExecuteAreas, null, true, 'Europe/Paris');
 
 module.exports = {getServiceActionToken, getServiceReactionToken, job};

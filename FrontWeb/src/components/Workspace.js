@@ -1,6 +1,5 @@
 // import React from "react";
 import BigCard from "./BigCard";
-import { Dropdown } from "semantic-ui-react";
 import React, { useEffect, useState } from "react";
 
 const Workspace = ({ items, id, page, area, data, action_id }) => {

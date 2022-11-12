@@ -31,7 +31,6 @@ const GetcurrentSong = async (token) => {
     }
     return {"status": "success", "song_name": response.data.item.name, "artist_name": artists, "album_name": response.data.item.album.name};
   }).catch((error) => {
-    console.log(error);
     return {"status": "error"};
   });
   return data;
@@ -81,6 +80,8 @@ const searchArtist = async (args, token) => {
         return {"track_uri": response.data.tracks.items[i].uri, "status": "success"};
       }
     }
+    console.log("No song found");
+    return {"status": "fail"};
   }).catch((error) => {
     return {"status": "error"};
   });
@@ -267,8 +268,6 @@ router.get('/auth/callback',
   async function (req, res) {
     const user_id = req.query.state.split(",")[0].split("=")[1];
     const service_id = req.query.state.split(",")[1].split("=")[1];
-    console.log("user id = " + user_id + " service id = " + service_id);
-    console.log('token: '+ req.user.accessToken);
     response = await addservice_copy(user_id, service_id, req.user.accessToken);
     console.log(response);
     if (response.status != 200) {
