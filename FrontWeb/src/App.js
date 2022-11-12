@@ -6,6 +6,7 @@ import Register from "./pages/Register";
 import Home from "./pages/Home";
 import All from "./pages/All";
 import Workspace from "./pages/Workspace";
+import My_workflow from "./pages/My_workflow";
 
 const App = () => {
   return (
@@ -16,6 +17,7 @@ const App = () => {
         <Route path="/home" element={<Home />} />
         <Route path="/all" element={<All />} />
         <Route path="/Workspace" element={<Workspace />} />
+        <Route path="/My_workflow" element={<My_workflow />} />
       </Routes>
     </BrowserRouter>
   );

@@ -17,9 +17,6 @@ function GoogleLoginComponent() {
             var decoded = jwt_decode(credentialResponse.credential);
             setUser(decoded);
             console.log(decoded);
-            // <div className="user-name">
-            //   <h3>{user.name}</h3>
-            // </div>;
             navigate("/home");
           }}
           onError={() => {

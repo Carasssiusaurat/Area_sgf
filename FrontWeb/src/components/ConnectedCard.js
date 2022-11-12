@@ -26,7 +26,7 @@ const ConnectedCard = ({ name, img_url, id }) => {
       </div>
       <div className="infos">
         <h2>Connected since:</h2>
-        <button onClick={DisableService}>Disconnect</button>
+        <button onClick={DisableService}>Disonnect</button>
         <div className="separator"></div>
       </div>
     </li>

@@ -6,12 +6,15 @@ import { Navigate } from "react-router-dom";
 const Home = () => {
   return (
     <div>
+      {sessionStorage.removeItem("id_select")}
+      {sessionStorage.removeItem("id_select_reaction")}
       {sessionStorage.getItem("token") === null ? (
         <Navigate to="/" />
       ) : (
         <Navigation />
       )}
-      <GetServicesId></GetServicesId>
+      {console.log("Je suis la Home")}
+      <GetServicesId page="0"></GetServicesId>
     </div>
   );
 };

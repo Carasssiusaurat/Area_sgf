@@ -1,5 +1,4 @@
 import React from "react";
-import GetServicesData from "./GetServicesData";
 
 class GetServicesId extends React.Component {
   constructor(props) {
@@ -12,12 +11,15 @@ class GetServicesId extends React.Component {
   }
 
   componentDidMount() {
-    fetch("http://localhost:8080/user/" + sessionStorage.getItem("id"), {
-      method: "GET",
-      headers: {
-        Authorization: "Bearer " + sessionStorage.getItem("token"),
-      },
-    })
+    fetch(
+      "http://localhost:8080/user/" + sessionStorage.getItem("id") + "/area",
+      {
+        method: "GET",
+        headers: {
+          Authorization: "Bearer " + sessionStorage.getItem("token"),
+        },
+      }
+    )
       .then((res) => res.json())
       .then((json) => {
         this.setState({

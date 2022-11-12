@@ -1,7 +1,6 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 
-
 const Navigation = () => {
   const logout = async () => {
     sessionStorage.clear();
@@ -33,7 +32,13 @@ const Navigation = () => {
             to="/Workspace"
             className={(nav) => (nav.isActive ? "nav-active" : "")}
           >
-            <li>Workspace Aria</li>
+            <li>Create workflow</li>
+          </NavLink>
+          <NavLink
+            to="/My_Workflow"
+            className={(nav) => (nav.isActive ? "nav-active" : "")}
+          >
+            <li>My Workflow</li>
           </NavLink>
         </ul>
       </div>

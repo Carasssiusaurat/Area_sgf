@@ -4,19 +4,6 @@ const Card = ({ name, img_url, url, service_id }) => {
   const EnableService = async () => {
     console.log(sessionStorage);
     window.location.href = url + "?token=" + sessionStorage.getItem("id") + "&service_id=" + service_id;
-    //const res = await fetch(
-    //  "http://localhost:8080/user/" + sessionStorage.getItem("id") + "/service",
-    //  {
-    //    method: "PUT",
-    //    headers: {
-    //      Authorization: "Bearer " + sessionStorage.getItem("token"),
-    //      "Content-Type": "application/json",
-    //    },
-    //    body: JSON.stringify({
-    //      name: name,
-    //    }),
-    //  }
-    //);
     console.log(sessionStorage.getItem("token"));
   };
   return (

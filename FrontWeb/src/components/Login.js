@@ -35,7 +35,7 @@ const Login_user = () => {
         sessionStorage.setItem("token", response.token);
         sessionStorage.setItem("id", response.userId);
         console.log(sessionStorage.getItem("token"));
-        navigate("/home");
+        navigate("/all");
       }
     } catch (error) {
       throw new Error("Issue with Register", error.message);

@@ -29,29 +29,9 @@ const Auth = ({ Text }) => {
       console.log(response.message);
       if (response.message === "user already exists")
         setAlready("User already exists");
-      else getToken();
+      else navigate("/");
     } catch (error) {
       throw new Error("Issue with Register", error.message);
-    }
-  };
-
-  const getToken = async () => {
-    try {
-      const res = await fetch("http://localhost:8080/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: mail,
-          password: password,
-        }),
-      });
-      const response = await res.json();
-      sessionStorage.setItem("token", response.token);
-      navigate("/home");
-    } catch (error) {
-      throw new Error("Issue with Token", error.message);
     }
   };
 
