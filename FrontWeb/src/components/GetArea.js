@@ -46,9 +46,6 @@ class GetArea extends React.Component {
             name={area.name}
             actif={area.actif === true ? "disable" : "enable"}
             id={area._id}
-            // img_url={service.img_url}
-            // url={service.connection_url}
-            // service_id={service._id}
           />
         ))}
       </div>

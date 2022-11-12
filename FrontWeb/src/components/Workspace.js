@@ -2,6 +2,7 @@
 import BigCard from "./BigCard";
 import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
+import GetName from "./GetName";
 
 const Workspace = ({ items, id, page, area, data, action_id }) => {
   const [action, setAction] = useState(0);
@@ -18,7 +19,7 @@ const Workspace = ({ items, id, page, area, data, action_id }) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        name: "Test",
+        name: sessionStorage.getItem("name"),
         user_id: sessionStorage.getItem("id"),
         action_id: sessionStorage.getItem("action_id"),
         action_arg: sessionStorage.getItem("actions_arg"),
@@ -31,7 +32,6 @@ const Workspace = ({ items, id, page, area, data, action_id }) => {
   };
 
   useEffect(() => {
-    // setIsSet(1);
     console.log("action_is_set = " + action_is_set);
   }, [action_is_set]);
 

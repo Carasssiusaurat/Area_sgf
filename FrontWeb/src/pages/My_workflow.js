@@ -8,6 +8,7 @@ const My_workflow = () => {
     <div>
       {sessionStorage.removeItem("id_select")}
       {sessionStorage.removeItem("id_select_reaction")}
+      {sessionStorage.removeItem("name")}
       {sessionStorage.getItem("token") === null ? (
         <Navigate to="/" />
       ) : (
