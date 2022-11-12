@@ -1,6 +1,6 @@
 import React from "react";
-import Auth from "../components/Auth";
 import Logo from "../components/Logo";
+import Login_user from "../components/Login";
 import GoogleLoginComponent from "../components/Google";
 import { NavLink } from "react-router-dom";
 import { GoogleOAuthProvider } from "@react-oauth/google";
@@ -10,7 +10,7 @@ const Login = () => {
     <div>
       <Logo />
       <div className="center">
-        <Auth Text="Login" />{" "}
+        <Login_user />
       </div>
       <div className="google">
         <GoogleOAuthProvider clientId="392568468203-3lrfh8iiiast4keo921gj5n0qajp7vmd.apps.googleusercontent.com">

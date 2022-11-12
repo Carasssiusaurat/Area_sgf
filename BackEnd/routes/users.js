@@ -3,30 +3,20 @@ const router = express.Router();
 const multer = require('multer');
 const upload = multer();
 const userController = require('../controllers/userController');
-const { protect } = require('../middleware/authMiddleware');
-
-//admin
-router.get('/user', protect, userController.getusers)
-
-router.post('/user', protect, upload.none(), userController.newuser)
-
-//admin -> verif jwt -> verif que role == 'admin'
-router.delete('/user', protect, userController.delAlluser)
-
-router.get('/user/:id', protect, userController.getuser)
-
-router.put('/user/:id', protect, userController.moduser)
-
-router.delete('/user/:id', protect, userController.delOneuser)
-
-router.put('/user/:id/service', protect, userController.addservice)
-
-router.put('/user/:uid/service/:sid', protect, userController.modservice)
-
-router.delete('/user/:uid/service/:sid', protect, userController.delOneservice)
-
-router.delete('/user/:uid/service', protect, userController.delAllservice)
+const { protect, admin } = require('../middleware/authMiddleware');
 
 router.post('/login', userController.login)
+router.get('/user', admin, userController.getusers)
+router.post('/user', upload.none(), userController.newuser)
+router.delete('/user', admin, userController.delAlluser)
+router.get('/user/:id', protect, userController.getuser)
+router.put('/user/:id', protect, userController.moduser)
+router.delete('/user/:id', admin, userController.delOneuser)
+router.get('/user/:id/service', protect, userController.getservices)
+router.put('/user/:id/service', protect, userController.addservice)
+router.delete('/user/:id/service', protect, userController.delAllservice)
+router.put('/user/:uid/service/:sid/status', protect, userController.updatestate)
+router.delete('/user/:uid/service/:sid', protect, userController.delOneservice)
+router.get('/user/:id/area', protect, userController.getuserarea)
 
 module.exports = router;
