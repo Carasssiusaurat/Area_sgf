@@ -74,6 +74,7 @@ const ExecuteAreas = async () => {
       const action_token = await getServiceActionToken(areas[i]._id);
       const reaction_token = await getServiceReactionToken(areas[i]._id);
       const return_action = await actions[areas[i].action._id.toString()](areas[i].action.args, action_token);
+      console.log(return_action);
       if (return_action.status === "success")
         reactions[areas[i].reaction._id.toString()](areas[i].reaction.args, reaction_token);
     }

@@ -108,20 +108,19 @@ router.post("/getValidToken", async (req, res) => {
 });
 
 const Getcalendar = async (args, token) => {
-  oauth2Client.setCredentials({ refresh_token: token });
+  oauth2Client.setCredentials({ access_token: token });
   const res = await calendar.events.list({
     auth: oauth2Client,
     calendarId: "primary",
   });
   trigger = parseInt(args[0]) * 60000;
-  res.data.items.forEach(function (items) {
-    const dateTime = new Date(items.start.dateTime);
-    const nowDate = new Date();
-    const diffTime = Math.abs(nowDate - dateTime);
-    if (diffTime <= trigger && nowDate < dateTime) {
+  const expected_time = new Date(now.getTime() + trigger);
+  for (var i = 0; i < res.data.items.length; i++) {
+    const time_of_event = new Date(res.data.items[i].start.dateTime);
+    if (expected_time > time_of_event && new Date(now.getTime()) < time_of_event) {
       return { status: "success" };
     }
-  });
+  }
   return { status: "fail" };
 };
 

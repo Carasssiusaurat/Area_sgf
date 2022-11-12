@@ -105,7 +105,7 @@ const GetDevices = async (token) => {
         return {"actual_device": response.data.devices[i].id, "status": "success"};
       }
     }
-    return;
+    return {"status": "fail"};
   }).catch((error) => {
     return {"status": "error"};
   });
