@@ -44,27 +44,31 @@ const reactions = {
 };
 
 const getServiceActionToken = async (id) => {
+  const tokens = []
   const area = await Areas.findOne({_id: id});
   const user = await Users.findOne({_id: area.user_id});
   const service = await Services.findOne({action_id: {$in: area.action._id}})
   for (let i = 0; i < user.services.length; i++) {
     if (user.services[i]._id.toString() == service._id.toString()) {
-      return (user.services[i].access_token);
+      tokens.push(user.services[i].access_token);
+      tokens.push(user.services[i].refresh_token);
     }
   }
-  return (null);
+  return (tokens);
 }
 
 const getServiceReactionToken = async (id) => {
+  const tokens = []
   const area = await Areas.findOne({_id: id});
   const user = await Users.findOne({_id: area.user_id});
   const service = await Services.findOne({reaction_id: {$in: area.reaction._id}})
   for (let i = 0; i < user.services.length; i++) {
     if (user.services[i]._id.toString() == service._id.toString()) {
-      return (user.services[i].access_token);
+      tokens.push(user.services[i].access_token);
+      tokens.push(user.services[i].refresh_token);
     }
   }
-  return (null);
+  return (tokens);
 }
 
 const ExecuteAreas = async () => {
@@ -74,12 +78,12 @@ const ExecuteAreas = async () => {
       const action_token = await getServiceActionToken(areas[i]._id);
       const reaction_token = await getServiceReactionToken(areas[i]._id);
       const return_action = await actions[areas[i].action._id.toString()](areas[i].action.args, action_token);
-      console.log(return_action);
       if (return_action.status === "success")
         reactions[areas[i].reaction._id.toString()](areas[i].reaction.args, reaction_token);
     }
   }
 };
+
 
 const job = new cronJob('*/5 * * * * *', ExecuteAreas, null, true, 'Europe/Paris');
 

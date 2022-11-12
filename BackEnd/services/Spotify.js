@@ -39,7 +39,7 @@ const GetcurrentSong = async (token) => {
 }
 
 const ImListeningASong = async (args, Token) => {
-  const Song = await GetcurrentSong(Token);
+  const Song = await GetcurrentSong(Token[0]);
   if (Song.status === "error") {
     return {"status": "error"};
   } else if (Song.status === "fail") {
@@ -113,8 +113,8 @@ const GetDevices = async (token) => {
 }
 
 const ChangeSong = async (args, token) => {
-  var uri = await searchArtist(args, token);
-  var device = await GetDevices(token);
+  var uri = await searchArtist(args, token[0]);
+  var device = await GetDevices(token[0]);
   if (device.status == "error" || uri.status == "error") {
     return {"status": "error"};
   }
@@ -129,21 +129,23 @@ const ChangeSong = async (args, token) => {
     {
       headers: {
         Accept: 'application/json',
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${token[0]}`,
         'Content-Type': 'application/json'
       },
     }
   ).then((response) => {
     return {"status": "success"};
   }).catch((error) => {
+    if (error.response.status == 401);
+      //refresh l'access token du user
     return {"code_error": error.response.data.error.status};
   });
   return data;
 }
 
 const AddSongToPlaylist = async (args, token) => {
-  const playlist = await SearchPlaylist(args, token);
-  const track = await searchArtist(args, token);
+  const playlist = await SearchPlaylist(args, token[0]);
+  const track = await searchArtist(args, token[0]);
   if (playlist.status == "error" || track.status == "error") {
     return {"status": "error"};
   }
@@ -152,7 +154,7 @@ const AddSongToPlaylist = async (args, token) => {
   }, 
   {
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${token[0]}`,
       'Content-Type': 'application/json'
     }
   }).then((response) => {
@@ -282,9 +284,13 @@ router.get('/auth/callback',
   }
 );
 
-const getAccesToken_From_RefreshToken = async (refreshToken) => {}
+const getAccesToken_From_RefreshToken = async (refreshToken) => {
+  refresh.requestNewAccessToken('spotify', refreshToken, function(err, accessToken, refreshToken) {
 
-const job = new cronJob('*/5 * * * * *', getAccesToken_From_RefreshToken, null, true, 'Europe/Paris');
+  })
+}
+
+const job = new cronJob('* * */1 * * *', getAccesToken_From_RefreshToken(), null, true, 'Europe/Paris');
 
 job.start()
 
