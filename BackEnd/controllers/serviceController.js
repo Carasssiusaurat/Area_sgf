@@ -75,22 +75,15 @@ const delOneservice = async (req, res) => {
 const updateservice = (req, res) => {
     if (!req.params.id || req.params.id == ":id")
         return res.status(400).send("get service error: incomplete or erroneous request")
-    const base_action_id = req.body.action_id.split(',');
-    const base_reaction_id = req.body.reaction_id.split(',');
-    const logo = req.body.img_url;
-    const service_name = req.body.name;
-    const connection = req.body.connection_url;
-
-    if (!base_action_id || !base_reaction_id || !service_name || !connection || !logo)
+    const base_action_id = req.body.action_id;
+    const base_reaction_id = req.body.reaction_id;
+    if (!base_action_id || !base_reaction_id)
         return res.status(400).send('missing field : cannot update service')
     const action_id = [...new Set(base_action_id)];
     const reaction_id = [...new Set(base_reaction_id)];
     Services.updateOne({_id: req.params.id}, {$set: {
         "action_id": action_id,
         "reaction_id": reaction_id,
-        "connection_url": connection,
-        "img_url": logo,
-        "name": service_name
     }}, (err, data) => {
         if (err) {
             return res.status(400).json({Error: err});}
