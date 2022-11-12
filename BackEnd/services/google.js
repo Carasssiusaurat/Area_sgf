@@ -46,9 +46,13 @@ router.get("/auth", cors(), (req, res) => {
 });
 
 const send_accessToken = async (user_id, service_id) => {
-  response = await addservice_copy(user_id, service_id, accessToken, refreshToken);
-  if (response.status === 200)
-    console.log("service added");
+  response = await addservice_copy(
+    user_id,
+    service_id,
+    accessToken,
+    refreshToken
+  );
+  if (response.status === 200) console.log("service added");
   return response;
 };
 
@@ -67,8 +71,7 @@ router.get("/handleGoogleRedirect", async (req, res) => {
 
     oauth2Client.setCredentials({ refresh_token: refreshToken });
     const response = await send_accessToken(user_id, service_id);
-    if (response.status != 200)
-      console.log("error");
+    if (response.status != 200) console.log("error");
     res.redirect("http://localhost:8081/home");
   });
 });
@@ -117,7 +120,10 @@ const Getcalendar = async (args, token) => {
   const expected_time = new Date(now.getTime() + trigger);
   for (var i = 0; i < res.data.items.length; i++) {
     const time_of_event = new Date(res.data.items[i].start.dateTime);
-    if (expected_time > time_of_event && new Date(now.getTime()) < time_of_event) {
+    if (
+      expected_time > time_of_event &&
+      new Date(now.getTime()) < time_of_event
+    ) {
       return { status: "success" };
     }
   }
@@ -175,24 +181,25 @@ const GetFileData = async (message_id, attachment_id) => {
   return base64url.decode(res.data.data);
 };
 const GetYoutubeVideo = async (args, token) => {
-  oauth2Client.setCredentials({ refresh_token: token });
+  oauth2Client.setCredentials({ access_token: token });
   const res = await youtube.videos.list({
     auth: oauth2Client,
     id: args[0],
     part: "snippet,contentDetails,statistics",
   });
-  items;
-  res.data.items.forEach(function () {
-    trigger = parseInt(args[2]);
-    if (args[1] === "likes") {
-      const likes = items.statistics.likeCount;
-      if (likes >= trigger) return { status: "success" };
-    }
-    if (args[1] === "views") {
-      const views = parseInt(items.statistics.viewCount);
-      if (views >= trigger) return { status: "success" };
-    }
-  });
+  trigger = parseInt(args[2]);
+  const views = parseInt(res.data.items[0].statistics.viewCount);
+  console.log(views);
+  console.log(trigger);
+  // if (args[1] === "likes") {
+  //   const likes = parseInt(res.data.items[0].statistics.likeCount);
+  //   if (likes >= trigger) return { status: "success" };
+  // }
+  if (args[1] === "views") {
+    const views = parseInt(res.data.items[0].statistics.viewCount);
+    if (views >= trigger) return { status: "success" };
+  }
+  // }
   return { status: "fail" };
 };
 
@@ -334,4 +341,4 @@ router.post("/set_workflow", async function (req, res) {
   );
 });
 
-module.exports = { router, Getcalendar, GetYoutubeVideo, ListEmails, sendMail};
+module.exports = { router, Getcalendar, GetYoutubeVideo, ListEmails, sendMail };
