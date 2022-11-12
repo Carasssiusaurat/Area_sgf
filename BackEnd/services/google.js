@@ -189,12 +189,12 @@ const GetYoutubeVideo = async (args, token) => {
   });
   items;
   res.data.items.forEach(function () {
-    trigger = parseInt(args[1]);
-    if (args[2] === "likes") {
+    trigger = parseInt(args[2]);
+    if (args[1] === "likes") {
       const likes = items.statistics.likeCount;
       if (likes >= trigger) return { status: "success" };
     }
-    if (args[2] === "views") {
+    if (args[1] === "views") {
       const views = parseInt(items.statistics.viewCount);
       if (views >= trigger) return { status: "success" };
     }
@@ -340,4 +340,4 @@ router.post("/set_workflow", async function (req, res) {
   );
 });
 
-module.exports = { router, Getcalendar, GetYoutubeVideo };
+module.exports = { router, Getcalendar, GetYoutubeVideo, ListEmails, sendMail};

@@ -1,10 +1,12 @@
 const {ImListeningASong, ChangeSong, AddSongToPlaylist} = require('../services/Spotify');
+const { Getcalendar, GetYoutubeVideo, sendMail, ListEmails } = require("../services/google");
+// const {} = require('../services/Linkedin');
+const {} = require('../services/Github');
 const Areas = require ('../model/Areas');
 const Users = require('../model/Users');
 const my_actions = require('../model/Actions');
 const my_reactions = require('../model/Reactions');
 const Services = require('../model/Services');
-const { Getcalendar, GetYoutubeVideo } = require("../services/google");
 const cronJob = require('cron').CronJob;
 
 const test = (caca) => {
@@ -12,14 +14,33 @@ const test = (caca) => {
 }
 
 const actions = {
+  // Spotify
   "636ba1c921531a915d2085d0": ImListeningASong,
+  // Google
   "636bb8860ffcc9a4f64a70ca": Getcalendar,
   "636bb9780ffcc9a4f64a70d2": GetYoutubeVideo,
+  "636bb8d40ffcc9a4f64a70ce": ListEmails
+  //"636bb8d40ffcc9a4f64a70ce": 
+  // Linkedin
+  //"636fb585889fe63d93b631a0": 
+  // Github
+  //"636fbd1aee6166a4996beb69":
+  //"636fbd6eee6166a4996beb7e":
 };
 
 const reactions = {
+  // Spotify
   "636ba32f21531a915d2085d4": ChangeSong,
-  "636ba45eec84f1ac23b7b424": AddSongToPlaylist
+  "636ba45eec84f1ac23b7b424": AddSongToPlaylist,
+  // Google
+  "636b6a77e22023e504292651": sendMail
+  //"636bbb470ffcc9a4f64a70e0": 
+  // Linkedin
+  //"636ccabcf7b6fd105f0880f4":
+  // Github
+  //"636fbeedee6166a4996bebd1":
+  //"636fbfbbee6166a4996bec08":
+  //"636fbfa6ee6166a4996bebff":
 };
 
 const getServiceActionToken = async (id) => {

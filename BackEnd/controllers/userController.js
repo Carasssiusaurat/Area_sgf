@@ -118,7 +118,6 @@ const addservice = async (req, res) => {
     try {
         if (user_to_update.services.filter(service => service.id === service_to_add._id.toString()).length > 0)
             return res.status(200).json({message: "Service already used"});
-        console.log(service_to_add._id);
         user_to_update.services.push({_id: service_to_add._id, actif: true, access_token: 'TOKEN'});
         user_to_update.save();
         return res.status(200).json({message: "Service added"});
