@@ -10,7 +10,6 @@ const drive = google.drive("v3");
 const base64url = require("base64url");
 const nodemailer = require("nodemailer");
 const { addservice_copy } = require("../controllers/userController");
-const fs = require("fs");
 const axios = require("axios");
 require("dotenv").config();
 

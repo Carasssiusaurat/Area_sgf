@@ -3,7 +3,6 @@ const express = require('express');
 const Router = require('express').Router;
 const axios = require('axios');
 const router = express.Router();
-const fs = require('fs');
 const { Interface } = require('readline');
 require('dotenv').config();
 const {addservice_copy} = require('../controllers/userController');

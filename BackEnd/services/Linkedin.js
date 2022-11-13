@@ -94,7 +94,7 @@ router.get('/auth/callback',
   async function(req, res) {
     const user_id = req.query.state.split(",")[0].split("=")[1];
     const service_id = req.query.state.split(",")[1].split("=")[1];
-    response = await addservice_copy(user_id, service_id, req.user.accessToken, req.user.profile.id, JSON.parse(profile._raw).firstName.preferredLocale.country);
+    response = await addservice_copy(user_id, service_id, req.user.accessToken, req.user.profile.id, JSON.parse(req.user.profile._raw).firstName.preferredLocale.country);
     if (response.status != 200) {
       console.log("Error while adding service");
       console.log(response);

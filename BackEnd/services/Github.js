@@ -7,7 +7,6 @@ const { raw } = require('express');
 const { use } = require('passport');
 const app = express();
 const {addservice_copy} = require('../controllers/userController');
-const fs = require('fs');
 const axios = require('axios');
 const router = express.Router();
 
@@ -94,20 +93,34 @@ router.get('/auth/callback',
 
 
     // check if i follow user
-  const receive_following = async (args, token) => {
-    const rawResponse = await fetch('https://api.github.com/user/followers', {
-      method: 'GET',
+  const receive_following = async (args, token, user, service_id) => {
+    const rawResponse = await axios.get('https://api.github.com/user/following', {
       headers: {
-        'Authorization': 'Bearer ' + token,
+        'Authorization': 'Bearer ' + token[0],
       }
+    }).then((response) => {
+      return (response)
+    }).catch((error) => {
+      console.log(error);
+      return ({status: "error"});
     });
-    const content = await rawResponse.json();
-    fs.writeFileSync('followers.json', JSON.stringify(content));
-    for (var i = 0; i != content.length; i++) {
-      if (content[i].login === args)
-        return ({'status':'success'});
-    };
-    return ({'status':'fail'});
+    if (rawResponse.status === 200) {
+      for (var i = 0; i < rawResponse.data.length; i++) {
+        console.log(rawResponse.data[i].login);
+        if (rawResponse.data[i].login === args[0])
+          return {status: "success"};
+      }
+    }
+    return ({status: "fail"});
+    // console.log(rawResponse);
+    // const content = rawResponse;
+    // console.log(content);
+    // for (var i = 0; i != content.length; i++) {
+    //   console.log(content[i]);
+    //   if (content[i].login === args[0])
+    //     return ({'status':'success'});
+    // };
+    // return ({'status':'fail'});
   }
 
 const IsFollower = async (args, token, user, service_action_id) => {
@@ -115,17 +128,18 @@ const IsFollower = async (args, token, user, service_action_id) => {
 
 }
 
-const check_follower = async (userName) =>{
-  const rawResponse = await router.get('https://api.github.com/user/following/' + userName, {
+const check_follower = async (args, token, user, service_id) =>{
+  const rawResponse = await axios.get('https://api.github.com/user/following/' + args[0], {
     headers: {
-      Authorization: 'Bearer ' + this.accessToken,
+      Authorization: 'Bearer ' + token[0],
     }
   }).then((response) => {
+    return (response)
   }).catch((error) => {});
   if (rawResponse.status === 204)
-   return {status: "success"};
+    return {status: "success"};
   else if (rawResponse.status === 404)
-   return {status: "fail"};
+    return {status: "fail"};
 }
 
 const ImFollowing = async (req, res) => {
