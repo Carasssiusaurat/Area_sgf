@@ -17,6 +17,7 @@ require("dotenv").config();
 var services = ["calendar", "youtube", "gmail"];
 var accessToken = "";
 var refreshToken = "";
+var tentative_refresh = 2;
 
 const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
@@ -82,7 +83,7 @@ const Getmail = async (token) => {
   return data.email;
 };
 
-router.post("/getValidToken", async (req, res) => {
+const getValidToken = async (refresToken) => {
   try {
     const request = await fetch("https://www.googleapis.com/oauth2/v4/token", {
       method: "POST",
@@ -92,28 +93,52 @@ router.post("/getValidToken", async (req, res) => {
       body: JSON.stringify({
         client_id: process.env.GOOGLE_CLIENT_ID,
         client_secret: process.env.GOOGLE_CLIENT_SECRET,
-        refresh_token: req.body.refreshToken,
+        refresh_token: refresToken,
         grant_type: "refresh_token",
       }),
     });
 
     const data = await request.json();
-    console.log("server 77 | data", data.access_token);
-
-    res.json({
-      accessToken: data.access_token,
-    });
+    console.log(data.access_token);
+    return ({ "status": "success", content: data.access_token})
   } catch (error) {
-    res.json({ error: error.message });
+    console.log(error)
+    return ({ "status": "error", content: error});
   }
-});
+};
 
 const Getcalendar = async (args, token, user, service_id) => {
   oauth2Client.setCredentials({ access_token: token[0] });
-  const res = await calendar.events.list({
-    auth: oauth2Client,
-    calendarId: "primary",
-  });
+  const res = await calendar.events
+    .list({
+      auth: oauth2Client,
+      calendarId: "primary",
+    })
+    .catch((error) => {
+      if (error.response.status == 401 && tentative_refresh > 0) {
+        tentative_refresh--;
+        const response = await getValidToken(token[1]);
+          if (response.status === "error") {
+            console.log(response.content);
+            return { "status": "error" }
+          } else {
+            console.log("new token = " + response.content);
+            for (var i = 0; i < user.services.length; i++) {
+              if (user.services[i]._id == service_id.toString()) {
+                user.services[i].access_token = response.content;
+                user.save();
+              }
+            }
+          }
+          Getcalendar(args, token, user, service_id);
+        };
+        if (error.response.status == 401) {
+          console.log("token expired please reconnect");
+          return { "status": "error" }
+        }
+        tentative_refresh = 2;
+        return {"status": "error"};
+      });
   trigger = parseInt(args[0]) * 60000;
   const now = new Date();
   const expected_time = new Date(now.getTime() + trigger);
