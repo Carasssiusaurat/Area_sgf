@@ -28,7 +28,7 @@ passport.deserializeUser(function (user, done) {
 passport.use(new MicrosoftStrategy({
   clientID: MICROSOFT_CLIENT_ID,
   clientSecret: MICROSOFT_CLIENT_SECRET,
-  callbackURL: "http://localhost:8080/microsoft/auth/callback",
+  callbackURL: "http://localhost:8080/service/microsoft/auth/callback",
 },
   function (accessToken, refreshToken, profile, done) {
     microsoft = new Microsoft(accessToken, "jaredhanson");
