@@ -29,12 +29,11 @@ const ConnectedCard = ({ name, img_url, id }) => {
         <h2 style={{ marginTop: 0 + "px" }}>Connected since:</h2>
         <a
           class="remove"
-          onClick={ConnectedCard}
+          onClick={DisableService}
           style={{ marginLeft: 27 + "px", marginTop: 3 + "px" }}
         >
           Disconnect
         </a>
-        {/* <button onClick={DisableService}>Disconnect</button> */}
         <div className="separator"></div>
       </div>
     </li>
