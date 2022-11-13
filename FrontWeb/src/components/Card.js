@@ -1,18 +1,24 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
-const Card = ({ service }) => {
+const Card = ({ name, img_url, url, service_id }) => {
+  const EnableService = async () => {
+    console.log(sessionStorage);
+    window.location.href = url + "?token=" + sessionStorage.getItem("id") + "&service_id=" + service_id;
+    console.log(sessionStorage.getItem("token"));
+  };
   return (
     <li className="card">
       <div className="service-logo">
         <div className="back"></div>
-        <img src={"./" + service + ".png"} alt={service} text={service} />
+        <img src={img_url} alt={name} text={name} />
       </div>
       <div className="service-name">
-        <h1>{service}</h1>
+        <h1>{name}</h1>
       </div>
       <div className="infos">
-        <h2>Connected since:</h2>
-        <button>Configure</button>
+        <div>
+          <button onClick={EnableService}>Connect</button>
+        </div>
         <div className="separator"></div>
       </div>
     </li>

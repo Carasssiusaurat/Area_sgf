@@ -1,13 +1,32 @@
 import React from "react";
 import Navigation from "../components/Navigation";
-import Services from "../components/Services";
 import List_Workspace from "../components/Workspace";
+import { Navigate } from "react-router-dom";
+import GetServicesId from "../components/GetServicesId";
+import GetName from "../components/GetName";
 
 const Workspace = () => {
   return (
     <div>
-      <Navigation></Navigation>
-      <List_Workspace></List_Workspace>
+      {/* {console.log("Je suis la Workspace")} */}
+      {sessionStorage.getItem("token") === null ? (
+        <Navigate to="/" />
+      ) : (
+        <Navigation />
+      )}
+      {sessionStorage.getItem("name") === null ? <GetName></GetName> : null}
+      {sessionStorage.getItem("id_select") === null && sessionStorage.getItem("name") != null ? (
+        <GetServicesId page="1"></GetServicesId>
+      ) : null}
+      {sessionStorage.getItem("id_select_reaction") === null &&
+      sessionStorage.getItem("id_select") != null ? (
+        <GetServicesId page="2"></GetServicesId>
+      ) : null}
+      {sessionStorage.getItem("id_select_reaction") != null &&
+      sessionStorage.getItem("id_select") != null ? (
+        <GetServicesId page="3"></GetServicesId>
+      ) : null}
+      {/* <List_Workspace></List_Workspace> */}
     </div>
   );
 };
