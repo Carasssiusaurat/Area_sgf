@@ -72,7 +72,7 @@ router.get('/auth/callback',
       console.log("token =" + token[0]);
       const content = await rawResponse.json();
       console.log(content);
-      return true
+      return ({'status':'succes'});
     }
 
     const follow_user = async(args, token, user, service_action_id) =>
@@ -84,7 +84,7 @@ router.get('/auth/callback',
         }
       });
       console.log(rawResponse);
-      return true;
+      return ({'status':'succes'});
     }
 
     const unfollow_user = async (args, token, user, service_action_id) =>
@@ -95,7 +95,7 @@ router.get('/auth/callback',
           'Authorization': 'Bearer ' + token[0],
         }
       });
-      return true;
+      return ({'status':'succes'});
     }
 
 
@@ -112,9 +112,9 @@ router.get('/auth/callback',
     for (var i = 0; i != content.length; i++) {
       console.log(content[i].login);
       if (content[i].login === args)
-        return true;
+        return ({'status':'succes'});
     };
-    return false;
+    return ({'status':'fail'});
   }
 
 const IsFollower = async (args, token, user, service_action_id) => {
@@ -133,9 +133,9 @@ const check_follower = async (userName) =>{
   }).catch((error) => {});
   //console.log(rawResponse);
   //if (rawResponse.status === 204)
-  //  return true;
+  //  return ({'status':'succes'});
   //else if (rawResponse.status === 404)
-  //  return false;
+  //  return ({'status':'fail'});
 }
 
 const ImFollowing = async (req, res) => {
