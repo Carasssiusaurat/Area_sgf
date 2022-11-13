@@ -1,9 +1,11 @@
 var express = require('express');
 var passport = require('passport');
-var GitLabStrategy = require('passport-gitlab2').Strategy;
+var MicrosoftStrategy = require('passport-microsoft').Strategy;
+var MICROSOFT_CLIENT_ID = "9945850a-6995-40ef-b4f7-c513a395d442"
+var MICROSOFT_CLIENT_SECRET = "6-E8Q~eL8QBzby5.sqmIO4JyYfqlegy3VG1kQaL7"
 var session = require('express-session');
 const fetch = require("node-fetch");
-let gitlab;
+let microsoft;
 const app = express();
 
 app.use(session({
@@ -23,28 +25,28 @@ passport.deserializeUser(function (user, done) {
   done(null, user);
 });
 
-passport.use(new GitLabStrategy({
-  clientID: GITLAB_CLIENT_ID,
-  clientSecret: GITLAB_CLIENT_SECRET,
-  callbackURL: "http://localhost:8080/gitlab/auth/callback"
+passport.use(new MicrosoftStrategy({
+  clientID: MICROSOFT_CLIENT_ID,
+  clientSecret: MICROSOFT_CLIENT_SECRET,
+  callbackURL: "http://localhost:8080/microsoft/auth/callback",
 },
   function (accessToken, refreshToken, profile, done) {
-    gitlab = new Gitlab(accessToken, "jaredhanson");
+    microsoft = new Microsoft(accessToken, "jaredhanson");
     console.log(profile);
     return done(null, profile);
   }
 ));
 
-app.get('/auth/gitlab',
-  passport.authenticate('gitlab', { scope: ['api'] }));
+app.get('/auth/microsoft',
+  passport.authenticate('microsoft', { scope: ['user.read'] }));
 
-app.get('/gitlab/auth/callback',
-  passport.authenticate('gitlab', { failureRedirect: '/login' }),
+app.get('/microsoft/auth/callback',
+  passport.authenticate('microsoft', { failureRedirect: '/login' }),
   function (req, res) {
     res.redirect('/');
   });
 
-class Gitlab {
+class Microsoft {
   constructor(accessToken, pseudo) {
     this.pseudo = pseudo;
     this.accessToken = accessToken
