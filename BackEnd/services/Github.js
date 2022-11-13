@@ -57,24 +57,6 @@ router.get('/auth/callback',
     res.redirect('http://localhost:8081/home');
   });
 
-    const receive_following = async (userName, token) =>
-    {
-      const rawResponse = await fetch('https://api.github.com/user/following', {
-        method: 'GET',
-        headers: {
-          'Authorization': 'Bearer ' + token,
-        }
-      });
-      const content = await rawResponse.json();
-      console.log(content);
-      for (var i = 0; i != content.done; i++) {
-        if (content.user === userName)
-          return true;
-      };
-      console.log(content);
-      return false;
-    }
-
     const fork_repo = async (repoName, token) =>
     {
       const body_json =
@@ -115,7 +97,8 @@ router.get('/auth/callback',
     }
 
 
-  const receive_followers = async (userName, token) => {
+    // check if i follow user
+  const receive_following = async (userName, token) => {
     const rawResponse = await fetch('https://api.github.com/user/followers', {
       method: 'GET',
       headers: {
@@ -133,12 +116,12 @@ router.get('/auth/callback',
   }
 
 const IsFollower = async (req, res) => {
-  const data = await receive_followers(req.body.args[0], req.body.token);
+  const data = await receive_following(req.body.args[0], req.body.token);
 
   console.log(data);
 }
 
-const check_following = async (userName) =>{
+const check_follower = async (userName) =>{
   const rawResponse = await router.get('https://api.github.com/user/following/' + userName, {
     headers: {
       Authorization: 'Bearer ' + this.accessToken,
@@ -154,36 +137,24 @@ const check_following = async (userName) =>{
 }
 
 const ImFollowing = async (req, res) => {
-  const data = await check_following(req.body.args[0]);
+  const data = await check_follower(req.body.args[0]);
   console.log(data);
 }
 
-router.get('/getfollowers', IsFollower);
+router.get('/followers', IsFollower);
 
 router.get('/imfollowing', ImFollowing);
 
-  router.get('/following',
-  function(req, res){
-    console.log(req.query.token);
-    receive_following(req.body.args[0], req.body.token).then(function(data) {console.log(data)});
-    res.redirect("/");
-    return res;
-  });
 
+// create a repo
   router.get('/user/repos',
   function(req, res){
     fork_repo(req.body.args[0], req.body.token).then(function(data) {console.log(data)});
     res.redirect("/");
     return res;
   });
-  
-  router.get('/repo/issues',
-  function(req, res){
-    create_issue(req.body.args[0], req.body.token).then(function(data) {console.log(data)});
-    res.redirect("/");
-    return res;
-  });
 
+// follow user
 router.get('/user/follow',
 function(req, res){
   follow_user(req.body.args[0], req.query.token).then(function(data) {console.log(data)});
@@ -191,6 +162,7 @@ function(req, res){
   return res;
 });
 
+// unfollow user
 router.get('/user/unfollow',
 function(req, res){
   unfollow_user(req.body.args[0], req.body.token).then(function(data) {console.log(data)});
@@ -198,11 +170,12 @@ function(req, res){
   return res;
 });
 
+//check if user is following
 router.get('/following/check',
 function(req, res){
-  check_following(req.body.args[0], req.body.token).then(function(data) {console.log(data)});
+  check_follower(req.body.args[0], req.body.token).then(function(data) {console.log(data)});
   res.redirect("/");
   return res;
 });
 
-module.exports = router;
+module.exports = {router, check_follower, receive_following, fork_repo, follow_user, unfollow_user};

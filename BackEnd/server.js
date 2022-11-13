@@ -17,7 +17,7 @@ const twitchroutes = require("./services/Twitch").router;
 const linkedinroutes = require("./services/Linkedin");
 const spotifyroutes = require("./services/Spotify").router;
 const googleroutes = require("./services/google").router;
-const githubroutes = require("./services/Github");
+const githubroutes = require("./services/Github").router;
 const areaexec = require("./Areas/executeAreas");
 
 app.use(cors());
