@@ -53,7 +53,6 @@ export class Print_Worspace extends React.Component {
                 Authorization: "Bearer " + await AsyncStorage.getItem("token"),
               },
             });
-            window.location.reload(false);
           };
 
         async activate_services(id){

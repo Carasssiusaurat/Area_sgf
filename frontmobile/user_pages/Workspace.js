@@ -264,10 +264,8 @@ export class Workspace_Page_Reaction extends React.Component {
             action_arg : json_action.args.toString(),
             reaction_arg : this.state.reaction.args,
             user_id : await AsyncStorage.getItem("id"),
-            name : "name"
+            name : this.state.name
         }
-        console.log(JSON.stringify(body_send));
-
         fetch(
             "http://"  + await AsyncStorage.getItem("ip") + ":8080/area/",
             {
@@ -279,7 +277,8 @@ export class Workspace_Page_Reaction extends React.Component {
             body : JSON.stringify(body_send)
             }
         )
-
+        AsyncStorage.setItem("action", "");
+        this.state.navigation.navigate("User");
     }
 
 
