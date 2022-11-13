@@ -44,6 +44,7 @@ const Workspace = ({ items, id, page, area, data, action_id }) => {
     if (page === "2") {
       sessionStorage.setItem("actions_arg", newArr);
       sessionStorage.setItem("action_id", area[action]._id);
+      console.log(sessionStorage.getItem("actions_arg"));
     }
     console.log(sessionStorage.getItem("actions_arg"));
   };
@@ -85,19 +86,17 @@ const Workspace = ({ items, id, page, area, data, action_id }) => {
       {page === "3" ? (
         <div style={{ marginLeft: 900 + "px" }}>
           <li className="single-big-card">
-            <h1 className="selected-service">{data[0].name}</h1>
-            <img className="logo-img" src={data[0].img_url}></img>
-            <p className="description">
-              Le Lorem Ipsum est le faux texte standard de l'imprimerie depuis
-              les années 1500, quand un imprimeur anonyme assembla ensemble des
-              morceaux de texte pour réaliser un livre spécimen de polices de
-              texte. Il n'a pas fait que survivre cinq siècles, mais s'est aussi
-              adapté à la bureautique informatique, sans que son contenu n'en
-              soit modifié.
-            </p>
+            {data.length != 0 ? <h1 className="selected-service">{data[0].name}</h1> : null}
+            {data.length != 0 ? <img className="logo-img" src={data[0].img_url}></img> : null}
+            {/* <h1 className="selected-service">{data[0].name}</h1> */}
+            {/* <img className="logo-img" src={data[0].img_url}></img> */}
+            {area.length != 0 ? (
+              <p className="description">{area[reaction].description}</p>
+            ) : null}
             <div className="form-group">
               <label>Action :</label>
               <select
+                style={{ marginLeft: 10 + "px" }}
                 name="idaction"
                 id="idaction"
                 className="form-control"
@@ -124,7 +123,11 @@ const Workspace = ({ items, id, page, area, data, action_id }) => {
                   : null}
               </div>
               <div className="infos">
-                <a class="select" onClick={Set_Area}>
+                <a
+                  style={{ fontSize: 17 + "px" }}
+                  class="select"
+                  onClick={Set_Area}
+                >
                   Set Reaction
                 </a>
               </div>
@@ -138,17 +141,13 @@ const Workspace = ({ items, id, page, area, data, action_id }) => {
           <li className="single-big-card">
             <h1 className="selected-service">{items[0].name}</h1>
             <img className="logo-img" src={items[0].img_url}></img>
-            <p className="description">
-              Le Lorem Ipsum est le faux texte standard de l'imprimerie depuis
-              les années 1500, quand un imprimeur anonyme assembla ensemble des
-              morceaux de texte pour réaliser un livre spécimen de polices de
-              texte. Il n'a pas fait que survivre cinq siècles, mais s'est aussi
-              adapté à la bureautique informatique, sans que son contenu n'en
-              soit modifié.
-            </p>
+            {area.length != 0 ? (
+              <p className="description">{area[action].description}</p>
+            ) : null}
             <div className="form-group">
               <label>Action :</label>
               <select
+                style={{ marginLeft: 10 + "px" }}
                 name="idaction"
                 id="idaction"
                 className="form-control"
@@ -162,8 +161,6 @@ const Workspace = ({ items, id, page, area, data, action_id }) => {
                   <option value={index}>{item.name}</option>
                 ))}
               </select>
-              {/* {console.log(action)}
-            {console.log(area)} */}
               <div className="list_args">
                 {area.length != 0
                   ? area[action].args.map((arg, index) => (

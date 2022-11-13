@@ -41,7 +41,7 @@
         color: white;
         
         border-radius: 20px;
-        padding: 100px 10px;
+        padding: 80px 10px;
         box-shadow: 0 2px 3px rgba(0, 0, 0, 0.307);
         background-color: $color-3;
     }
@@ -71,6 +71,17 @@
     padding: 100px 10px;
     box-shadow: 0 2px 3px rgba(0, 0, 0, 0.307);
     background-color: $color-3;
+
+    input{
+    height: 60px;
+    width: 500px;
+    // border-radius: 60px;
+    // box-shadow: inset 0px 0px 25px;
+    border: none;
+    outline: none;
+    background-color: #2E2D3C;
+    color: white; 
+  }
 
     .actions {
         margin-top: -90px;
@@ -379,6 +390,16 @@
     box-shadow: 0 2px 3px rgba(0, 0, 0, 0.307);
     background-color: $color-4;
 
+    // .list_args {
+    //   display: flex;
+    //   margin-top: -100px;
+    // }
+
+    input {
+      // display: flex;
+      margin-top: 20px;
+    }
+
     .selected-service {
         display: flex;
         // justify-content: center;
@@ -397,7 +418,8 @@
 }
 
 .select {
-    margin-top: 0px;
+    user-select: none;
+    margin-top: 20px;
     width: 180px;
     position: absolute;
     height: 10px;
@@ -586,19 +608,9 @@
 
 .card-4 {
     display: inline-block;
-    
-    // position: relative;
-    // list-style-type: none;
     width: 290px;
-    // border-inline-end-width: 1000px;
-    // height: 0px;
     padding-left: 100;
     float: left;
-    // margin: 0 5.5%;
-    // margin
-    // padding-block-end: -100px;
-    // padding
-    // padding-inline-end: -100px;
     position: relative;
     margin-left : 1%;
     margin-top: 1%;
@@ -628,12 +640,9 @@
     }
     .infos {
         margin-left: 20px;
-        // position: relative;
         z-index: 3;
         width: 235px;
         margin-top: -60px;
-        // height: 0px;
-        // margin: 5px auto;
         color: white;
         
         border-radius: 20px;
@@ -642,19 +651,6 @@
         background-color: $color-4;
     }
     .select {
-        // position: absolute;
-        // display: flex;
-        // color: white;
-        // margin-top: 25px;
-        // width: 225px;
-        // border-radius: 10rem;
-        // overflow: hidden;
-        // text-align: center;
-        // font-size: 1rem;
-        // letter-spacing: .15rem;
-        // line-height: 1.5;
-        // transition: all .3s;
-        // text-align: center;
         margin-top: 22px;
         width: 180px;
         position: absolute;
@@ -711,7 +707,65 @@
         left: 20%;
         text-transform: capitalize;
         color: white;
-        transform: translate(-50%, -50%);
+        transform: translate(-10%, -50%);
     }
-    // padding: 10px 5px;
+}
+
+.card-5 {
+  display:inline-block;
+  position: relative;
+  list-style-type: none;
+  padding-left: 100;
+  position: relative;
+  margin-left : 2%;
+  margin-top: 3%;
+
+  .service-logo {
+      width: 70px;
+      position: relative;
+      z-index: 1;
+  }
+  .service-logo img {
+      display: flex;
+      margin-top: -75px;
+      height: 120px;
+      width: 100%;
+      height: auto;
+      margin-left: 25px;
+  }
+  .back {
+      margin: 5px 20px auto;
+      border-radius: 20px;
+      padding: 5px 0;
+      box-shadow: 0 2px 3px rgba(0, 0, 0, 0.307);
+      background-color: $color-4;
+      width: 300px;
+      height: 70px;
+      z-index: 2;
+  }
+  .infos {
+      margin-left: 20px;
+      // position: relative;
+      z-index: 3;
+      width: 285px;
+      margin-top: -80px;
+      height: 0px;
+      // margin: 5px auto;
+      color: white;
+      
+      border-radius: 20px;
+      padding: 100px 10px;
+      box-shadow: 0 2px 3px rgba(0, 0, 0, 0.307);
+      background-color: $color-3;
+  }
+  .service-name {
+      z-index: 4;
+      position: absolute;
+      top: 23%;
+      left: 50%;
+      text-transform: capitalize;
+      color: white;
+      transform: translate(-50%, -50%);
+  }
+  // padding: 10px 5px;
 }

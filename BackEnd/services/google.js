@@ -15,10 +15,9 @@ const axios = require("axios");
 require("dotenv").config();
 
 var services = ["calendar", "youtube", "gmail"];
-const now = new Date();
 var accessToken = "";
 var refreshToken = "";
-var user = "";
+var tentative_refresh = 2;
 
 const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
@@ -76,15 +75,41 @@ router.get("/handleGoogleRedirect", async (req, res) => {
   });
 });
 
-const Getmail = async () => {
-  const { data } = await axios.get(
-    "https://www.googleapis.com/oauth2/v3/userinfo?access_token=" + accessToken
-  );
-  console.log(data.email);
-  user = data.email;
+const Getmail = async (args, token, user, service_id) => {
+  const { data } = await axios
+    .get(
+      "https://www.googleapis.com/oauth2/v3/userinfo?access_token=" + token[0]
+    )
+    .catch(async (error) => {
+      if (error.response.status == 401 && tentative_refresh > 0) {
+        tentative_refresh--;
+        const response = await getValidToken(token[1]);
+        if (response.status === "error") {
+          console.log(response.content);
+          return { status: "error" };
+        } else {
+          console.log("new token = " + response.content);
+          token[0] = response.content;
+          for (var i = 0; i < user.services.length; i++) {
+            if (user.services[i]._id == service_id.toString()) {
+              user.services[i].access_token = response.content;
+              user.save();
+            }
+          }
+        }
+        Getmail(args, token, user, service_id);
+      }
+      if (error.response.status == 401 && tentative_refresh == 0) {
+        console.log("token expired please reconnect");
+        return { status: "error" };
+      }
+      tentative_refresh = 2;
+      return { status: "error" };
+    });
+  return { mail: data.email, accesToken: token[0] };
 };
 
-router.post("/getValidToken", async (req, res) => {
+const getValidToken = async (refreshToken) => {
   try {
     const request = await fetch("https://www.googleapis.com/oauth2/v4/token", {
       method: "POST",
@@ -94,32 +119,68 @@ router.post("/getValidToken", async (req, res) => {
       body: JSON.stringify({
         client_id: process.env.GOOGLE_CLIENT_ID,
         client_secret: process.env.GOOGLE_CLIENT_SECRET,
-        refresh_token: req.body.refreshToken,
+        refresh_token: refreshToken,
         grant_type: "refresh_token",
       }),
     });
 
     const data = await request.json();
-    console.log("server 77 | data", data.access_token);
-
-    res.json({
-      accessToken: data.access_token,
-    });
+    console.log(data.access_token);
+    return { status: "success", content: data.access_token };
   } catch (error) {
-    res.json({ error: error.message });
+    console.log(error);
+    return { status: "error", content: error };
   }
-});
+};
 
-const Getcalendar = async (args, token) => {
-  oauth2Client.setCredentials({ access_token: token });
-  const res = await calendar.events.list({
-    auth: oauth2Client,
-    calendarId: "primary",
-  });
+const Getcalendar = async (args, token, user, service_id) => {
+  oauth2Client.setCredentials({ access_token: token[0] });
+  const res = await calendar.events
+    .list({
+      auth: oauth2Client,
+      calendarId: "primary",
+    })
+    .catch(async (error) => {
+      if (error.response.status == 401 && tentative_refresh > 0) {
+        tentative_refresh--;
+        const response = await getValidToken(token[1]);
+        if (response.status === "error") {
+          console.log(response.content);
+          return { status: "error" };
+        } else {
+          console.log("new token = " + response.content);
+          token[0] = response.content;
+          for (var i = 0; i < user.services.length; i++) {
+            if (user.services[i]._id == service_id.toString()) {
+              user.services[i].access_token = response.content;
+              user.save();
+            }
+          }
+        }
+        Getcalendar(args, token, user, service_id);
+      }
+      if (error.response.status == 401 && tentative_refresh == 0) {
+        console.log("token expired please reconnect");
+        return { status: "error" };
+      }
+      tentative_refresh = 2;
+      return { status: "error" };
+    });
   trigger = parseInt(args[0]) * 60000;
+  const now = new Date();
   const expected_time = new Date(now.getTime() + trigger);
   for (var i = 0; i < res.data.items.length; i++) {
-    const time_of_event = new Date(res.data.items[i].start.dateTime);
+    if (
+      res.data.items[i].status != "cancelled" &&
+      res.data.items[i].start["date"] != undefined
+    )
+      var time_of_event = new Date(res.data.items[i].start.date);
+    if (
+      res.data.items[i].status != "cancelled" &&
+      res.data.items[i].start["dateTime"] != undefined
+    )
+      var time_of_event = new Date(res.data.items[i].start.dateTime);
+    console.log(time_of_event);
     if (
       expected_time > time_of_event &&
       new Date(now.getTime()) < time_of_event
@@ -145,25 +206,49 @@ const Getcalendar = async (args, token) => {
 //   }
 // };
 
-const ListEmails = async () => {
+const GetMailInfo = async (args, token, user_mail) => {
+  oauth2Client.setCredentials({ access_token: token[0] });
   const res = await gmail.users.messages.list({
     auth: oauth2Client,
-    userId: user,
-    // q: "has:attachment",
+    userId: user_mail,
+    q: "from:" + args[0],
     maxResults: 1,
   });
-  // console.log(res.data.messages);
-  return res.data.messages;
+  if (!res.data.messages) return false;
+  return res.data.messages[0].id;
 };
 
-const GetMailInfo = async (id) => {
+const ListEmails = async (args, token, user, service_id) => {
+  oauth2Client.setCredentials({
+    access_token: token[0],
+    refresh_token: token[1],
+  });
+  const data = await Getmail(args, token, user, service_id);
+  const user_mail = data.mail;
+  token[0] = data.accesToken;
+  oauth2Client.setCredentials({
+    access_token: token[0],
+    refresh_token: token[1],
+  });
+  var mail = await GetMailInfo(args, token, user_mail);
+  if (mail === false) return { status: "fail" };
+
   const res = await gmail.users.messages.get({
     auth: oauth2Client,
-    userId: user,
-    id: id,
+    userId: user_mail,
+    id: mail,
   });
-  // console.log(res.data.messages);
-  return res.data;
+  const now = new Date();
+  var nowDate = new Date(now.getTime() - 30000);
+  for (let i = 0; i < res.data.payload.headers.length; i++) {
+    if (res.data.payload.headers[i].name == "Date")
+      var mailDate = new Date(res.data.payload.headers[i].value);
+  }
+  console.log(mailDate);
+  console.log(nowDate);
+  console.log(now);
+  if (mailDate > nowDate) return { status: "success" };
+  return { status: "fail" };
 };
 
 const GetFileData = async (message_id, attachment_id) => {
@@ -180,21 +265,49 @@ const GetFileData = async (message_id, attachment_id) => {
   // console.log(res.data.data);
   return base64url.decode(res.data.data);
 };
-const GetYoutubeVideo = async (args, token) => {
-  oauth2Client.setCredentials({ access_token: token });
-  const res = await youtube.videos.list({
-    auth: oauth2Client,
-    id: args[0],
-    part: "snippet,contentDetails,statistics",
-  });
+
+const GetYoutubeVideo = async (args, token, user, service_id) => {
+  oauth2Client.setCredentials({ access_token: token[0] });
+  const res = await youtube.videos
+    .list({
+      auth: oauth2Client,
+      id: args[0],
+      part: "snippet,contentDetails,statistics",
+    })
+    .catch(async (error) => {
+      if (error.response.status == 401 && tentative_refresh > 0) {
+        tentative_refresh--;
+        const response = await getValidToken(token[1]);
+        if (response.status === "error") {
+          console.log(response.content);
+          return { status: "error" };
+        } else {
+          console.log("new token = " + response.content);
+          token[0] = response.content;
+          for (var i = 0; i < user.services.length; i++) {
+            if (user.services[i]._id == service_id.toString()) {
+              user.services[i].access_token = response.content;
+              user.save();
+            }
+          }
+        }
+        GetYoutubeVideo(args, token, user, service_id);
+      }
+      if (error.response.status == 401 && tentative_refresh == 0) {
+        console.log("token expired please reconnect");
+        return { status: "error" };
+      }
+      tentative_refresh = 2;
+      return { status: "error" };
+    });
   trigger = parseInt(args[2]);
   const views = parseInt(res.data.items[0].statistics.viewCount);
   console.log(views);
   console.log(trigger);
-  // if (args[1] === "likes") {
-  //   const likes = parseInt(res.data.items[0].statistics.likeCount);
-  //   if (likes >= trigger) return { status: "success" };
-  // }
+  if (args[1] === "likes") {
+    const likes = parseInt(res.data.items[0].statistics.likeCount);
+    if (likes >= trigger) return { status: "success" };
+  }
   if (args[1] === "views") {
     const views = parseInt(res.data.items[0].statistics.viewCount);
     if (views >= trigger) return { status: "success" };
@@ -203,7 +316,18 @@ const GetYoutubeVideo = async (args, token) => {
   return { status: "fail" };
 };
 
-async function sendMail(user, object, text) {
+async function sendMail(args, token, user, service_id) {
+  oauth2Client.setCredentials({
+    access_token: token[0],
+    refresh_token: token[1],
+  });
+  const data = await Getmail(args, token, user, service_id);
+  const user_mail = data.mail;
+  token[0] = data.accesToken;
+  oauth2Client.setCredentials({
+    access_token: token[0],
+    refresh_token: token[1],
+  });
   try {
     accessToken = await oauth2Client.getAccessToken();
 
@@ -211,25 +335,27 @@ async function sendMail(user, object, text) {
       service: "gmail",
       auth: {
         type: "OAuth2",
-        user: user,
+        user: user_mail,
         clientId: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        refreshToken: refreshToken,
+        refreshToken: token[1],
         accessToken: accessToken,
       },
     });
 
     const mailOptions = {
-      from: "AREA " + "<" + user + ">",
-      to: user,
-      subject: object,
-      text: text,
-      html: "<h1>" + text + "</h1>",
+      from: "AREA " + "<" + user_mail + ">",
+      to: args[0],
+      subject: args[1],
+      text: args[2],
+      html: "<h1>" + args[2] + "</h1>",
     };
 
     const result = await transport.sendMail(mailOptions);
+    console.log(result);
     return result;
   } catch (error) {
+    console.log(error);
     return error;
   }
 }
