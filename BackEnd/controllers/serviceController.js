@@ -4,23 +4,23 @@ const Actions = require('../model/Actions');
 const Reactions = require('../model/Reactions');
 
 const newservice = (req, res) => {
-    const base_action_id = req.body.action_id.split(',');
-    const base_reaction_id = req.body.react_id.split(',');
+    // const base_action_id = req.body.action_id.split(',');
+    // const base_reaction_id = req.body.react_id.split(',');
     const connection = req.body.connection_url;
     const service_name = req.body.service_name;
     const logo = req.body.logo_url;
 
-    if(!base_action_id || !base_reaction_id || !service_name || !connection || !logo) {
+    if(!service_name || !connection || !logo) {
         return res.status(400).send('missing field : cannot add service')
     }
-    const action_id = [...new Set(base_action_id)];
-    const reaction_id = [...new Set(base_reaction_id)];
+    // const action_id = [...new Set(base_action_id)];
+    // const reaction_id = [...new Set(base_reaction_id)];
 
     Services.findOne({name: service_name}, (err, data) => {
         if (!data) {
             const new_service = new Services({
-                action_id: action_id,
-                reaction_id: reaction_id,
+                // action_id: action_id,
+                // reaction_id: reaction_id,
                 name: service_name,
                 img_url: logo,
                 connection_url: connection

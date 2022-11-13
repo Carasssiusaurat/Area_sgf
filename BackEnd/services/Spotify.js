@@ -377,7 +377,7 @@ passport.deserializeUser(function (obj, done) {
 const strategy = new SpotifyStrategy({
     clientID: process.env.SPOTIFY_CLIENT_ID,
     clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-    callbackURL: 'http://localhost:8080/spotify/auth/callback',
+    callbackURL: 'http://localhost:8080/service/spotify/auth/callback',
     passReqToCallback: true
   },
   function(req, accessToken, refreshToken, expires_in, profile, done) {
@@ -396,14 +396,13 @@ const SpotifyAuth = async (req, res, next) => {
 
 router.get('/auth', SpotifyAuth);
 
-
 router.get('/auth/callback',
   passport.authenticate('spotify', { failureRedirect: '/login' }),
   async function (req, res) {
     const user_id = req.query.state.split(",")[0].split("=")[1];
     const service_id = req.query.state.split(",")[1].split("=")[1];
     console.log(req.user.expires_in)
-    response = await addservice_copy(user_id, service_id, req.user.accessToken, req.user.refreshToken);
+    response = await addservice_copy(user_id, service_id, req.user.accessToken, req.user.refreshToken, null);
     if (response.status != 200) {
       console.log("error");
       console.log(response.message)

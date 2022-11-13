@@ -3,6 +3,7 @@ const express = require('express');
 const Router = require('express').Router;
 const axios = require('axios');
 const { response } = require('express');
+const { addservice_copy } = require('../controllers/userController');
 const router = Router();
 //const fs = require('fs');
 //const { request } = require('http');
@@ -16,8 +17,9 @@ passport.use(
     {
     clientID: process.env.TWITCH_CLIENT_ID,
     clientSecret: process.env.TWITCH_CLIENT_SECRET,
-    callbackURL: "http://localhost:8080/twitch/auth/callback",
-    scope: SCOPES
+    callbackURL: "http://localhost:8080/service/twitch/auth/callback",
+    scope: SCOPES,
+    passreqToCallback: true
     },
     function(accessToken, refreshToken, profile, done) {
       return done(null, {accessToken, refreshToken});
@@ -90,7 +92,7 @@ twitchSubCount = async (usertoken, self_id, subs) => {
   }
 }
 
-twitchAnnouncement = async (usertoken, self_id, streamer_id, color, msg) => {
+twitchAnnouncement = async (usertoken, self_id, streamer, color, msg) => {
   /*
   let usertoken = req.headers.authorization
   let self_id = req.body.user_id
@@ -101,7 +103,8 @@ twitchAnnouncement = async (usertoken, self_id, streamer_id, color, msg) => {
     color = req.body.color
   }
   */
-  color = color || "primary"
+ color = color || "primary"
+ let streamer_id = await UserIdFromName(usertoken, streamer)
   let body = {"message": msg, "color": color}
   try {
   const data = await axios.post('https://api.twitch.tv/helix/chat/announcements?broadcaster_id=' + streamer_id + "&moderator_id=" + self_id,  body, {
@@ -171,12 +174,13 @@ twitchGoalReached = async (usertoken, streamer_id, percent, goalType) => {
 }
 
 
-twitchLastPlayedIs = async (usertoken, streamer_id, gamename) => {
+twitchLastPlayedIs = async (usertoken, streamer, gamename) => {
   /*
   let usertoken = req.headers.authorization
   let streamer_id = req.body.streamer_id
   let gamename = req.body.gameName
   */
+  let streamer_id = await UserIdFromName(usertoken, streamer)
   try {
   const data = await axios.get('https://api.twitch.tv/helix/channels?broadcaster_id=' + streamer_id, {
     headers: {
@@ -195,16 +199,16 @@ twitchLastPlayedIs = async (usertoken, streamer_id, gamename) => {
   }
 }
 
-twitchWhisp = async (usertoken, self_id, receiver) => {
+twitchWhisp = async (usertoken, self_id, streamer) => {
   /*
   usertoken = req.headers.authorization
   self_id = req.body.user_id
   receiver = req.body.to
   */
-  let receiver_id = await UserIdFromName(usertoken, receiver)
+  let streamer_id = await UserIdFromName(usertoken, streamer)
   let body = {"message": req.body.message }
   try {
-  const data = await axios.post('https://api.twitch.tv/helix/whispers?from_user_id=' + self_id + "&to_user_id=" + receiver_id,  body, {
+  const data = await axios.post('https://api.twitch.tv/helix/whispers?from_user_id=' + self_id + "&to_user_id=" + streamer_id, body, {
     headers: {
       'Authorization': "Bearer " + usertoken,
       'Client-ID': process.env.TWITCH_CLIENT_ID
@@ -237,6 +241,7 @@ GetUserId = async (req, res) => {
   },);
   return(data.data.data[0].id)
   } catch(err) {
+    console.log("responseresponsea")
     console.log(err)
     return(err)
   }
@@ -260,19 +265,37 @@ GetUserIdFromName = async (req, res) => {
 
 var twitchToken = ''
 
-router.get('/twitch/auth/callback',
+const TwitchAuth = async (req, res, next) => {
+  passport.authenticate('twitch', {scope: SCOPES, showDialog: true, state: "token=" + req.query.token + ",serviceid=" + req.query.service_id})(req, res, next)
+}
+
+router.get('/auth', TwitchAuth)
+
+router.get('/auth/callback',
   passport.authenticate('twitch', {failureRedirect: '/login'}),
   async function(req, res) {
-  twitchToken = req.user.accessToken;
-  twitchRefresh = req.user.refreshToken
-
-  GetUserId(req).then((data) => {
-    console.log("refresh", twitchRefresh)
-    res.json({user_id: data, bearer_token:req.user.accessToken, refresh_token:twitchRefresh});
-    
-  }).catch((error) => { 
-    res.status(500).send("error: couldn't get user Id")
-  });
+    try {
+      const user_id = req.query.state.split(",")[0].split("=")[1];
+      const service_id = req.query.state.split(",")[1].split("=")[1];
+      twitchToken = req.user.accessToken;
+      twitchRefresh = req.user.refreshToken
+      const response = await GetUserId(req, res).then(async (data) => {
+      return await addservice_copy(user_id, service_id, twitchToken, twitchRefresh, data)
+    }).catch((error) => {
+      console.log(error)
+      res.status(500).send("error: couldn't get user Id")
+    });
+    if (response.status != 200) {
+      console.log(response.status)
+      console.log("error: couldn't add service")
+    }
+    console.log("service added");
+    res.redirect('http://localhost:8081/home');
+    return req.user.accessToken;
+  } catch (err) {
+    console.log(err)
+    res.status(500).send("error: couldn't add service")
+  }
 });
 
 anyIsStreaming = async (usertoken, user_id) => {
@@ -305,7 +328,7 @@ anyIsStreaming = async (usertoken, user_id) => {
   }
 }
 
-streamerIsStreaming = async (usertoken, user_id, username) => {
+const streamerIsStreaming = async (args, token, user, service_id) => {
   /*
   if (!req.headers.authorization || !req.query.user_id || !req.body.broadcaster) {
     res.json("error: one or several fields missing (headers.authorization: query.user_id: body.broadcaster)")
@@ -315,24 +338,24 @@ streamerIsStreaming = async (usertoken, user_id, username) => {
   let username = req.body.broadcaster
   */
   try {
-  const data = await axios.get("https://api.twitch.tv/helix/streams/followed?user_id="+ user_id, {
-    headers: {
-      Authorization: usertoken,
-      'Client-ID': process.env.TWITCH_CLIENT_ID
-  }});
-  if (!data.data.data) {
-    return {"status": "error"};
-  }
-  let vals = data.data.data
-  const streamer = vals.find(e => e.user_name === username)
-  if(streamer && streamer.type === "live") {
-    return {"status": "success"};
-  } else {
-    return {"status": "fail"};
-  }
+    const data = await axios.get("https://api.twitch.tv/helix/streams/followed?user_id="+ token[2], {
+      headers: {
+        Authorization: token[0],
+        'Client-ID': process.env.TWITCH_CLIENT_ID
+    }});
+    if (!data.data.data) {
+      return {"status": "error"};
+    }
+    let vals = data.data.data
+    const streamer = vals.find(e => e.user_name === args[0])
+    if(streamer && streamer.type === "live") {
+      return {"status": "success"};
+    } else {
+      return {"status": "fail"};
+    }
   } catch(err) {
-  console.log(err)
-  return {"status": "error"};
+    console.log(err.response.status)
+    return {"status": "error"};
   }
 }
 
@@ -345,4 +368,4 @@ passport.deserializeUser(function (obj, done) {
   done(null, obj);
 })
 
-module.exports = router;
+module.exports = {router, streamerIsStreaming, };

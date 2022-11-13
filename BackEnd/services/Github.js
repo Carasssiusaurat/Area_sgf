@@ -9,6 +9,7 @@ const app = express();
 const {addservice_copy} = require('../controllers/userController');
 const fs = require('fs');
 const axios = require('axios');
+const router = express.Router();
 
 app.use(session({ secret: 'SECRET', resave: true,
 saveUninitialized: true}));
@@ -24,11 +25,11 @@ passport.deserializeUser(function(user, done) {
 passport.use(new GitHubStrategy({
     clientID: process.env.GITHUB_CLIENT_ID,
     clientSecret: process.env.GITHUB_CLIENT_SECRET,
-    callbackURL: "http://127.0.0.1:8080/github/auth/callback"
+    callbackURL: "http://127.0.0.1:8080/service/github/auth/callback",
+    passReqToCallback: true
   },
-  function(accessToken, refreshToken, profile, done) {
-    console.log("github token : " + accessToken);
-    return done(null, accessToken);
+  function(req, accessToken, refreshToken, profile, done) {
+    return done(null, {accessToken, refreshToken, profile});
   }
 ));
 
@@ -37,19 +38,16 @@ const github_auth = async (req, res, next) => {
   passport.authenticate('github', {scope: GITHUB_SCOPES, showDialog: true, state: "token=" + req.query.token + ",serviceid=" + req.query.service_id})(req, res, next); 
 }
 
-app.get('/auth', github_auth);
+router.get('/auth', github_auth);
 
-app.get('/auth/callback', 
+router.get('/auth/callback',
   passport.authenticate('github', { failureRedirect: '/login' }),
   async function(req, res) {
     console.log(req.user);
     const user_id = req.query.state.split(",")[0].split("=")[1];
     const service_id = req.query.state.split(",")[1].split("=")[1];
-    console.log("user id = " + user_id + " service id = " + service_id);
-    console.log(req.user)
     console.log(req.user.accessToken)
-    console.log(req.user.refreshToken)
-    response = await addservice_copy(user_id, service_id, req.user);
+    response = await addservice_copy(user_id, service_id, req.user.accessToken, req.user.refreshToken, null);
     console.log(response);
     if (response.status != 200) {
       console.log("error");
@@ -141,7 +139,7 @@ const IsFollower = async (req, res) => {
 }
 
 const check_following = async (userName) =>{
-  const rawResponse = await axios.get('https://api.github.com/user/following/' + userName, {
+  const rawResponse = await router.get('https://api.github.com/user/following/' + userName, {
     headers: {
       Authorization: 'Bearer ' + this.accessToken,
     }
@@ -160,11 +158,11 @@ const ImFollowing = async (req, res) => {
   console.log(data);
 }
 
-app.get('/getfollowers', IsFollower);
+router.get('/getfollowers', IsFollower);
 
-app.get('/imfollowing', ImFollowing);
+router.get('/imfollowing', ImFollowing);
 
-  app.get('/github/following',
+  router.get('/following',
   function(req, res){
     console.log(req.query.token);
     receive_following(req.body.args[0], req.body.token).then(function(data) {console.log(data)});
@@ -172,39 +170,39 @@ app.get('/imfollowing', ImFollowing);
     return res;
   });
 
-  app.get('/github/user/repos',
+  router.get('/user/repos',
   function(req, res){
     fork_repo(req.body.args[0], req.body.token).then(function(data) {console.log(data)});
     res.redirect("/");
     return res;
   });
   
-  app.get('/github/repo/issues',
+  router.get('/repo/issues',
   function(req, res){
     create_issue(req.body.args[0], req.body.token).then(function(data) {console.log(data)});
     res.redirect("/");
     return res;
   });
 
-app.get('/github/user/follow',
+router.get('/user/follow',
 function(req, res){
   follow_user(req.body.args[0], req.query.token).then(function(data) {console.log(data)});
   res.redirect("/");
   return res;
 });
 
-app.get('/github/user/unfollow',
+router.get('/user/unfollow',
 function(req, res){
   unfollow_user(req.body.args[0], req.body.token).then(function(data) {console.log(data)});
   res.redirect("/");
   return res;
 });
 
-app.get('/github/following/check',
+router.get('/following/check',
 function(req, res){
   check_following(req.body.args[0], req.body.token).then(function(data) {console.log(data)});
   res.redirect("/");
   return res;
 });
 
-module.exports = app;
+module.exports = router;

@@ -11,12 +11,13 @@ const areaRoutes = require('./routes/areas');
 const about_jsonRoutes = require('./routes/about_json');
 const cors = require("cors");
 const app = express();
-const twitchroute = require("./services/Twitch")
 const passport = require('passport');
 const session = require("express-session");
-const spotifyroutes = require("./services/Spotify.js").router;
-const googleRoutes = require("./services/google").router;
-const githubRoutes = require("./services/Github.js");
+const twitchroutes = require("./services/Twitch").router;
+const linkedinroutes = require("./services/Linkedin");
+const spotifyroutes = require("./services/Spotify").router;
+const googleroutes = require("./services/google").router;
+const githubroutes = require("./services/Github");
 const areaexec = require("./Areas/executeAreas");
 
 app.use(cors());
@@ -64,13 +65,15 @@ app.use('/', reactionRoutes);
 
 app.use('/', areaRoutes);
 
-app.use('/service/twitch', twitchroute);
+app.use('/service/twitch', twitchroutes);
 
 app.use("/service/spotify", spotifyroutes);
 
-app.use("/service/github", githubRoutes);
+app.use("/service/github", githubroutes);
 
-app.use("/service/Google", googleRoutes);
+app.use("/service/Google", googleroutes);
+
+app.use("/service/linkedin", linkedinroutes);
 
 app.listen(PORT, () => {
     console.log(`server is running on port : ${PORT}`)

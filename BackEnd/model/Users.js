@@ -5,6 +5,7 @@ const service = new Schema({
     _service_id: mongoose.SchemaTypes.ObjectId,
     access_token: String,
     refresh_token: String,
+    user_id: String,
     actif: Boolean
 });
 

@@ -3,14 +3,15 @@ const app = express();
 var LinkedInStrategy = require('passport-linkedin-oauth2').Strategy;
 var passport = require('passport');
 var session = require('express-session');
+const {addservice_copy} = require("../controllers/userController");
 require('dotenv').config()
 let LinkedIn;
 
+router = express.Router();
 
-
-app.use(passport.initialize());
-app.use(passport.session());
-app.use(session({ secret: 'SECRET' }));
+// app.use(passport.initialize());
+// app.use(passport.session());
+// app.use(session({ secret: 'SECRET' }));
 
 passport.serializeUser(function(user, done) {
     done(null, user);
@@ -23,13 +24,14 @@ passport.serializeUser(function(user, done) {
 passport.use(new LinkedInStrategy({
     clientID: process.env.LINKEDIN_CLIENT_ID,
     clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
-    callbackURL: "http://127.0.0.1:3000/auth/linkedin/callback",
+    callbackURL: "http://127.0.0.1:8080/service/linkedin/auth/callback",
     scope: ['r_emailaddress', 'r_liteprofile', 'w_member_social'],
     sessions : false,
   }, function(accessToken, refreshToken, profile, done) {
     process.nextTick(function () {
+      console.log(accessToken);
       LinkedIn = new Linkedin(accessToken, profile.id, JSON.parse(profile._raw).firstName.preferredLocale.country);
-      return done(null, profile);
+      return done(null, {accessToken, refreshToken, profile});
     });
   }));
 
@@ -85,31 +87,43 @@ class Linkedin{
   }
 }
 
-app.get('/linkedin/country', 
+router.get('/linkedin/country', 
 function(req, res){
   let location = LinkedIn.send_localisation();
   res.send(location);
 });
 
-app.get('/linkedin/send',
+router.get('/linkedin/send',
   function(req, res){
     LinkedIn.send_message(req.params["message"]);
     res.send("true");
   });
 
+const LinkedinAuth = async (req, res, next) => {
+  passport.authenticate('linkedin', {showDialog: true, state: "token=" + req.query.token + ",serviceid=" + req.query.service_id})(req, res, next);
+};
 
-app.listen(8080, () => {
-    console.log('Serveur en écoute sur le port 8080');
-});
+router.get('/auth', LinkedinAuth);
 
-app.get('/auth/linkedin',
-  passport.authenticate('linkedin', { state: 'SOME STATE'  }),
-  function(req, res){
-    return res;
-  });
+router.get('/auth/callback',
+  passport.authenticate('linkedin', { failureRedirect: '/login' }),
+  async function(req, res) {
+    const user_id = req.query.state.split(",")[0].split("=")[1];
+    const service_id = req.query.state.split(",")[1].split("=")[1];
+    console.log(req.user)
+    response = await addservice_copy(user_id, service_id, req.user.accessToken, req.user.refreshToken, null);
+    if (response.status != 200) {
+      console.log("Error while adding service");
+      console.log(response);
+    }
+    console.log("Service added");
+    res.redirect('http://localhost:8081/home');
+    return req.user.accessToken;
+  })
+// router.get('/auth/callback',
+//     passport.authenticate('linkedin', {
+//     successRedirect: '/',
+//     failureRedirect: '/login'
+//   }));
 
-
-app.get('/auth/linkedin/callback', passport.authenticate('linkedin', {
-    successRedirect: '/',
-    failureRedirect: '/login'
-  }));
+module.exports = router;

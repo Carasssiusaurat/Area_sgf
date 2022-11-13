@@ -127,7 +127,7 @@ const addservice = async (req, res) => {
     }
 }
 
-const addservice_copy = async (usr_id, service_id, access_token, refresh_token) => {
+const addservice_copy = async (usr_id, service_id, access_token, refresh_token, user_id) => {
     var response = "";
     const user_to_update = await Users.findOne({ _id: usr_id });
     const service_to_add = await Services.findOne({ _id: service_id });
@@ -143,6 +143,7 @@ const addservice_copy = async (usr_id, service_id, access_token, refresh_token) 
       user_to_update.services.push({
         _id: service_to_add._id,
         actif: true,
+        user_id: user_id ? user_id : "",
         access_token: access_token,
         refresh_token: refresh_token
       });

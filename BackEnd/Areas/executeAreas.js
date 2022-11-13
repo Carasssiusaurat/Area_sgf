@@ -1,7 +1,8 @@
 const {ImListeningASong, ChangeSong, AddSongToPlaylist} = require('../services/Spotify');
 const { Getcalendar, GetYoutubeVideo, sendMail, ListEmails } = require("../services/google");
+const { streamerIsStreaming } = require('../services/Twitch')
 // const {} = require('../services/Linkedin');
-const {} = require('../services/Github');
+// const {} = require('../services/Github');
 const Areas = require ('../model/Areas');
 const Users = require('../model/Users');
 const my_actions = require('../model/Actions');
@@ -9,23 +10,21 @@ const my_reactions = require('../model/Reactions');
 const Services = require('../model/Services');
 const cronJob = require('cron').CronJob;
 
-const test = (caca) => {
-  console.log(caca)
-}
-
 const actions = {
   // Spotify
   "636ba1c921531a915d2085d0": ImListeningASong,
   // Google
   "636bb8860ffcc9a4f64a70ca": Getcalendar,
   "636bb9780ffcc9a4f64a70d2": GetYoutubeVideo,
-  "636bb8d40ffcc9a4f64a70ce": ListEmails
+  "636bb8d40ffcc9a4f64a70ce": ListEmails,
   //"636bb8d40ffcc9a4f64a70ce": 
   // Linkedin
   //"636fb585889fe63d93b631a0": 
   // Github
   //"636fbd1aee6166a4996beb69":
   //"636fbd6eee6166a4996beb7e":
+  // Twitch
+  "6370ee51f8abcc998a99c9d1": streamerIsStreaming,
 };
 
 const reactions = {
@@ -41,6 +40,7 @@ const reactions = {
   //"636fbeedee6166a4996bebd1":
   //"636fbfbbee6166a4996bec08":
   //"636fbfa6ee6166a4996bebff":
+  // Twitch
 };
 
 const getServiceActionToken = async (id) => {
@@ -52,6 +52,8 @@ const getServiceActionToken = async (id) => {
     if (user.services[i]._id.toString() == service._id.toString()) {
       tokens.push(user.services[i].access_token);
       tokens.push(user.services[i].refresh_token);
+      if (user.services[i].user_id)
+        tokens.push(user.services[i].user_id);
     }
   }
   return (tokens);
@@ -66,6 +68,8 @@ const getServiceReactionToken = async (id) => {
     if (user.services[i]._id.toString() == service._id.toString()) {
       tokens.push(user.services[i].access_token);
       tokens.push(user.services[i].refresh_token);
+      if (user.services[i].user_id)
+        tokens.push(user.services[i].user_id);
     }
   }
   return (tokens);
