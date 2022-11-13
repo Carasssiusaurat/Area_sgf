@@ -77,8 +77,8 @@ const star_project = async (args, token, user, service_action_id) => {
       }
     });
     if (rawResponse.status === 304)
-      return true;
-    return false;
+      return {status: "success"};
+    return {status: "fail"};
   }
 
 router.get('/gitlab/todos',
