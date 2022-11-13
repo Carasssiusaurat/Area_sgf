@@ -3,6 +3,7 @@ const { Getcalendar, GetYoutubeVideo, sendMail, ListEmails } = require("../servi
 const { streamerIsStreaming, twitchLastPlayedIs, twitchGoalReached, twitchSoundtrackIs, twitchSubCount, twitchAnnouncement, twitchWhisp } = require('../services/Twitch')
 const { check_follower, receive_following, fork_repo, follow_user, unfollow_user} = require('../services/Github')
 const { star_project, list_projects_stars } = require('../services/Gitlab');
+const { send_localisation, send_message} = require('../services/Linkedin')
 // const {} = require('../services/Linkedin');
 // const {} = require('../services/Github');
 const Areas = require ('../model/Areas');
@@ -20,7 +21,7 @@ const actions = {
   "636bb9780ffcc9a4f64a70d2": GetYoutubeVideo,
   "636bb8d40ffcc9a4f64a70ce": ListEmails,
   // Linkedin
-  //"636fb585889fe63d93b631a0": 
+  "636fb585889fe63d93b631a0": send_localisation,
   // Github
   "636fbd1aee6166a4996beb69": check_follower,
   "636fbd6eee6166a4996beb7e": receive_following,
@@ -40,9 +41,8 @@ const reactions = {
   "636ba45eec84f1ac23b7b424": AddSongToPlaylist,
   // Google
   "636b6a77e22023e504292651": sendMail,
-  //"636bbb470ffcc9a4f64a70e0": 
   // Linkedin
-  //"636ccabcf7b6fd105f0880f4":
+  "636ccabcf7b6fd105f0880f4": send_message,
   // Github
   "636fbeedee6166a4996bebd1": fork_repo,
   "636fbfa6ee6166a4996bebff": follow_user,

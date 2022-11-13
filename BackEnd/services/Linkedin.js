@@ -27,35 +27,42 @@ passport.use(new LinkedInStrategy({
     callbackURL: "http://127.0.0.1:8080/service/linkedin/auth/callback",
     scope: ['r_emailaddress', 'r_liteprofile', 'w_member_social'],
     sessions : false,
-  }, function(accessToken, refreshToken, profile, done) {
-    process.nextTick(function () {
-      console.log(accessToken);
-      LinkedIn = new Linkedin(accessToken, profile.id, JSON.parse(profile._raw).firstName.preferredLocale.country);
-      return done(null, {accessToken, refreshToken, profile});
-    });
+    passReqToCallback: true
+  }, function(req, accessToken, refreshToken, profile, done) {
+    return done(null, {accessToken, refreshToken, profile});
+    // process.nextTick(function () {
+      // console.log(accessToken);
+      // LinkedIn = new Linkedin(accessToken, profile.id, JSON.parse(profile._raw).firstName.preferredLocale.country);
+      // return done(null, {accessToken, refreshToken, profile});
+    // });
   }));
 
 
-class Linkedin{
 
-  constructor(accessToken, id, country) {
-    this.accessToken = accessToken;
-    this.id = id;
-    this.country = country;
+
+// class Linkedin{
+
+//   constructor(accessToken, id, country) {
+//     this.accessToken = accessToken;
+//     this.id = id;
+//     this.country = country;
+//   }
+
+  const send_localisation = (args, token, user, service_id) => {
+    if (args[0] == token[2])
+      return {status: "success"};
+    return {status: "fail"};
   }
 
-  async send_localisation(){
-    return country;
-  }
 
-  async send_message(text){
+  const send_message = async (args, token, user, service_id) => {
     let  json_call = `{
-      "author": "` + "urn:li:person:" + this.id + `",
+      "author": "` + "urn:li:person:" + token[1] + `",
       "lifecycleState": "PUBLISHED",
       "specificContent": {
           "com.linkedin.ugc.ShareContent": {
               "shareCommentary": {
-                  "text": "` + text + `"
+                  "text": "` + args[0] + `"
               },
               "shareMediaCategory": "NONE"
           }
@@ -64,28 +71,22 @@ class Linkedin{
           "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"
       }
     }`;
-    this.send_data(json_call);
+    send_data(json_call, token[0]);
   }
-  ////////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////////
- async send_data(json_call)
- {
+ const send_data = async (json_call, accessToken) => {
   const rawResponse = await fetch('https://api.linkedin.com/v2/ugcPosts', {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer ' + this.accessToken,
+        'Authorization': 'Bearer ' + accessToken,
       },
       body: json_call
     });
     const content = await rawResponse.json();
-    if (content.message != null){
-      return true;
+    if (content.message != null) {
+      return {status: "success"};
     }
-    return false;
+    return {status: "fail"};
   }
-}
 
 router.get('/linkedin/country', 
 function(req, res){
@@ -111,7 +112,7 @@ router.get('/auth/callback',
     const user_id = req.query.state.split(",")[0].split("=")[1];
     const service_id = req.query.state.split(",")[1].split("=")[1];
     console.log(req.user)
-    response = await addservice_copy(user_id, service_id, req.user.accessToken, req.user.refreshToken, null);
+    response = await addservice_copy(user_id, service_id, req.user.accessToken, req.user.profile.id, JSON.parse(profile._raw).firstName.preferredLocale.country);
     if (response.status != 200) {
       console.log("Error while adding service");
       console.log(response);
@@ -126,4 +127,4 @@ router.get('/auth/callback',
 //     failureRedirect: '/login'
 //   }));
 
-module.exports = router;
+module.exports = {router , send_localisation, send_message};
