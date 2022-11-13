@@ -41,7 +41,7 @@ const GetcurrentSong = async (token, user, service_id) => {
       refresh.requestNewAccessToken('spotify', token[1], (err, accessToken, refreshToken) => {
         if (err) {
           console.log(err);
-          return null
+          return { "status": "error" }
         } else {
           console.log("new token = " + accessToken);
           for (var i = 0; i < user.services.length; i++) {
@@ -56,7 +56,7 @@ const GetcurrentSong = async (token, user, service_id) => {
     }
     if (error.response.status == 401) {
       console.log("token expired please reconnect");
-      return null
+      return { "status": "error" }
     }
     tentative_refresh = 2;
     return {"status": "error"};
@@ -117,7 +117,7 @@ const searchArtist = async (args, token, user, service_id) => {
       refresh.requestNewAccessToken('spotify', token[1], (err, accessToken, refreshToken) => {
         if (err) {
           console.log(err);
-          return null
+          return { "status": "error" }
         } else {
           console.log("new token = " + accessToken);
           for (var i = 0; i < user.services.length; i++) {
@@ -132,7 +132,7 @@ const searchArtist = async (args, token, user, service_id) => {
     }
     if (error.response.status == 401) {
       console.log("token expired please reconnect");
-      return null
+      return { "status": "error" }
     }
     tentative_refresh = 2;
     return {"status": "error"};
@@ -163,7 +163,7 @@ const GetDevices = async (token, user, service_id) => {
       refresh.requestNewAccessToken('spotify', token[1], (err, accessToken, refreshToken) => {
         if (err) {
           console.log(err);
-          return null
+          return { "status": "error" }
         } else {
           console.log("new token = " + accessToken);
           for (var i = 0; i < user.services.length; i++) {
@@ -178,7 +178,7 @@ const GetDevices = async (token, user, service_id) => {
     }
     if (error.response.status == 401) {
       console.log("token expired please reconnect");
-      return null
+      return { "status": "error" }
     }
     tentative_refresh = 2;
     return {"status": "error"};
@@ -282,7 +282,7 @@ const CreatePlaylist = async (args, token) => {
       refresh.requestNewAccessToken('spotify', token[1], (err, accessToken, refreshToken) => {
         if (err) {
           console.log(err);
-          return null
+          return { "status": "error" }
         } else {
           console.log("new token = " + accessToken);
           for (var i = 0; i < user.services.length; i++) {
@@ -297,7 +297,7 @@ const CreatePlaylist = async (args, token) => {
     }
     if (error.response.status == 401) {
       console.log("token expired please reconnect");
-      return null
+      return { "status": "error" }
     }
     tentative_refresh = 2;
     return {"status": "error"};
@@ -323,11 +323,12 @@ const SearchPlaylist = async (args, token, user, service_id) => {
     return CreatePlaylist(args, token[0]);
   }).catch((error) => {
     if (error.response.status == 401 && tentative_refresh > 0) {
+      console.log("token expired");
       tentative_refresh--;
       refresh.requestNewAccessToken('spotify', token[1], (err, accessToken, refreshToken) => {
         if (err) {
           console.log(err);
-          return null
+          return { "status": "error" }
         } else {
           console.log("new token = " + accessToken);
           for (var i = 0; i < user.services.length; i++) {
@@ -340,9 +341,9 @@ const SearchPlaylist = async (args, token, user, service_id) => {
       });
       SearchPlaylist(args, token, user, service_id);
     }
-    if (error.response.status == 401) {
+    if (error.response.status == 401 && tentative_refresh == 0) {
       console.log("token expired please reconnect");
-      return null
+      return { "status": "error" }
     }
     tentative_refresh = 2;
     return {"status": "error"};
