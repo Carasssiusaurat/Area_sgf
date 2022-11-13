@@ -24,12 +24,10 @@ const GetcurrentSong = async (token, user, service_id) => {
     }
   }).then((response) => {
     let artists = [];
-    //console.log(response);
     if (response.data === '') {
       console.log("No song playing");
       return {"status": "fail"};
     }
-    //actual_artist = response.item.artists[0].name;
     for (let i = 0; i < response.data.item.artists.length; i++) {
       artists.push(response.data.item.artists[i].name);
     }
@@ -43,7 +41,6 @@ const GetcurrentSong = async (token, user, service_id) => {
           console.log(err);
           return { "status": "error" }
         } else {
-          console.log("new token = " + accessToken);
           for (var i = 0; i < user.services.length; i++) {
             if (user.services[i]._id == service_id.toString()) {
               user.services[i].access_token = accessToken;
@@ -119,7 +116,6 @@ const searchArtist = async (args, token, user, service_id) => {
           console.log(err);
           return { "status": "error" }
         } else {
-          console.log("new token = " + accessToken);
           for (var i = 0; i < user.services.length; i++) {
             if (user.services[i]._id == service_id.toString()) {
               user.services[i].access_token = accessToken;
@@ -165,7 +161,6 @@ const GetDevices = async (token, user, service_id) => {
           console.log(err);
           return { "status": "error" }
         } else {
-          console.log("new token = " + accessToken);
           for (var i = 0; i < user.services.length; i++) {
             if (user.services[i]._id == service_id.toString()) {
               user.services[i].access_token = accessToken;
@@ -195,7 +190,6 @@ const ChangeSong = async (args, token, user, service_id) => {
   if (device.status == "fail") {
     return {"status": "fail"};
   }
-  console.log("track_uri = " + uri.track_uri, "device = " + device.actual_device);
   const data = await axios.put('https://api.spotify.com/v1/me/player/play?device_id=' + device.actual_device, 
     {
       uris: [uri.track_uri]
@@ -284,7 +278,6 @@ const CreatePlaylist = async (args, token) => {
           console.log(err);
           return { "status": "error" }
         } else {
-          console.log("new token = " + accessToken);
           for (var i = 0; i < user.services.length; i++) {
             if (user.services[i]._id == service_id.toString()) {
               user.services[i].access_token = accessToken;
@@ -330,7 +323,6 @@ const SearchPlaylist = async (args, token, user, service_id) => {
           console.log(err);
           return { "status": "error" }
         } else {
-          console.log("new token = " + accessToken);
           for (var i = 0; i < user.services.length; i++) {
             if (user.services[i]._id == service_id.toString()) {
               user.services[i].access_token = accessToken;
@@ -351,21 +343,6 @@ const SearchPlaylist = async (args, token, user, service_id) => {
   return data;
 }
 
-var trigger = {
-  "songid": "",
-  "artistid": ""
-};
-
-var reaction = {
-  "songid": "",
-  "artistid": ""
-};
-
-var current_song = {
-  "songid": "",
-  "artistid": ""
-};
-
 passport.serializeUser(function (user, done) {
   done(null, user);
 });
@@ -381,7 +358,6 @@ const strategy = new SpotifyStrategy({
     passReqToCallback: true
   },
   function(req, accessToken, refreshToken, expires_in, profile, done) {
-    //console.log("refresh_token = " + refreshToken);
     return done(null, {accessToken, refreshToken, expires_in, profile});
   }
 )
@@ -390,7 +366,6 @@ passport.use(strategy);
 refresh.use(strategy);
 
 const SpotifyAuth = async (req, res, next) => {
-  //console.log("user id = " + req.query.token + "server id = " + req.query.service_id);
   passport.authenticate('spotify', {scope: SCOPES, showDialog: true, state: "token=" + req.query.token + ",serviceid=" + req.query.service_id})(req, res, next);
 }
 
@@ -401,7 +376,6 @@ router.get('/auth/callback',
   async function (req, res) {
     const user_id = req.query.state.split(",")[0].split("=")[1];
     const service_id = req.query.state.split(",")[1].split("=")[1];
-    console.log(req.user.expires_in)
     response = await addservice_copy(user_id, service_id, req.user.accessToken, req.user.refreshToken, null);
     if (response.status != 200) {
       console.log("error");
@@ -413,41 +387,28 @@ router.get('/auth/callback',
   }
 );
 
-//router.get('/get_current_song', function(req, res) {
-//  Getcurrentsong().then((data) => {
-//    res.json(data);
-//    console.log(data);
-//  }).catch((error) => {
-//    res.json(error);
-//    console.log(error);
-//  });
-//});
+// router.get('/test_spotify_actions', async function(req, res) {
+//   for (let i = 0; i < actions.length; i++) {
+//     if (actions[i][req.body.action_id]) {
+//       const data = await actions[i][req.body.action_id](req.body.args, req.body.token);
+//       res.json(data);
+//     }
+//   }
+// })
 
-router.get('/test_spotify_actions', async function(req, res) {
-  console.log("test spotify actions");
-  console.log(req.body.token);
-  for (let i = 0; i < actions.length; i++) {
-    if (actions[i][req.body.action_id]) {
-      const data = await actions[i][req.body.action_id](req.body.args, req.body.token);
-      res.json(data);
-      //console.log(data);
-    }
-  }
-})
+// router.get('/get_devices', async function(req, res) {
+//   const data = await my_spotify.GetDevices();
+//   res.json(data);
+// });
 
-router.get('/get_devices', async function(req, res) {
-  const data = await my_spotify.GetDevices();
-  res.json(data);
-});
-
-router.get('/change_song', function(req, res) {
-  my_spotify.changeSong(reaction).then((data) => {
-    res.json(data);
-    console.log(data);
-  }).catch((error) => {
-    res.json(error);
-    console.log(error);
-  });
-});
+// router.get('/change_song', function(req, res) {
+//   my_spotify.changeSong(reaction).then((data) => {
+//     res.json(data);
+//     console.log(data);
+//   }).catch((error) => {
+//     res.json(error);
+//     console.log(error);
+//   });
+// });
 
 module.exports = {router, AddSongToPlaylist, ImListeningASong, ChangeSong};

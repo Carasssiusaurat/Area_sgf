@@ -191,7 +191,6 @@ const updatestate = async (req, res) => {
     const user_to_update = await Users.findOne({_id: req.params.uid});
     try {
         if (user_to_update.services.filter(service => service._id == req.params.sid)) {
-            console.log()
             user_to_update.services.filter(service => service._id == req.params.sid)[0].actif = !user_to_update.services.filter(service => service._id == req.params.sid)[0].actif
             user_to_update.save();
             return res.status(200).json({message: "User updated"});

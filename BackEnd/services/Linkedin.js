@@ -30,30 +30,13 @@ passport.use(new LinkedInStrategy({
     passReqToCallback: true
   }, function(req, accessToken, refreshToken, profile, done) {
     return done(null, {accessToken, refreshToken, profile});
-    // process.nextTick(function () {
-      // console.log(accessToken);
-      // LinkedIn = new Linkedin(accessToken, profile.id, JSON.parse(profile._raw).firstName.preferredLocale.country);
-      // return done(null, {accessToken, refreshToken, profile});
-    // });
   }));
-
-
-
-
-// class Linkedin{
-
-//   constructor(accessToken, id, country) {
-//     this.accessToken = accessToken;
-//     this.id = id;
-//     this.country = country;
-//   }
 
   const send_localisation = (args, token, user, service_id) => {
     if (args[0] == token[2])
       return {status: "success"};
     return {status: "fail"};
   }
-
 
   const send_message = async (args, token, user, service_id) => {
     let  json_call = `{
@@ -111,7 +94,6 @@ router.get('/auth/callback',
   async function(req, res) {
     const user_id = req.query.state.split(",")[0].split("=")[1];
     const service_id = req.query.state.split(",")[1].split("=")[1];
-    console.log(req.user)
     response = await addservice_copy(user_id, service_id, req.user.accessToken, req.user.profile.id, JSON.parse(profile._raw).firstName.preferredLocale.country);
     if (response.status != 200) {
       console.log("Error while adding service");
@@ -121,10 +103,5 @@ router.get('/auth/callback',
     res.redirect('http://localhost:8081/home');
     return req.user.accessToken;
   })
-// router.get('/auth/callback',
-//     passport.authenticate('linkedin', {
-//     successRedirect: '/',
-//     failureRedirect: '/login'
-//   }));
 
 module.exports = {router , send_localisation, send_message};

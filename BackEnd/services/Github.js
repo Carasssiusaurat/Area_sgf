@@ -43,12 +43,9 @@ router.get('/auth', github_auth);
 router.get('/auth/callback',
   passport.authenticate('github', { failureRedirect: '/login' }),
   async function(req, res) {
-    console.log(req.user);
     const user_id = req.query.state.split(",")[0].split("=")[1];
     const service_id = req.query.state.split(",")[1].split("=")[1];
-    console.log(req.user.accessToken)
     response = await addservice_copy(user_id, service_id, req.user.accessToken, req.user.refreshToken, null);
-    console.log(response);
     if (response.status != 200) {
       console.log("error");
       console.log(response.message)
@@ -69,9 +66,7 @@ router.get('/auth/callback',
         },
         body : JSON.stringify(body_json)
       });
-      console.log("token =" + token[0]);
       const content = await rawResponse.json();
-      console.log(content);
       return ({'status':'success'});
     }
 
@@ -83,7 +78,6 @@ router.get('/auth/callback',
           'Authorization': 'Bearer ' + token[0],
         }
       });
-      console.log(rawResponse);
       return ({'status':'success'});
     }
 
@@ -110,7 +104,6 @@ router.get('/auth/callback',
     const content = await rawResponse.json();
     fs.writeFileSync('followers.json', JSON.stringify(content));
     for (var i = 0; i != content.length; i++) {
-      console.log(content[i].login);
       if (content[i].login === args)
         return ({'status':'success'});
     };
@@ -120,7 +113,6 @@ router.get('/auth/callback',
 const IsFollower = async (args, token, user, service_action_id) => {
   const data = await receive_following(args[0], token[0]);
 
-  console.log(data);
 }
 
 const check_follower = async (userName) =>{
@@ -129,55 +121,52 @@ const check_follower = async (userName) =>{
       Authorization: 'Bearer ' + this.accessToken,
     }
   }).then((response) => {
-//    console.log(response);
   }).catch((error) => {});
-  //console.log(rawResponse);
-  //if (rawResponse.status === 204)
-  //  return ({'status':'success'});
-  //else if (rawResponse.status === 404)
-  //  return ({'status':'fail'});
+  if (rawResponse.status === 204)
+   return {status: "success"};
+  else if (rawResponse.status === 404)
+   return {status: "fail"};
 }
 
 const ImFollowing = async (req, res) => {
   const data = await check_follower(req.body.args[0]);
-  console.log(data);
 }
 
-router.get('/followers', IsFollower);
+// router.get('/followers', IsFollower);
 
-router.get('/imfollowing', ImFollowing);
+// router.get('/imfollowing', ImFollowing);
 
 
-// create a repo
-  router.get('/user/repos',
-  function(req, res){
-    fork_repo(req.body.args[0], req.body.token).then(function(data) {console.log(data)});
-    res.redirect("/");
-    return res;
-  });
+// // create a repo
+//   router.get('/user/repos',
+//   function(req, res){
+//     fork_repo(req.body.args[0], req.body.token).then(function(data) {console.log(data)});
+//     res.redirect("/");
+//     return res;
+//   });
 
-// follow user
-router.get('/user/follow',
-function(req, res){
-  follow_user(req.body.args[0], req.body.token).then(function(data) {console.log(data)});
-  res.redirect("/");
-  return res;
-});
+// // follow user
+// router.get('/user/follow',
+// function(req, res){
+//   follow_user(req.body.args[0], req.body.token).then(function(data) {console.log(data)});
+//   res.redirect("/");
+//   return res;
+// });
 
-// unfollow user
-router.get('/user/unfollow',
-function(req, res){
-  unfollow_user(req.body.args[0], req.body.token).then(function(data) {console.log(data)});
-  res.redirect("/");
-  return res;
-});
+// // unfollow user
+// router.get('/user/unfollow',
+// function(req, res){
+//   unfollow_user(req.body.args[0], req.body.token).then(function(data) {console.log(data)});
+//   res.redirect("/");
+//   return res;
+// });
 
-//check if user is following
-router.get('/following/check',
-function(req, res){
-  check_follower(req.body.args[0], req.body.token).then(function(data) {console.log(data)});
-  res.redirect("/");
-  return res;
-});
+// //check if user is following
+// router.get('/following/check',
+// function(req, res){
+//   check_follower(req.body.args[0], req.body.token).then(function(data) {console.log(data)});
+//   res.redirect("/");
+//   return res;
+// });
 
 module.exports = {router, check_follower, receive_following, fork_repo, follow_user, unfollow_user};

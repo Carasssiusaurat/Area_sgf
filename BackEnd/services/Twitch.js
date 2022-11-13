@@ -179,7 +179,6 @@ const twitchLastPlayedIs = async (args, token, user, service_action_id) => {
 }
 
 const twitchWhisp = async (args, token, user, service_action_id) => {
-  console.log("EJKBDKJ")
 //const twitchWhisp = async (usertoken, self_id, streamer) => {
   /*
   usertoken = req.headers.authorization
@@ -270,7 +269,6 @@ router.get('/auth/callback',
       res.status(500).send("error: couldn't get user Id")
     });
     if (response.status != 200) {
-      console.log(response.status)
       console.log("error: couldn't add service")
     }
     console.log("service added");
@@ -346,7 +344,6 @@ const streamerIsStreaming = async (args, token, user, service_action_id) => {
     return {"status": "error"};
   }
 }
-
 
 passport.serializeUser(function (user, done) {
   done(null, user);

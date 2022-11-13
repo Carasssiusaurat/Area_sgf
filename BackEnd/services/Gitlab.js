@@ -43,7 +43,6 @@ router.get('/auth', gitlab_auth);
 router.get('/auth/callback',
   passport.authenticate('gitlab', { failureRedirect: '/login'}),
   async function(req, res) {
-    console.log(req.user);
     const user_id = req.query.state.split(",")[0].split("=")[1];
     const service_id = req.query.state.split(",")[1].split("=")[1];
     response = await addservice_copy(user_id, service_id, req.user.accessToken, req.user.refreshToken, null);
@@ -81,18 +80,18 @@ const star_project = async (args, token, user, service_action_id) => {
     return {status: "fail"};
   }
 
-router.get('/gitlab/todos',
-  function (req, res) {
-    gitlab.star_project("").then(function (data) { console.log(data) });
-    res.redirect("/");
-    return res;
-  });
+// router.get('/gitlab/todos',
+//   function (req, res) {
+//     gitlab.star_project("").then(function (data) { console.log(data) });
+//     res.redirect("/");
+//     return res;
+//   });
 
-router.get('/gitlab/projects',
-  function (req, res) {
-    gitlab.list_projects_starrers("", 5).then(function (data) { console.log(data) });
-    res.redirect("/");
-    return res;
-  });
+// router.get('/gitlab/projects',
+//   function (req, res) {
+//     gitlab.list_projects_starrers("", 5).then(function (data) { console.log(data) });
+//     res.redirect("/");
+//     return res;
+//   });
 
 module.exports = { router, star_project, list_projects_stars };

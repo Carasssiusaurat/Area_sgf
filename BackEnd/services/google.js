@@ -88,7 +88,6 @@ const Getmail = async (args, token, user, service_id) => {
           console.log(response.content);
           return { status: "error" };
         } else {
-          console.log("new token = " + response.content);
           token[0] = response.content;
           for (var i = 0; i < user.services.length; i++) {
             if (user.services[i]._id == service_id.toString()) {
@@ -125,7 +124,6 @@ const getValidToken = async (refreshToken) => {
     });
 
     const data = await request.json();
-    console.log(data.access_token);
     return { status: "success", content: data.access_token };
   } catch (error) {
     console.log(error);
@@ -148,7 +146,6 @@ const Getcalendar = async (args, token, user, service_id) => {
           console.log(response.content);
           return { status: "error" };
         } else {
-          console.log("new token = " + response.content);
           token[0] = response.content;
           for (var i = 0; i < user.services.length; i++) {
             if (user.services[i]._id == service_id.toString()) {
@@ -180,7 +177,6 @@ const Getcalendar = async (args, token, user, service_id) => {
       res.data.items[i].start["dateTime"] != undefined
     )
       var time_of_event = new Date(res.data.items[i].start.dateTime);
-    console.log(time_of_event);
     if (
       expected_time > time_of_event &&
       new Date(now.getTime()) < time_of_event
@@ -244,9 +240,6 @@ const ListEmails = async (args, token, user, service_id) => {
     if (res.data.payload.headers[i].name == "Date")
       var mailDate = new Date(res.data.payload.headers[i].value);
   }
-  console.log(mailDate);
-  console.log(nowDate);
-  console.log(now);
   if (mailDate > nowDate) return { status: "success" };
   return { status: "fail" };
 };
@@ -258,11 +251,6 @@ const GetFileData = async (message_id, attachment_id) => {
     messageId: message_id,
     id: attachment_id,
   });
-  // console.log(res.data.data);
-  // console.log("------------------------------------");
-  // var test = base64url.decode(res.data.data);
-  // console.log(base64url.fromBase64(res.data.data));
-  // console.log(res.data.data);
   return base64url.decode(res.data.data);
 };
 
@@ -282,7 +270,6 @@ const GetYoutubeVideo = async (args, token, user, service_id) => {
           console.log(response.content);
           return { status: "error" };
         } else {
-          console.log("new token = " + response.content);
           token[0] = response.content;
           for (var i = 0; i < user.services.length; i++) {
             if (user.services[i]._id == service_id.toString()) {
@@ -302,8 +289,6 @@ const GetYoutubeVideo = async (args, token, user, service_id) => {
     });
   trigger = parseInt(args[2]);
   const views = parseInt(res.data.items[0].statistics.viewCount);
-  console.log(views);
-  console.log(trigger);
   if (args[1] === "likes") {
     const likes = parseInt(res.data.items[0].statistics.likeCount);
     if (likes >= trigger) return { status: "success" };
@@ -360,111 +345,111 @@ async function sendMail(args, token, user, service_id) {
   }
 }
 
-const isWorkflow = async (service, action, trigger, reaction, id) => {
-  var activated = 0;
-  if (service === services[0]) {
-    trigger = parseInt(trigger) * 60000;
-    var item = await Getcalendar();
-    item.forEach(function (items) {
-      const dateTime = new Date(items.start.dateTime);
-      const nowDate = new Date();
-      const diffTime = Math.abs(nowDate - dateTime);
-      if (diffTime <= trigger && nowDate < dateTime) {
-        console.log("ca marche");
-      }
-    });
-  }
-  if (service === services[1]) {
-    var item = await GetYoutubeVideo(id);
-    item.forEach(function (items) {
-      trigger = parseInt(trigger);
-      console.log(items.statistics);
-      const img = items.snippet.thumbnails.high;
-      if (action === "likes") {
-        const likes = items.statistics.likeCount;
-        if (likes >= trigger) activated = 1;
-      }
-      if (action === "views") {
-        const views = parseInt(items.statistics.viewCount);
-        if (views >= trigger) activated = 1;
-      }
-      if (activated == 1) {
-        if (reaction === "gmail") {
-          console.log("OK");
-          console.log(items.snippet.title);
-          sendMail(
-            user,
-            items.snippet.title + " Reached " + trigger + " " + action,
-            items.snippet.title +
-              " Reached " +
-              trigger +
-              " " +
-              action +
-              '<br/> <img style="width:250px;" src="' +
-              items.snippet.thumbnails.high.url +
-              '" />'
-          )
-            .then((result) => console.log("Email sent...", result))
-            .catch((error) => console.log(error.message));
-        }
-      }
-    });
-  }
-  if (service === services[2]) {
-    var mail = await ListEmails();
-    console.log(mail[0].id);
-    var info = await GetMailInfo(mail[0].id);
-    for (let i = 0; i < info.payload.headers.length; i++) {
-      if (info.payload.headers[i].name == "Date")
-        var mailDate = new Date(info.payload.headers[i].value);
-    }
-    if (mailDate > now) {
-      console.log(info.payload.parts);
-      for (let i = 0; i < info.payload.parts.length; i++) {
-        console.log(info.payload.parts.length);
-        if (info.payload.parts[i].body.attachmentId != undefined) {
-          // console.log(info.payload.parts[i]);
-          var data = await GetFileData(
-            mail[0].id,
-            info.payload.parts[i].body.attachmentId
-          );
-          var fileMetadata = {
-            name: info.payload.parts[i].filename,
-          };
-          var media = {
-            mimeType: info.payload.parts[i].mimeType,
-            body: data,
-          };
+// const isWorkflow = async (service, action, trigger, reaction, id) => {
+//   var activated = 0;
+//   if (service === services[0]) {
+//     trigger = parseInt(trigger) * 60000;
+//     var item = await Getcalendar();
+//     item.forEach(function (items) {
+//       const dateTime = new Date(items.start.dateTime);
+//       const nowDate = new Date();
+//       const diffTime = Math.abs(nowDate - dateTime);
+//       if (diffTime <= trigger && nowDate < dateTime) {
+//         console.log("ca marche");
+//       }
+//     });
+//   }
+//   if (service === services[1]) {
+//     var item = await GetYoutubeVideo(id);
+//     item.forEach(function (items) {
+//       trigger = parseInt(trigger);
+//       console.log(items.statistics);
+//       const img = items.snippet.thumbnails.high;
+//       if (action === "likes") {
+//         const likes = items.statistics.likeCount;
+//         if (likes >= trigger) activated = 1;
+//       }
+//       if (action === "views") {
+//         const views = parseInt(items.statistics.viewCount);
+//         if (views >= trigger) activated = 1;
+//       }
+//       if (activated == 1) {
+//         if (reaction === "gmail") {
+//           console.log("OK");
+//           console.log(items.snippet.title);
+//           sendMail(
+//             user,
+//             items.snippet.title + " Reached " + trigger + " " + action,
+//             items.snippet.title +
+//               " Reached " +
+//               trigger +
+//               " " +
+//               action +
+//               '<br/> <img style="width:250px;" src="' +
+//               items.snippet.thumbnails.high.url +
+//               '" />'
+//           )
+//             .then((result) => console.log("Email sent...", result))
+//             .catch((error) => console.log(error.message));
+//         }
+//       }
+//     });
+//   }
+//   if (service === services[2]) {
+//     var mail = await ListEmails();
+//     console.log(mail[0].id);
+//     var info = await GetMailInfo(mail[0].id);
+//     for (let i = 0; i < info.payload.headers.length; i++) {
+//       if (info.payload.headers[i].name == "Date")
+//         var mailDate = new Date(info.payload.headers[i].value);
+//     }
+//     if (mailDate > now) {
+//       console.log(info.payload.parts);
+//       for (let i = 0; i < info.payload.parts.length; i++) {
+//         console.log(info.payload.parts.length);
+//         if (info.payload.parts[i].body.attachmentId != undefined) {
+//           // console.log(info.payload.parts[i]);
+//           var data = await GetFileData(
+//             mail[0].id,
+//             info.payload.parts[i].body.attachmentId
+//           );
+//           var fileMetadata = {
+//             name: info.payload.parts[i].filename,
+//           };
+//           var media = {
+//             mimeType: info.payload.parts[i].mimeType,
+//             body: data,
+//           };
 
-          try {
-            const file = await drive.files.create({
-              auth: oauth2Client,
-              resource: fileMetadata,
-              media: media,
-              fields: "id",
-            });
-            console.log("File Id:", file.data.id);
-            return file.data.id;
-          } catch (err) {
-            throw err;
-          }
-        }
-      }
-    }
-    console.log(now);
-    console.log(mailDate);
-  }
-};
+//           try {
+//             const file = await drive.files.create({
+//               auth: oauth2Client,
+//               resource: fileMetadata,
+//               media: media,
+//               fields: "id",
+//             });
+//             console.log("File Id:", file.data.id);
+//             return file.data.id;
+//           } catch (err) {
+//             throw err;
+//           }
+//         }
+//       }
+//     }
+//     console.log(now);
+//     console.log(mailDate);
+//   }
+// };
 
-router.post("/set_workflow", async function (req, res) {
-  console.log(req.body);
-  isWorkflow(
-    req.body.service,
-    req.body.action,
-    req.body.trigger,
-    req.body.reaction,
-    req.body.id
-  );
-});
+// router.post("/set_workflow", async function (req, res) {
+//   console.log(req.body);
+//   isWorkflow(
+//     req.body.service,
+//     req.body.action,
+//     req.body.trigger,
+//     req.body.reaction,
+//     req.body.id
+//   );
+// });
 
 module.exports = { router, Getcalendar, GetYoutubeVideo, ListEmails, sendMail };
