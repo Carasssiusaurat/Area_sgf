@@ -106,11 +106,10 @@ const Getmail = async (args, token, user, service_id) => {
       tentative_refresh = 2;
       return { status: "error" };
     });
-  console.log(data.email);
-  return data.email;
+  return { mail: data.email, accesToken: token[0] };
 };
 
-const getValidToken = async (refresToken) => {
+const getValidToken = async (refreshToken) => {
   try {
     const request = await fetch("https://www.googleapis.com/oauth2/v4/token", {
       method: "POST",
@@ -120,7 +119,7 @@ const getValidToken = async (refresToken) => {
       body: JSON.stringify({
         client_id: process.env.GOOGLE_CLIENT_ID,
         client_secret: process.env.GOOGLE_CLIENT_SECRET,
-        refresh_token: refresToken,
+        refresh_token: refreshToken,
         grant_type: "refresh_token",
       }),
     });
@@ -313,7 +312,13 @@ async function sendMail(args, token, user, service_id) {
     access_token: token[0],
     refresh_token: token[1],
   });
-  const user_mail = await Getmail(args, token, user, service_id);
+  const data = await Getmail(args, token, user, service_id);
+  const user_mail = data.mail;
+  token[0] = data.accesToken;
+  oauth2Client.setCredentials({
+    access_token: token[0],
+    refresh_token: token[1],
+  });
   try {
     accessToken = await oauth2Client.getAccessToken();
 
