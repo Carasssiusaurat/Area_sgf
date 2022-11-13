@@ -70,8 +70,9 @@ class Gitlab {
         'Authorization': 'Bearer ' + this.accessToken,
       }
     });
-    const content = await rawResponse.json();
-    return true;
+    if (rawResponse.status === 304)
+      return true;
+    return false;
   }
 }
 
