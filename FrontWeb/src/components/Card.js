@@ -3,7 +3,12 @@ import React, { useEffect, useState } from "react";
 const Card = ({ name, img_url, url, service_id }) => {
   const EnableService = async () => {
     console.log(sessionStorage);
-    window.location.href = url + "?token=" + sessionStorage.getItem("id") + "&service_id=" + service_id;
+    window.location.href =
+      url +
+      "?token=" +
+      sessionStorage.getItem("id") +
+      "&service_id=" +
+      service_id;
     console.log(sessionStorage.getItem("token"));
   };
   return (
@@ -15,9 +20,16 @@ const Card = ({ name, img_url, url, service_id }) => {
       <div className="service-name">
         <h1>{name}</h1>
       </div>
-      <div className="infos">
+      <div className="infos" style={{ height:  + "px" }}>
         <div>
-          <button onClick={EnableService}>Connect</button>
+          {/* <button onClick={EnableService}>Connect</button> */}
+          <a
+            class="select"
+            style={{ marginLeft: 27 + "px" }}
+            onClick={EnableService}
+          >
+            Connect
+          </a>
         </div>
         <div className="separator"></div>
       </div>

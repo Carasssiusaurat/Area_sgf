@@ -17,7 +17,7 @@ const ConnectedCard = ({ name, img_url, id }) => {
     window.location.reload(false);
   };
   return (
-    <li className="card">
+    <li className="card-5">
       <div className="service-logo">
         <div className="back"></div>
         <img src={img_url} alt={name} text={name} />
@@ -26,8 +26,15 @@ const ConnectedCard = ({ name, img_url, id }) => {
         <h1>{name}</h1>
       </div>
       <div className="infos">
-        <h2>Connected since:</h2>
-        <button onClick={DisableService}>Disonnect</button>
+        <h2 style={{ marginTop: 0 + "px" }}>Connected since:</h2>
+        <a
+          class="remove"
+          onClick={ConnectedCard}
+          style={{ marginLeft: 27 + "px", marginTop: 3 + "px" }}
+        >
+          Disconnect
+        </a>
+        {/* <button onClick={DisableService}>Disconnect</button> */}
         <div className="separator"></div>
       </div>
     </li>
