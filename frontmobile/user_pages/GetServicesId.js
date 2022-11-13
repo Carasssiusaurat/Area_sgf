@@ -2,20 +2,21 @@ import React from "react";
 import GetServicesData from "./GetServicesData";
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { View, Text, Button, Image, StyleSheet, TextInput,
-    TouchableOpacity, SafeAreaView, ScrollView} from "react-native";
+    TouchableOpacity, SafeAreaView, ScrollView, ProgressBarAndroidBase} from "react-native";
     
 class GetServicesId extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
+      navigation : props.navigation,
       items: [],
       isLoaded: false,
     };
   }
 
   async componentDidMount() {
-    fetch("http://localhost:8080/user/" + await AsyncStorage.getItem("id"), {
+    fetch("http://"  + await AsyncStorage.getItem("ip") + ":8080/user/" + await AsyncStorage.getItem("id"), {
       method: "GET",
       headers: {
         Authorization: "Bearer " + await AsyncStorage.getItem("token"),
@@ -40,7 +41,7 @@ class GetServicesId extends React.Component {
 
     return (
       <View>
-        <GetServicesData id={items}></GetServicesData>
+        <GetServicesData id={items} navigation={this.state.navigation}></GetServicesData>
       </View>
     );
   }

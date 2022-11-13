@@ -14,6 +14,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import {User_home} from './user_pages/all_services'
 import {Active_services} from './user_pages/active_services'
 import { Fun_WebView } from './Webview';
+import {Workspace_Page, Workspace_Page_Reaction} from './user_pages/Workspace'
+import { Print_Worspace } from './user_pages/Print_Workspace';
 
 const Stack = createNativeStackNavigator();
 
@@ -21,6 +23,7 @@ const Stack = createNativeStackNavigator();
 class Login extends React.Component {
   constructor(props){
     super(props);
+    AsyncStorage.setItem("action", "");
     this.state = {
       email : "",
       password : "",
@@ -38,7 +41,7 @@ class Login extends React.Component {
       return;
     }
     try {
-      const res = await fetch("http://localhost:8080/login", {
+      const res = await fetch("http://" + await AsyncStorage.getItem("ip") + ":8080/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -74,8 +77,11 @@ class Login extends React.Component {
   }
 
   render(){
+    AsyncStorage.getItem("ip").then((response) => console.log(response));
     return(
       <View style = {{backgroundColor : 'rgba(125, 19, 191, 1)', height : '100%'}}>
+          <Text style = {{marginTop : 50, textAlign : "center", fontWeight : "bold"}} >Set the ip</Text>
+          <TextInput style={[styles.input_style, ]} onChangeText = {(text) => AsyncStorage.setItem("ip", text)}></TextInput>
           <Image style={[styles.center_image, {marginTop : 60}]} source={require('./assets/Logo.png')}></Image>
           <this.Inputs name="Email"/>
           <this.Inputs name="Password"/>
@@ -128,7 +134,7 @@ class Register extends React.Component {
       return;
     }
     try {
-      const res = await fetch("http://localhost:8080/user", {
+      const res = await fetch("http://" + await AsyncStorage.getItem("ip") + ":8080/user", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -149,7 +155,7 @@ class Register extends React.Component {
 
   getToken = async () => {
     try {
-      const res = await fetch("http://localhost:8080/login", {
+      const res = await fetch("http://"  + await AsyncStorage.getItem("ip") + ":8080/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -203,6 +209,9 @@ const App = () => {
         <Stack.Screen name="User" component={User_home} options={{headerShown: false}}  />
         <Stack.Screen name="Actif" component={Active_services} options={{headerShown: false}}  />
         <Stack.Screen name="Web" component={Fun_WebView} options={{headerShown: false, url : "", webView : "", service_id : ""}}  />
+        <Stack.Screen name="Workspace" component={Workspace_Page} options={{headerShown: false, action : ""}}  />
+        <Stack.Screen name="Workspace_r" component={Workspace_Page_Reaction} options={{headerShown: false, action : ""}}  />
+        <Stack.Screen name="Workspace_p" component={Print_Worspace} options={{headerShown: false}}  />
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -210,7 +219,7 @@ const App = () => {
 
 export default App;
 
-const styles = StyleSheet.create({
+export const styles = StyleSheet.create({
 
   center_image : {
     marginLeft : "auto", 
