@@ -3,14 +3,25 @@ $color-1: #61dafb;
 $color-2: salmon;
 $color-3: #282c34;
 $color-4: #1B1B21;
-input{
-    height: 60px;
-    width: 500px;
-    // border-radius: 60px;
-    // box-shadow: inset 0px 0px 25px;
-    border: none;
-    outline: none;
-    background-color: #2E2D3C; 
+// input{
+//   height: 60px;
+//   width: 500px;
+//   // border-radius: 60px;
+//   // box-shadow: inset 0px 0px 25px;
+//   border: none;
+//   outline: none;
+//   background-color: #2E2D3C; 
+// }
+.center {
+  input{
+      height: 60px;
+      width: 500px;
+      // border-radius: 60px;
+      // box-shadow: inset 0px 0px 25px;
+      border: none;
+      outline: none;
+      background-color: #2E2D3C; 
+  }
 }
 
 ::placeholder {

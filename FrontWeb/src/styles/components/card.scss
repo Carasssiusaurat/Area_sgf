@@ -72,6 +72,17 @@
     box-shadow: 0 2px 3px rgba(0, 0, 0, 0.307);
     background-color: $color-3;
 
+    input{
+    height: 60px;
+    width: 500px;
+    // border-radius: 60px;
+    // box-shadow: inset 0px 0px 25px;
+    border: none;
+    outline: none;
+    background-color: #2E2D3C;
+    color: white; 
+  }
+
     .actions {
         margin-top: -90px;
         margin-left: 391px;
@@ -379,6 +390,16 @@
     box-shadow: 0 2px 3px rgba(0, 0, 0, 0.307);
     background-color: $color-4;
 
+    // .list_args {
+    //   display: flex;
+    //   margin-top: -100px;
+    // }
+
+    input {
+      // display: flex;
+      margin-top: 20px;
+    }
+
     .selected-service {
         display: flex;
         // justify-content: center;
@@ -397,7 +418,7 @@
 }
 
 .select {
-    margin-top: 0px;
+    margin-top: 20px;
     width: 180px;
     position: absolute;
     height: 10px;
@@ -711,7 +732,7 @@
         left: 20%;
         text-transform: capitalize;
         color: white;
-        transform: translate(-50%, -50%);
+        transform: translate(-10%, -50%);
     }
     // padding: 10px 5px;
 }

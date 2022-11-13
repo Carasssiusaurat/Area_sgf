@@ -19,6 +19,18 @@ const BigCard = ({ name, img_url, id, index, reaction, area }) => {
   };
 
   const ChangeValue = () => {
+    if (button_state === "remove") {
+      {
+        sessionStorage.removeItem("id_select");
+      }
+      {
+        sessionStorage.removeItem("id_select_reaction");
+      }
+      {
+        sessionStorage.removeItem("name");
+      }
+      window.location.reload(false);
+    }
     if (reaction != 1 && reaction != 2 && reaction != 900 && reaction != 3) {
       sessionStorage.setItem("id_select", id);
       window.location.reload(false);
