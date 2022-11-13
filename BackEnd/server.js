@@ -18,6 +18,7 @@ const linkedinroutes = require("./services/Linkedin");
 const spotifyroutes = require("./services/Spotify").router;
 const googleroutes = require("./services/google").router;
 const githubroutes = require("./services/Github").router;
+const gitlabroutes = require("./services/Gitlab").router;
 const areaexec = require("./Areas/executeAreas");
 
 app.use(cors());
@@ -72,6 +73,8 @@ app.use("/service/spotify", spotifyroutes);
 app.use("/service/github", githubroutes);
 
 app.use("/service/Google", googleroutes);
+
+app.use("/service/gitlab", gitlabroutes);
 
 app.use("/service/linkedin", linkedinroutes);
 

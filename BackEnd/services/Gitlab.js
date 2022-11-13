@@ -3,9 +3,11 @@ var passport = require('passport');
 var GitLabStrategy = require('passport-gitlab2').Strategy;
 var session = require('express-session');
 const fetch = require("node-fetch");
-const { Router } = require('express');
 let gitlab;
 const app = express();
+const {addservice_copy} = require('../controllers/userController');
+
+const router = express.Router();
 
 app.use(session({
   secret: 'SECRET', resave: true,
@@ -26,7 +28,7 @@ passport.use(new GitLabStrategy({
   callbackURL: "http://localhost:8080/service/gitlab/auth/callback",
   passReqToCallback: true
 },
-  function (accessToken, refreshToken, profile, done) {
+  function (req, accessToken, refreshToken, profile, done) {
     return done(null, {accessToken, refreshToken, profile});
   }
 ));
@@ -44,24 +46,13 @@ router.get('/auth/callback',
     console.log(req.user);
     const user_id = req.query.state.split(",")[0].split("=")[1];
     const service_id = req.query.state.split(",")[1].split("=")[1];
-    console.log(req.user.accessToken)
     response = await addservice_copy(user_id, service_id, req.user.accessToken, req.user.refreshToken, null);
-    console.log(response);
     if (response.status != 200) {
       console.log("error");
       console.log(response.message)
     }
     console.log("GitLab service added");
     res.redirect('http://localhost:8081/home');
-  });
-
-app.get('/auth/gitlab',
-  passport.authenticate('gitlab', { scope: ['api'] }));
-
-app.get('/gitlab/auth/callback',
-  passport.authenticate('gitlab', { failureRedirect: '/login' }),
-  function (req, res) {
-    res.redirect('/');
   });
 
 class Gitlab {
@@ -96,16 +87,18 @@ class Gitlab {
   }
 }
 
-app.get('/gitlab/todos',
+router.get('/gitlab/todos',
   function (req, res) {
     gitlab.star_project("").then(function (data) { console.log(data) });
     res.redirect("/");
     return res;
   });
 
-app.get('/gitlab/projects',
+router.get('/gitlab/projects',
   function (req, res) {
     gitlab.list_projects_starrers("", 5).then(function (data) { console.log(data) });
     res.redirect("/");
     return res;
   });
+
+module.exports = { router }
