@@ -8,11 +8,11 @@ const protect = asyncHandler(async (req, res, next) => {
     //if request contain authorization + at least a token bearer
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         try {
-            token = req.headers.authorization.split(' ')[1]//get token from request: 'Bearer' is [0]
-            const decode = jwt.verify(token, process.env.JWT_SECRET)//verify token validity
-            //req.user = await User.findById(decode.id).select('-password')// leftover from schema attempt
+            token = req.headers.authorization.split(' ')[1]
+            const decode = jwt.verify(token, process.env.JWT_SECRET)
+            console.log(decode)
             next()
-        } catch (err) { //catch jwt.verify error
+        } catch (err) {
             console.log(err)
             res.status(401)
             throw new Error('authorization fail')
