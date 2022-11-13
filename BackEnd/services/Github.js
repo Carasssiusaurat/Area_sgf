@@ -57,40 +57,42 @@ router.get('/auth/callback',
     res.redirect('http://localhost:8081/home');
   });
 
-    const fork_repo = async (repoName, token) =>
+    const fork_repo = async (args, token, user, service_action_id) =>
     {
       const body_json =
-      {"name" : repoName};
+      {"name" : args[0]};
       //
       const rawResponse = await fetch('https://api.github.com/user/repos', {
         method: 'POST',
         headers: {
-          'Authorization': 'Bearer ' + token,
+          'Authorization': 'Bearer ' + token[0],
         },
         body : JSON.stringify(body_json)
       });
+      console.log("token =" + token[0]);
       const content = await rawResponse.json();
       console.log(content);
       return true
     }
 
-    const follow_user = async(userName, token) =>
+    const follow_user = async(args, token, user, service_action_id) =>
     {
-      const rawResponse = await fetch('https://api.github.com/user/following/' + userName, {
+      const rawResponse = await fetch('https://api.github.com/user/following/' + args[0], {
         method: 'PUT',
         headers: {
-          'Authorization': 'Bearer ' + token,
+          'Authorization': 'Bearer ' + token[0],
         }
       });
+      console.log(rawResponse);
       return true;
     }
 
-    const unfollow_user = async (userName, token) =>
+    const unfollow_user = async (args, token, user, service_action_id) =>
     {
-      const rawResponse = await fetch('https://api.github.com/user/following/' + userName, {
+      const rawResponse = await fetch('https://api.github.com/user/following/' + args[0], {
         method: 'DELETE',
         headers: {
-          'Authorization': 'Bearer ' + token,
+          'Authorization': 'Bearer ' + token[0],
         }
       });
       return true;
@@ -98,7 +100,7 @@ router.get('/auth/callback',
 
 
     // check if i follow user
-  const receive_following = async (userName, token) => {
+  const receive_following = async (args, token) => {
     const rawResponse = await fetch('https://api.github.com/user/followers', {
       method: 'GET',
       headers: {
@@ -109,14 +111,14 @@ router.get('/auth/callback',
     fs.writeFileSync('followers.json', JSON.stringify(content));
     for (var i = 0; i != content.length; i++) {
       console.log(content[i].login);
-      if (content[i].login === userName)
+      if (content[i].login === args)
         return true;
     };
     return false;
   }
 
-const IsFollower = async (req, res) => {
-  const data = await receive_following(req.body.args[0], req.body.token);
+const IsFollower = async (args, token, user, service_action_id) => {
+  const data = await receive_following(args[0], token[0]);
 
   console.log(data);
 }
@@ -157,7 +159,7 @@ router.get('/imfollowing', ImFollowing);
 // follow user
 router.get('/user/follow',
 function(req, res){
-  follow_user(req.body.args[0], req.query.token).then(function(data) {console.log(data)});
+  follow_user(req.body.args[0], req.body.token).then(function(data) {console.log(data)});
   res.redirect("/");
   return res;
 });
