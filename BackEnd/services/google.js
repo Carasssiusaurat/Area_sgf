@@ -15,10 +15,8 @@ const axios = require("axios");
 require("dotenv").config();
 
 var services = ["calendar", "youtube", "gmail"];
-const now = new Date();
 var accessToken = "";
 var refreshToken = "";
-var user = "";
 
 const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
@@ -76,12 +74,12 @@ router.get("/handleGoogleRedirect", async (req, res) => {
   });
 });
 
-const Getmail = async () => {
+const Getmail = async (token) => {
   const { data } = await axios.get(
-    "https://www.googleapis.com/oauth2/v3/userinfo?access_token=" + accessToken
+    "https://www.googleapis.com/oauth2/v3/userinfo?access_token=" + token
   );
   console.log(data.email);
-  user = data.email;
+  return data.email;
 };
 
 router.post("/getValidToken", async (req, res) => {
@@ -110,14 +108,16 @@ router.post("/getValidToken", async (req, res) => {
   }
 });
 
-const Getcalendar = async (args, token) => {
-  oauth2Client.setCredentials({ access_token: token });
+const Getcalendar = async (args, token, user, service_id) => {
+  oauth2Client.setCredentials({ access_token: token[0] });
   const res = await calendar.events.list({
     auth: oauth2Client,
     calendarId: "primary",
   });
   trigger = parseInt(args[0]) * 60000;
+  const now = new Date();
   const expected_time = new Date(now.getTime() + trigger);
+  console.log(expected_time);
   for (var i = 0; i < res.data.items.length; i++) {
     const time_of_event = new Date(res.data.items[i].start.dateTime);
     if (
@@ -145,25 +145,40 @@ const Getcalendar = async (args, token) => {
 //   }
 // };
 
-const ListEmails = async () => {
+const GetMailInfo = async (args, token, user) => {
+  oauth2Client.setCredentials({ access_token: token[0] });
   const res = await gmail.users.messages.list({
     auth: oauth2Client,
     userId: user,
-    // q: "has:attachment",
+    q: "from:" + args[0],
     maxResults: 1,
   });
-  // console.log(res.data.messages);
-  return res.data.messages;
+  if (!res.data.messages) return false;
+  return res.data.messages[0].id;
 };
 
-const GetMailInfo = async (id) => {
+const ListEmails = async (args, token) => {
+  const user = await Getmail(token[0]);
+  var mail = await GetMailInfo(args, token, user);
+  if (mail === false) return { status: "fail" };
+
+  oauth2Client.setCredentials({ access_token: token[0] });
   const res = await gmail.users.messages.get({
     auth: oauth2Client,
     userId: user,
-    id: id,
+    id: mail,
   });
-  // console.log(res.data.messages);
-  return res.data;
+  const now = new Date();
+  var nowDate = new Date(now.getTime() - 30000);
+  for (let i = 0; i < res.data.payload.headers.length; i++) {
+    if (res.data.payload.headers[i].name == "Date")
+      var mailDate = new Date(res.data.payload.headers[i].value);
+  }
+  console.log(mailDate);
+  console.log(nowDate);
+  console.log(now);
+  if (mailDate > nowDate) return { status: "success" };
+  return { status: "fail" };
 };
 
 const GetFileData = async (message_id, attachment_id) => {
@@ -180,8 +195,9 @@ const GetFileData = async (message_id, attachment_id) => {
   // console.log(res.data.data);
   return base64url.decode(res.data.data);
 };
+
 const GetYoutubeVideo = async (args, token) => {
-  oauth2Client.setCredentials({ access_token: token });
+  oauth2Client.setCredentials({ access_token: token[0] });
   const res = await youtube.videos.list({
     auth: oauth2Client,
     id: args[0],
@@ -191,10 +207,10 @@ const GetYoutubeVideo = async (args, token) => {
   const views = parseInt(res.data.items[0].statistics.viewCount);
   console.log(views);
   console.log(trigger);
-  // if (args[1] === "likes") {
-  //   const likes = parseInt(res.data.items[0].statistics.likeCount);
-  //   if (likes >= trigger) return { status: "success" };
-  // }
+  if (args[1] === "likes") {
+    const likes = parseInt(res.data.items[0].statistics.likeCount);
+    if (likes >= trigger) return { status: "success" };
+  }
   if (args[1] === "views") {
     const views = parseInt(res.data.items[0].statistics.viewCount);
     if (views >= trigger) return { status: "success" };
@@ -203,7 +219,12 @@ const GetYoutubeVideo = async (args, token) => {
   return { status: "fail" };
 };
 
-async function sendMail(user, object, text) {
+async function sendMail(args, token) {
+  oauth2Client.setCredentials({
+    access_token: token[0],
+    refresh_token: token[1],
+  });
+  const user = await Getmail(token[0]);
   try {
     accessToken = await oauth2Client.getAccessToken();
 
@@ -214,22 +235,24 @@ async function sendMail(user, object, text) {
         user: user,
         clientId: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        refreshToken: refreshToken,
+        refreshToken: token[1],
         accessToken: accessToken,
       },
     });
 
     const mailOptions = {
       from: "AREA " + "<" + user + ">",
-      to: user,
-      subject: object,
-      text: text,
-      html: "<h1>" + text + "</h1>",
+      to: args[0],
+      subject: args[1],
+      text: args[2],
+      html: "<h1>" + args[2] + "</h1>",
     };
 
     const result = await transport.sendMail(mailOptions);
+    console.log(result);
     return result;
   } catch (error) {
+    console.log(error);
     return error;
   }
 }
