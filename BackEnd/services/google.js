@@ -219,11 +219,20 @@ const GetMailInfo = async (args, token, user_mail) => {
 };
 
 const ListEmails = async (args, token, user, service_id) => {
-  const user_mail = await Getmail(args, token, user, service_id);
+  oauth2Client.setCredentials({
+    access_token: token[0],
+    refresh_token: token[1],
+  });
+  const data = await Getmail(args, token, user, service_id);
+  const user_mail = data.mail;
+  token[0] = data.accesToken;
+  oauth2Client.setCredentials({
+    access_token: token[0],
+    refresh_token: token[1],
+  });
   var mail = await GetMailInfo(args, token, user_mail);
   if (mail === false) return { status: "fail" };
 
-  oauth2Client.setCredentials({ access_token: token[0] });
   const res = await gmail.users.messages.get({
     auth: oauth2Client,
     userId: user_mail,
