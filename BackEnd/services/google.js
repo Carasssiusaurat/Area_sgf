@@ -114,7 +114,7 @@ const Getcalendar = async (args, token, user, service_id) => {
       auth: oauth2Client,
       calendarId: "primary",
     })
-    .catch((error) => {
+    .catch(async (error) => {
       if (error.response.status == 401 && tentative_refresh > 0) {
         tentative_refresh--;
         const response = await getValidToken(token[1]);
@@ -123,6 +123,7 @@ const Getcalendar = async (args, token, user, service_id) => {
             return { "status": "error" }
           } else {
             console.log("new token = " + response.content);
+            token[0] = response.content;
             for (var i = 0; i < user.services.length; i++) {
               if (user.services[i]._id == service_id.toString()) {
                 user.services[i].access_token = response.content;
@@ -132,7 +133,7 @@ const Getcalendar = async (args, token, user, service_id) => {
           }
           Getcalendar(args, token, user, service_id);
         };
-        if (error.response.status == 401) {
+        if (error.response.status == 401 && tentative_refresh == 0) {
           console.log("token expired please reconnect");
           return { "status": "error" }
         }
@@ -144,7 +145,11 @@ const Getcalendar = async (args, token, user, service_id) => {
   const expected_time = new Date(now.getTime() + trigger);
   console.log(expected_time);
   for (var i = 0; i < res.data.items.length; i++) {
-    const time_of_event = new Date(res.data.items[i].start.dateTime);
+    if (res.data.items[i].status != "cancelled" && res.data.items[i].start["date"] != undefined)
+      var time_of_event = new Date(res.data.items[i].start.date);
+    if (res.data.items[i].status != "cancelled"  && res.data.items[i].start["dateTime"] != undefined)
+      var time_of_event = new Date(res.data.items[i].start.dateTime);
+    console.log(time_of_event);
     if (
       expected_time > time_of_event &&
       new Date(now.getTime()) < time_of_event
