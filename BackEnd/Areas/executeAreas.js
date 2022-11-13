@@ -1,6 +1,6 @@
 const {ImListeningASong, ChangeSong, AddSongToPlaylist} = require('../services/Spotify');
 const { Getcalendar, GetYoutubeVideo, sendMail, ListEmails } = require("../services/google");
-const { streamerIsStreaming } = require('../services/Twitch')
+const { streamerIsStreaming, twitchLastPlayedIs, twitchGoalReached, twitchSoundtrackIs, twitchSubCount, twitchAnnouncement, twitchWhisp } = require('../services/Twitch')
 // const {} = require('../services/Linkedin');
 // const {} = require('../services/Github');
 const Areas = require ('../model/Areas');
@@ -25,6 +25,10 @@ const actions = {
   //"636fbd6eee6166a4996beb7e":
   // Twitch
   "6370ee51f8abcc998a99c9d1": streamerIsStreaming,
+  "6370ecbff8abcc998a99c9cf": twitchLastPlayedIs,
+  "6370eb9ff8abcc998a99c9cd": twitchGoalReached,
+  "6370ea82f8abcc998a99c9cb": twitchSoundtrackIs,
+  "6370e995f8abcc998a99c9c9": twitchSubCount,
 };
 
 const reactions = {
@@ -32,7 +36,7 @@ const reactions = {
   "636ba32f21531a915d2085d4": ChangeSong,
   "636ba45eec84f1ac23b7b424": AddSongToPlaylist,
   // Google
-  "636b6a77e22023e504292651": sendMail
+  "636b6a77e22023e504292651": sendMail,
   //"636bbb470ffcc9a4f64a70e0": 
   // Linkedin
   //"636ccabcf7b6fd105f0880f4":
@@ -41,6 +45,8 @@ const reactions = {
   //"636fbfbbee6166a4996bec08":
   //"636fbfa6ee6166a4996bebff":
   // Twitch
+  "6370f273f8abcc998a99c9d4": twitchWhisp,
+  "6370f178f8abcc998a99c9d3": twitchAnnouncement
 };
 
 const getServiceActionToken = async (id) => {

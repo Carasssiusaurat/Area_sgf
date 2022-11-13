@@ -68,10 +68,14 @@ router.get('/twitch/lastPlayed', async function (req, res) {
 });
 */
 
-twitchSubCount = async (usertoken, self_id, subs) => {
+const twitchSubCount = async (args, token, user, service_action_id) => {
+//const twitchSubCount = async (usertoken, self_id, subs) => {
   //const usertoken = req.headers.authorization
   //const self_id = req.body.self_id
   //const subs = req.body.subs
+  subs = args[0]
+  usertoken = token[0]
+  self_id = token[2]
   try {
   const data = await axios.get('https://api.twitch.tv/helix/subscriptions?broadcaster_id=' + self_id,{
     headers: {
@@ -92,7 +96,8 @@ twitchSubCount = async (usertoken, self_id, subs) => {
   }
 }
 
-twitchAnnouncement = async (usertoken, self_id, streamer, color, msg) => {
+const twitchAnnouncement = async (args, token, user, service_action_id) => {
+//const twitchAnnouncement = async (usertoken, self_id, streamer, color, msg) => {
   /*
   let usertoken = req.headers.authorization
   let self_id = req.body.user_id
@@ -103,8 +108,12 @@ twitchAnnouncement = async (usertoken, self_id, streamer, color, msg) => {
     color = req.body.color
   }
   */
- color = color || "primary"
- let streamer_id = await UserIdFromName(usertoken, streamer)
+  let usertoken = token[0]
+  let self_id = token[2]
+  let streamer = args[0]
+  let msg = args[1]
+  color = args[2] || "primary"
+  let streamer_id = await UserIdFromName(usertoken, streamer)
   let body = {"message": msg, "color": color}
   try {
   const data = await axios.post('https://api.twitch.tv/helix/chat/announcements?broadcaster_id=' + streamer_id + "&moderator_id=" + self_id,  body, {
@@ -120,12 +129,17 @@ twitchAnnouncement = async (usertoken, self_id, streamer, color, msg) => {
   }
 }
 
-twitchSoundtrackIs = async (usertoken, streamer_id, soundtrack) => {
+const twitchSoundtrackIs = async (args, token, user, service_action_id) => {
+//const twitchSoundtrackIs = async (usertoken, streamer_id, soundtrack) => {
   /*
   let usertoken = req.headers.authorization
   let streamer_id = req.body.streamer_id
   let soundtrack = req.body.soudtrack
   */
+  let usertoken = token[0]
+  let streamer = args[0]
+  let soundtrack = args[1]
+  let streamer_id = await UserIdFromName(token[0], streamer)
   try {
   const data = await axios.get('https://api.twitch.tv/helix/soundtrack/current_track?broadcaster_id=' + streamer_id, {
     headers: {
@@ -144,13 +158,19 @@ twitchSoundtrackIs = async (usertoken, streamer_id, soundtrack) => {
   }
 }
 
-twitchGoalReached = async (usertoken, streamer_id, percent, goalType) => {
+const twitchGoalReached = async (args, token, user, service_action_id) => {
+//const twitchGoalReached = async (usertoken, streamer_id, percent, goalType) => {
   /*
   let usertoken = req.headers.authorization
   let streamer_id = req.body.streamer_id
   let percent = req.body.percentage
   let goalType = req.body.type
   */
+  let usertoken = token[0]
+  let streamer = args[0]
+  let percent = args[1]
+  let goalType = args[2]
+  let streamer_id = await UserIdFromName(token[0], streamer)
   try {
     const data = await axios.get('https://api.twitch.tv/helix/goals?broadcaster_id=' + streamer_id, {
       headers: {
@@ -173,14 +193,16 @@ twitchGoalReached = async (usertoken, streamer_id, percent, goalType) => {
   }
 }
 
-
-twitchLastPlayedIs = async (usertoken, streamer, gamename) => {
+const twitchLastPlayedIs = async (args, token, user, service_action_id) => {
+//const twitchLastPlayedIs = async (usertoken, streamer, gamename) => {
   /*
   let usertoken = req.headers.authorization
   let streamer_id = req.body.streamer_id
   let gamename = req.body.gameName
   */
-  let streamer_id = await UserIdFromName(usertoken, streamer)
+  let usertoken = token[0]
+  let streamer_id = await UserIdFromName(token[0], args[0])
+  let gamename = args[1]
   try {
   const data = await axios.get('https://api.twitch.tv/helix/channels?broadcaster_id=' + streamer_id, {
     headers: {
@@ -199,14 +221,19 @@ twitchLastPlayedIs = async (usertoken, streamer, gamename) => {
   }
 }
 
-twitchWhisp = async (usertoken, self_id, streamer) => {
+const twitchWhisp = async (args, token, user, service_action_id) => {
+//const twitchWhisp = async (usertoken, self_id, streamer) => {
   /*
   usertoken = req.headers.authorization
   self_id = req.body.user_id
   receiver = req.body.to
   */
+  let usertoken = token[0]
+  let self_id = token[2]
+  streamer = args[0]
+  msg = args[1]
   let streamer_id = await UserIdFromName(usertoken, streamer)
-  let body = {"message": req.body.message }
+  let body = {"message": msg }
   try {
   const data = await axios.post('https://api.twitch.tv/helix/whispers?from_user_id=' + self_id + "&to_user_id=" + streamer_id, body, {
     headers: {
@@ -298,7 +325,7 @@ router.get('/auth/callback',
   }
 });
 
-anyIsStreaming = async (usertoken, user_id) => {
+const anyIsStreaming = async (usertoken, user_id) => {
   /*
   if (!req.headers.authorization || !req.query.user_id) {
     res.status(400).send("error: missing field")
@@ -368,4 +395,4 @@ passport.deserializeUser(function (obj, done) {
   done(null, obj);
 })
 
-module.exports = {router, streamerIsStreaming, };
+module.exports = {router, streamerIsStreaming, twitchWhisp, twitchLastPlayedIs, twitchGoalReached, twitchSoundtrackIs, twitchAnnouncement, twitchSubCount };
