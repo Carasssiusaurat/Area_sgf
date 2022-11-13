@@ -39,38 +39,66 @@ UserIdFromName = async (token, username) => {
   }
 };
 
+router.get('/twitch/subCount', async function (req, res) {
+  twitchSubCount(req, res)
+});
+
+router.get('/twitch/makeAnnonce', async function (req, res) {
+  twitchAnnouncement(req, res)
+});
+
+/*
+router.get('/twitch/startRaid', async function (req, res) {
+  twitchStartRaid(req, res)
+});
+*/
+
+router.get('/twitch/soundtrack', async function (req, res) {
+  twitchSoundtrackIs(req, res)
+});
+
+router.get('/twitch/goalCheck', async function (req, res) {
+  twitchGoalReached(req, res)
+});
+
+router.get('/twitch/lastPlayed', async function (req, res) {
+  twitchLastPlayedIs(req, res)
+});
+
 twitchSubCount = async (req, res) => {
   const usertoken = req.headers.authorization
-  const streamer_id = req.body.streamer_id
+  const self_id = req.body.self_id
   const subs = req.body.subs
   try {
-  const data = await axios.get('https://api.twitch.tv/helix/subscriptions?broadcaster_id=' + streamer_id,{
+  const data = await axios.get('https://api.twitch.tv/helix/subscriptions?broadcaster_id=' + self_id,{
     headers: {
       'Authorization': "Bearer " + usertoken,
       'Client-ID': process.env.TWITCH_CLIENT_ID
     }}
   )
   if (data.data.total >= subs) {
-    console.log(True)//TEMP RETURN
+    console.log("True")//TEMP RETURN
+    res.send("TRUE")
   } else {
-    console.log(False)//TEMP RETURN
+    console.log("False")//TEMP RETURN
+    res.send("FALSE")
   }
   } catch(err) {
     console.log(err)
     res.send(err)
   }
-  res.json(data.data.total)
 }
 
 twitchAnnouncement = async (req, res) => {
-  usertoken = req.headers.authorization
-  self_id = req.body.user_id
-  streamer_id = req.body.streamer_id
+  let usertoken = req.headers.authorization
+  let self_id = req.body.user_id
+  let streamer_id = req.body.streamer_id
   let color = "primary"
+  let msg = req.body.message
   if (req.body.color) {
     color = req.body.color
   }
-  let body = {"message": req.body.message, "color": color}
+  let body = {"message": msg, "color": color}
   try {
   const data = await axios.post('https://api.twitch.tv/helix/chat/announcements?broadcaster_id=' + streamer_id + "&moderator_id=" + self_id,  body, {
     headers: {
@@ -85,10 +113,12 @@ twitchAnnouncement = async (req, res) => {
   }
 }
 
+/*
 twitchStartRaid = async (req, res) => {
   usertoken = req.headers.authorization
   self_id = req.body.user_id
-  receiver = req.body.receiver_id
+  receiver_id = req.body.receiver_id
+  console.log(usertoken)
   try {
   const data = await axios.post('https://api.twitch.tv/helix/raids?from_broadcaster_id=' + self_id + "&to_broadcaster_id=" + receiver_id,{
     headers: {
@@ -102,7 +132,7 @@ twitchStartRaid = async (req, res) => {
     res.send(err)
   }
 }
-
+*/
 
 twitchSoundtrackIs = async (req, res) => {
   let usertoken = req.headers.authorization
@@ -132,24 +162,23 @@ twitchGoalReached = async (req, res) => {
   let usertoken = req.headers.authorization
   let streamer_id = req.body.streamer_id
   let percent = req.body.percentage
+  let goalType = req.body.type
   try {
-  const data = await axios.get('https://api.twitch.tv/helix/goals?broadcaster_id=' + streamer_id, {
-    headers: {
-      'Authorization': "Bearer " + usertoken,
-      'Client-ID': process.env.TWITCH_CLIENT_ID
-    }}
-  )
-  infos = data.data.data[0]
-  if (infos) {
-    let goalpercent = infos.current_amount / infos.target_amount
-    if (percent <= goalpercent) {
-      console.log("TRUE")
-      res.status(200).send("goal is completed at " + goalpercent)
-    } else {
-      console.log("FALSE")
-      res.status(200).send("goal hasn't reached " + percent + " completion")
+    const data = await axios.get('https://api.twitch.tv/helix/goals?broadcaster_id=' + streamer_id, {
+      headers: {
+        'Authorization': "Bearer " + usertoken,
+        'Client-ID': process.env.TWITCH_CLIENT_ID
+      }
+    })
+    infos = data.data.data.filter(element => element.type === goalType)
+    if (infos) {
+      let goalpercent = infos[0].current_amount / infos[0].target_amount
+      if (percent <= goalpercent) {
+        res.status(200).send("first goal is completed at " + goalpercent)
+      } else {
+        res.status(200).send("first goal hasn't reached " + percent + " percent completion")
+      }
     }
-  }
   } catch(err) {
     console.log(err)
     res.send(err)
@@ -170,7 +199,7 @@ twitchLastPlayedIs = async (req, res) => {
   )
   if (data.data.data[0].game_name === gamename) {
     console.log("TRUE")
-    res.status(200).send("last game player truly is " + gamename)
+    res.status(200).send("last game played truly is " + gamename)
   } else {
     console.log("FALSE")
     res.status(200).send("last game played isn't " + gamename)
