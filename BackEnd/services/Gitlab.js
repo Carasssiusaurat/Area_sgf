@@ -55,37 +55,31 @@ router.get('/auth/callback',
     res.redirect('http://localhost:8081/home');
   });
 
-class Gitlab {
-  constructor(accessToken, pseudo) {
-    this.pseudo = pseudo;
-    this.accessToken = accessToken
-  }
-
-  async list_projects_starrers(project_id, nb_starrers) {
-    const rawResponse = await fetch('https://gitlab.com/api/v4/projects/' + project_id + '/starrers', {
+const list_projects_stars = async (args, token, user, service_action_id) => {
+    const rawResponse = await fetch('https://gitlab.com/api/v4/projects/' + args[0] + '/starrers', {
       method: 'GET',
       headers: {
-        'Authorization': 'Bearer ' + this.accessToken,
+        'Authorization': 'Bearer ' + token[0],
       }
     });
     const content = await rawResponse.json();
-    if (content.length > nb_starrers)
+    if (content.length > agrs[1])
       return {status: "success"};
     return {status: "fail"};
   }
 
-  async star_project(project_id) {
-    const rawResponse = await fetch('https://gitlab.com/api/v4/projects/' + project_id + '/star', {
+const star_project = async (args, token, user, service_action_id) => {
+    const rawResponse = await fetch('https://gitlab.com/api/v4/projects/' + args[0] + '/star', {
       method: 'GET',
       headers: {
-        'Authorization': 'Bearer ' + this.accessToken,
+        // 'Authorization': `Bearer ${token[0]}`,
+        'Authorization': 'Bearer ' + token[0],
       }
     });
     if (rawResponse.status === 304)
       return true;
     return false;
   }
-}
 
 router.get('/gitlab/todos',
   function (req, res) {
@@ -101,4 +95,4 @@ router.get('/gitlab/projects',
     return res;
   });
 
-module.exports = { router }
+module.exports = { router, star_project, list_projects_stars };

@@ -2,6 +2,7 @@ const {ImListeningASong, ChangeSong, AddSongToPlaylist} = require('../services/S
 const { Getcalendar, GetYoutubeVideo, sendMail, ListEmails } = require("../services/google");
 const { streamerIsStreaming, twitchLastPlayedIs, twitchGoalReached, twitchSoundtrackIs, twitchSubCount, twitchAnnouncement, twitchWhisp } = require('../services/Twitch')
 const { check_follower, receive_following, fork_repo, follow_user, unfollow_user} = require('../services/Github')
+const { star_project, list_projects_stars } = require('../services/Gitlab');
 // const {} = require('../services/Linkedin');
 // const {} = require('../services/Github');
 const Areas = require ('../model/Areas');
@@ -18,7 +19,6 @@ const actions = {
   "636bb8860ffcc9a4f64a70ca": Getcalendar,
   "636bb9780ffcc9a4f64a70d2": GetYoutubeVideo,
   "636bb8d40ffcc9a4f64a70ce": ListEmails,
-  //"636bb8d40ffcc9a4f64a70ce": 
   // Linkedin
   //"636fb585889fe63d93b631a0": 
   // Github
@@ -30,6 +30,8 @@ const actions = {
   "6370eb9ff8abcc998a99c9cd": twitchGoalReached,
   "6370ea82f8abcc998a99c9cb": twitchSoundtrackIs,
   "6370e995f8abcc998a99c9c9": twitchSubCount,
+  // Gitlab
+  "63713cbffd2f7069e1c58013": list_projects_stars,
 };
 
 const reactions = {
@@ -47,7 +49,9 @@ const reactions = {
   "636fbfbbee6166a4996bec08": unfollow_user,
   // Twitch
   "6370f273f8abcc998a99c9d4": twitchWhisp,
-  "6370f178f8abcc998a99c9d3": twitchAnnouncement
+  "6370f178f8abcc998a99c9d3": twitchAnnouncement,
+  // Gitlab
+  "63713d77fd2f7069e1c58019": star_project,
 };
 
 const getServiceActionToken = async (id) => {

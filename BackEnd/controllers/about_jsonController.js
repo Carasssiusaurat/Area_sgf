@@ -4,7 +4,7 @@ const Actions = require('../model/Actions')
 const Reactions = require('../model/Reactions')
 
 const getAboutJson = async (req, res) => {
-    const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress)
+    var ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress)
     if (ip != "::1")
         ip = ip.split(":")[3]
     const current_time = new Date().getTime();
