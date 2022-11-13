@@ -22,6 +22,7 @@ const WorflowCard = ({ name, actif, id }) => {
         Authorization: "Bearer " + sessionStorage.getItem("token"),
       },
     });
+    window.location.reload(false);
   };
 
   useEffect(() => {
