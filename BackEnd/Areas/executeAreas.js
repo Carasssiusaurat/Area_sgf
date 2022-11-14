@@ -2,7 +2,7 @@ const {ImListeningASong, ChangeSong, AddSongToPlaylist} = require('../services/S
 const { Getcalendar, GetYoutubeVideo, sendMail, ListEmails } = require("../services/google");
 const { streamerIsStreaming, twitchLastPlayedIs, twitchGoalReached, twitchSoundtrackIs, twitchSubCount, twitchAnnouncement, twitchWhisp } = require('../services/Twitch')
 const { check_follower, receive_following, fork_repo, follow_user, unfollow_user} = require('../services/Github')
-const { star_project, list_projects_stars } = require('../services/Gitlab');
+const { star_project, get_project_owned_by_user, unstar_project } = require('../services/Gitlab');
 const { send_localisation, send_message} = require('../services/Linkedin')
 // const {} = require('../services/Linkedin');
 // const {} = require('../services/Github');
@@ -32,7 +32,7 @@ const actions = {
   "6370ea82f8abcc998a99c9cb": twitchSoundtrackIs,
   "6370e995f8abcc998a99c9c9": twitchSubCount,
   // Gitlab
-  "63713cbffd2f7069e1c58013": list_projects_stars,
+  "63713cbffd2f7069e1c58013": get_project_owned_by_user,
 };
 
 const reactions = {
@@ -52,6 +52,7 @@ const reactions = {
   "6370f178f8abcc998a99c9d3": twitchAnnouncement,
   // Gitlab
   "63713d77fd2f7069e1c58019": star_project,
+  "6371be96af01e59ca3708f74": unstar_project,
 };
 
 const getServiceActionToken = async (id) => {

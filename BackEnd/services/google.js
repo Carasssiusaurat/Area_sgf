@@ -132,12 +132,13 @@ const getValidToken = async (refreshToken) => {
 
 const Getcalendar = async (args, token, user, service_id) => {
   oauth2Client.setCredentials({ access_token: token[0] });
-  const res = await calendar.events
+  const items = await calendar.events
     .list({
       auth: oauth2Client,
       calendarId: "primary",
-    })
-    .catch(async (error) => {
+    }).then((response) => {
+      return response.data.items;
+    }).catch(async (error) => {
       if (error.response.status == 401 && tentative_refresh > 0) {
         tentative_refresh--;
         const response = await getValidToken(token[1]);
@@ -165,23 +166,13 @@ const Getcalendar = async (args, token, user, service_id) => {
   trigger = parseInt(args[0]) * 60000;
   const now = new Date();
   const expected_time = new Date(now.getTime() + trigger);
-  for (var i = 0; i < res.data.items.length; i++) {
-    if (
-      res.data.items[i].status != "cancelled" &&
-      res.data.items[i].start["date"] != undefined
-    )
-      var time_of_event = new Date(res.data.items[i].start.date);
-    if (
-      res.data.items[i].status != "cancelled" &&
-      res.data.items[i].start["dateTime"] != undefined
-    )
-      var time_of_event = new Date(res.data.items[i].start.dateTime);
-    if (
-      expected_time > time_of_event &&
-      new Date(now.getTime()) < time_of_event
-    ) {
-      return { status: "success" };
-    }
+  for (var i = 0; i < items.length; i++) {
+    if (items[i].status != "cancelled" && items[i].start["date"] != undefined)
+      var time_of_event = new Date(items[i].start.date);
+    if (items[i].status != "cancelled" && items[i].start["dateTime"] != undefined)
+      var time_of_event = new Date(items[i].start.dateTime);
+    if (expected_time.getTime() > time_of_event.getTime() && time_of_event.getTime() > now.getTime())
+      return {status: "success"};
   }
   return { status: "fail" };
 };
@@ -228,7 +219,7 @@ const ListEmails = async (args, token, user, service_id) => {
   var mail = await GetMailInfo(args, token, user_mail);
   if (mail === false) return { status: "fail" };
 
-  const res = await gmail.users.messages.get({
+  const res = gmail.users.messages.get({
     auth: oauth2Client,
     userId: user_mail,
     id: mail,
@@ -255,13 +246,19 @@ const GetFileData = async (message_id, attachment_id) => {
 
 const GetYoutubeVideo = async (args, token, user, service_id) => {
   oauth2Client.setCredentials({ access_token: token[0] });
-  const res = await youtube.videos
+  const items = await youtube.videos
     .list({
       auth: oauth2Client,
       id: args[0],
       part: "snippet,contentDetails,statistics",
-    })
-    .catch(async (error) => {
+    }).then((response) => {
+      console.log(response);
+      return response.data.items;
+    }).catch(async (error) => {
+      if (error.response.status == 403) {
+        console.log("Authenticated user account suspended\nTry another account");
+        return { status: "error" };
+      }
       if (error.response.status == 401 && tentative_refresh > 0) {
         tentative_refresh--;
         const response = await getValidToken(token[1]);
@@ -286,17 +283,19 @@ const GetYoutubeVideo = async (args, token, user, service_id) => {
       tentative_refresh = 2;
       return { status: "error" };
     });
+  if (items.status == "error")
+    return { status: "error" };
   trigger = parseInt(args[2]);
-  const views = parseInt(res.data.items[0].statistics.viewCount);
   if (args[1] === "likes") {
-    const likes = parseInt(res.data.items[0].statistics.likeCount);
-    if (likes >= trigger) return { status: "success" };
+    const likes = parseInt(items[0].statistics.likeCount);
+    if (likes >= trigger)
+      return { status: "success" };
   }
   if (args[1] === "views") {
-    const views = parseInt(res.data.items[0].statistics.viewCount);
-    if (views >= trigger) return { status: "success" };
+    const views = parseInt(items[0].statistics.viewCount);
+    if (views >= trigger)
+      return { status: "success" };
   }
-  // }
   return { status: "fail" };
 };
 
