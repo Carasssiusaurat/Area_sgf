@@ -94,7 +94,7 @@ router.get('/auth/callback',
 
     // check if i follow user
   const receive_following = async (args, token, user, service_id) => {
-    const rawResponse = await axios.get('https://api.github.com/user/following', {
+    const rawResponse = await axios.get('https://api.github.com/user/followers', {
       headers: {
         'Authorization': 'Bearer ' + token[0],
       }
@@ -106,7 +106,6 @@ router.get('/auth/callback',
     });
     if (rawResponse.status === 200) {
       for (var i = 0; i < rawResponse.data.length; i++) {
-        console.log(rawResponse.data[i].login);
         if (rawResponse.data[i].login === args[0])
           return {status: "success"};
       }

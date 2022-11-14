@@ -3,6 +3,7 @@ var passport = require('passport');
 var GitLabStrategy = require('passport-gitlab2').Strategy;
 var session = require('express-session');
 const fetch = require("node-fetch");
+const axios = require('axios');
 let gitlab;
 const app = express();
 const {addservice_copy} = require('../controllers/userController');
@@ -48,50 +49,75 @@ router.get('/auth/callback',
     response = await addservice_copy(user_id, service_id, req.user.accessToken, req.user.refreshToken, null);
     if (response.status != 200) {
       console.log("error");
-      console.log(response.message)
+      console.log(response)
+      res.redirect('http://localhost:8080/login');
     }
     console.log("GitLab service added");
     res.redirect('http://localhost:8081/home');
   });
 
-const list_projects_stars = async (args, token, user, service_action_id) => {
-    const rawResponse = await fetch('https://gitlab.com/api/v4/projects/' + args[0] + '/starrers', {
-      method: 'GET',
-      headers: {
-        'Authorization': 'Bearer ' + token[0],
+const get_project_owned_by_user = async (args, token, user, service_action_id) => {
+  const res = await axios.get('https://gitlab.com/api/v4/users/' + args[0] + '/projects?custom_attributes[simple]=true', {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token[0]}`,
+    }
+  }).then((response) => {
+    // console.log(response.data);
+    for (var i = 0; i < response.data.length; i++) {
+      if (response.data[i].name === args[1]) {
+        console.log("project found");
+        return {status: "success"};
       }
-    });
-    const content = await rawResponse.json();
-    if (content.length > args[1])
-      return {status: "success"};
+    }
     return {status: "fail"};
-  }
+  }).catch((error) => {
+    if (error.response.status === 404)
+      console.log(error.response.data);
+    return ({status: "error"});
+  })
+  return res;
+}
 
 const star_project = async (args, token, user, service_action_id) => {
     const rawResponse = await fetch('https://gitlab.com/api/v4/projects/' + args[0] + '/star', {
-      method: 'GET',
+      method: 'POST',
       headers: {
-        // 'Authorization': `Bearer ${token[0]}`,
-        'Authorization': 'Bearer ' + token[0],
+        'Authorization': `Bearer ${token[0]}`,
       }
+    }).then((response) => {
+      return response;
+    }).catch((error) => {
+      if (error.status === 401) {
+        console.log("token expired");
+      }
+      return {status: "error"};
     });
     if (rawResponse.status === 304)
-      return {status: "success"};
-    return {status: "fail"};
+      return {status: "fail"};
+    console.log("starred");
+    return {status: "success"};
   }
 
-// router.get('/gitlab/todos',
-//   function (req, res) {
-//     gitlab.star_project("").then(function (data) { console.log(data) });
-//     res.redirect("/");
-//     return res;
-//   });
 
-// router.get('/gitlab/projects',
-//   function (req, res) {
-//     gitlab.list_projects_starrers("", 5).then(function (data) { console.log(data) });
-//     res.redirect("/");
-//     return res;
-//   });
+  const unstar_project = async (args, token, user, service_action_id) => {
+    const rawResponse = await fetch('https://gitlab.com/api/v4/projects/' + args[0] + '/unstar', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token[0]}`,
+      }
+    }).then((response) => {
+      return response;
+    }).catch((error) => {
+      if (error.status === 401) {
+        console.log("token expired");
+      }
+      return {status: "error"};
+    });
+    if (rawResponse.status === 304)
+      return {status: "fail"};
+    console.log("unstarred");
+    return {status: "success"};
+  }
 
-module.exports = { router, star_project, list_projects_stars };
+module.exports = { router, star_project, get_project_owned_by_user , unstar_project};
