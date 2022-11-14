@@ -33,7 +33,7 @@ const GetcurrentSong = async (token, user, service_id) => {
     tentative_refresh = 2;
     return {"status": "success", "song_name": response.data.item.name, "artist_name": artists, "album_name": response.data.item.album.name};
   }).catch((error) => {
-    if (error.response.status == 401 && tentative_refresh > 0) {
+    if (error && error.response && error.response.status == 401 && tentative_refresh > 0) {
       tentative_refresh--;
       refresh.requestNewAccessToken('spotify', token[1], (err, accessToken, refreshToken) => {
         if (err) {
@@ -108,7 +108,7 @@ const searchArtist = async (args, token, user, service_id) => {
     tentative_refresh = 2;
     return {"status": "fail"};
   }).catch((error) => {
-    if (error.response.status == 401 && tentative_refresh > 0) {
+    if (error && error.response && error.response.status == 401 && tentative_refresh > 0) {
       tentative_refresh--;
       refresh.requestNewAccessToken('spotify', token[1], (err, accessToken, refreshToken) => {
         if (err) {
@@ -153,7 +153,7 @@ const GetDevices = async (token, user, service_id) => {
     tentative_refresh = 2;
     return {"status": "fail"};
   }).catch((error) => {
-    if (error.response.status == 401 && tentative_refresh > 0) {
+    if (error && error.response && error.response.status == 401 && tentative_refresh > 0) {
       tentative_refresh--;
       refresh.requestNewAccessToken('spotify', token[1], (err, accessToken, refreshToken) => {
         if (err) {
@@ -289,7 +289,7 @@ const GetUser = async (token, user, service_id) => {
       });
       GetUser(token, user, service_id);
     }
-    if (error.response.status == 401 && tentative_refresh == 0) {
+    if (error && error.response && error.response.status == 401 && tentative_refresh == 0) {
       console.log("token expired please reconnect");
       return { "status": "error" }
     }
@@ -341,7 +341,7 @@ const CreatePlaylist = async (args, token, user, service_id) => {
       return { "status": "error" }
     }
     tentative_refresh = 2;
-    return {"status": "error", "msg": "t'es un caca"};
+    return {"status": "error", "msg": error};
   });
   return data;
 }

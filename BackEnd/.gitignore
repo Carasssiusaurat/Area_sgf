@@ -1,4 +1,2 @@
 .env
 node_modules
-services/Twitter.js
-prout.js
