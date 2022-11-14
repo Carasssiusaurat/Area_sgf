@@ -4,8 +4,7 @@ $color-3: #282c34;
 $color-4: #1B1B21;
 
 .logout {
-    // margin-top: -4px;
-    color: white;
+  color: white;
   font-size: .8em;
   font-family: 'Oswald', sans-serif;
 	position: relative;
@@ -20,7 +19,6 @@ $color-4: #1B1B21;
 }
 
 .logout-button {
-    // margin-top: -100px;
     text-decoration: none;
     float: right;
     padding: 12px;
@@ -28,7 +26,6 @@ $color-4: #1B1B21;
     margin-right: 30px;
     color:#1B1B21;
     width: 60px;
-    // background-color: #1B1B21;
     transition: width .35s;
     -webkit-transition: width .35s;
     overflow: hidden
@@ -44,17 +41,12 @@ $color-4: #1B1B21;
       }
       display: inline-block;
     width: 100%;
-    // background-color: black;
     a:hover{
-        // color: black;
         width: 140px;
-        
       }
       a:hover .logout{
         opacity: .9;
-
       }
-      
       a {
         text-decoration: none;
       }

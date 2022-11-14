@@ -25,7 +25,6 @@ class GetServicesData extends React.Component {
       this.props.page != "3" &&
       this.props.page != "4"
     ) {
-      console.log("ALLO");
       if (this.props.id.services.length != 0) {
         for (let i = 0; i < this.props.id.services.length; i++) {
           fetch(
@@ -51,9 +50,7 @@ class GetServicesData extends React.Component {
         }
       }
     }
-    // console.log(this.props.page);
     if (this.props.page === "2") {
-      console.log("ALLO");
       fetch("http://localhost:8080/service/" + this.props.id, {
         method: "GET",
         headers: {
@@ -108,7 +105,6 @@ class GetServicesData extends React.Component {
       }
     }
     if (this.props.page === "3") {
-      console.log("je suis dans getserviceData page 3");
       fetch("http://localhost:8080/service/" + this.props.id, {
         method: "GET",
         headers: {
@@ -158,8 +154,6 @@ class GetServicesData extends React.Component {
           console.log(err);
         });
     }
-
-    console.log("YOUPIIIIIIIIIIIII");
     this.state.isLoaded = true;
   }
 
@@ -167,7 +161,6 @@ class GetServicesData extends React.Component {
     const { isLoaded, items, area, data, action_id } = this.state;
 
     if (!this.state.isLoaded) return;
-    // if (this.props.page === "2") console.log(this.props.page);
 
     return (
       <div className="test">
@@ -195,7 +188,6 @@ class GetServicesData extends React.Component {
         ) : null}
         {this.props.page === "3" ? (
           <List_Workspace
-            // items={items}
             id={items}
             page={this.props.page}
             area={area}

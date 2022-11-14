@@ -14,7 +14,6 @@ const Home = () => {
       ) : (
         <Navigation />
       )}
-      {console.log("Je suis la Home")}
       <GetServicesId page="0"></GetServicesId>
     </div>
   );
