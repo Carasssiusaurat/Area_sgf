@@ -27,7 +27,6 @@ const Workspace = ({ items, id, page, area, data, action_id }) => {
         reaction_arg: args_value,
       }),
     });
-    console.log("action_id = " + sessionStorage.getItem("action_id"));
     navigate("/My_Workflow");
   };
 
@@ -36,8 +35,6 @@ const Workspace = ({ items, id, page, area, data, action_id }) => {
   }, [action_is_set]);
 
   const updateFieldChanged = (index) => (e) => {
-    // console.log("index: " + index);
-    // console.log("property name: " + e.target.name);
     let newArr = [...args_value];
     newArr[index] = e.target.value;
     setArguments(newArr);
@@ -59,9 +56,6 @@ const Workspace = ({ items, id, page, area, data, action_id }) => {
         <h1>Reactions</h1>
       </div>
       {console.log(action_is_set)}
-      {/* {console.log(items)} */}
-      {/* {console.log(items[0].name)}
-      {console.log(area)} */}
       {page != "2" && page != "3"
         ? items.map((item, index) => (
             <BigCard
@@ -88,8 +82,6 @@ const Workspace = ({ items, id, page, area, data, action_id }) => {
           <li className="single-big-card">
             {data.length != 0 ? <h1 className="selected-service">{data[0].name}</h1> : null}
             {data.length != 0 ? <img className="logo-img" src={data[0].img_url}></img> : null}
-            {/* <h1 className="selected-service">{data[0].name}</h1> */}
-            {/* <img className="logo-img" src={data[0].img_url}></img> */}
             {area.length != 0 ? (
               <p className="description">{area[reaction].description}</p>
             ) : null}
@@ -111,7 +103,6 @@ const Workspace = ({ items, id, page, area, data, action_id }) => {
                 ))}
               </select>
               {console.log(action)}
-              {/*{console.log(area)} */}
               <div className="list_args">
                 {area.length != 0
                   ? area[reaction].args.map((arg, index) => (
@@ -202,10 +193,6 @@ const Workspace = ({ items, id, page, area, data, action_id }) => {
                 area={area}
               />
             ))
-          : null}
-        {action_is_set === 1 ? console.log("hmmmmmmmmmmm") : null}
-        {sessionStorage.getItem("id_select_reaction") != null
-          ? console.log("OK OK OK")
           : null}
       </div>
     </li>

@@ -33,10 +33,6 @@ const WorflowCard = ({ name, actif, id }) => {
     <div>
       <div className="card-4">
         <div className="service-logo">
-          {console.log(actif)}
-
-          {/* <div className="back"></div> */}
-          {/* <img src={img_url} alt={name} text={name} /> */}
           <a onClick={DeleteArea}>
             <img
               src="https://cdn-icons-png.flaticon.com/512/5028/5028066.png"

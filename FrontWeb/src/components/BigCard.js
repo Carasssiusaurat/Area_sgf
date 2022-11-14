@@ -11,8 +11,6 @@ const BigCard = ({ name, img_url, id, index, reaction, area }) => {
   var button_state = "select";
 
   const updateFieldChanged = (index) => (e) => {
-    console.log("index: " + index);
-    console.log("property name: " + e.target.name);
     let newArr = [...args_value];
     newArr[index] = e.target.value;
     setArguments(newArr);
@@ -35,7 +33,6 @@ const BigCard = ({ name, img_url, id, index, reaction, area }) => {
       sessionStorage.setItem("id_select", id);
       window.location.reload(false);
     } else {
-      console.log("OUIN OUIN");
       sessionStorage.setItem("id_select_reaction", id);
       window.location.reload(false);
     }

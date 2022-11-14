@@ -8,7 +8,6 @@ import GetName from "../components/GetName";
 const Workspace = () => {
   return (
     <div>
-      {/* {console.log("Je suis la Workspace")} */}
       {sessionStorage.getItem("token") === null ? (
         <Navigate to="/" />
       ) : (
@@ -26,7 +25,6 @@ const Workspace = () => {
       sessionStorage.getItem("id_select") != null ? (
         <GetServicesId page="3"></GetServicesId>
       ) : null}
-      {/* <List_Workspace></List_Workspace> */}
     </div>
   );
 };

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 
 const Card = ({ name, img_url, url, service_id }) => {
   const EnableService = async () => {
-    console.log(sessionStorage);
     window.location.href =
       url +
       "?token=" +
@@ -22,7 +21,6 @@ const Card = ({ name, img_url, url, service_id }) => {
       </div>
       <div className="infos" style={{ height:  + "px" }}>
         <div>
-          {/* <button onClick={EnableService}>Connect</button> */}
           <a
             class="select"
             style={{ marginLeft: 27 + "px" }}
