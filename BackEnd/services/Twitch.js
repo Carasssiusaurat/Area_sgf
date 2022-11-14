@@ -83,12 +83,6 @@ const twitchAnnouncement = async (args, token, user, service_action_id) => {
 }
 
 const twitchSoundtrackIs = async (args, token, user, service_action_id) => {
-//const twitchSoundtrackIs = async (usertoken, streamer_id, soundtrack) => {
-  /*
-  let usertoken = req.headers.authorization
-  let streamer_id = req.body.streamer_id
-  let soundtrack = req.body.soudtrack
-  */
   let usertoken = token[0]
   let streamer = args[0]
   let soundtrack = args[1]
@@ -100,7 +94,7 @@ const twitchSoundtrackIs = async (args, token, user, service_action_id) => {
       'Client-ID': process.env.TWITCH_CLIENT_ID
     }}
   )
-  if (data.data.data[0].track.title === soundtrack) {
+  if (data.data.data[0].track.title.toLowerCase() === soundtrack.toLowerCase()) {
     return {"status": "success"};
   } else {
     return {"status": "fail"};
@@ -116,13 +110,6 @@ const twitchSoundtrackIs = async (args, token, user, service_action_id) => {
 }
 
 const twitchGoalReached = async (args, token, user, service_action_id) => {
-//const twitchGoalReached = async (usertoken, streamer_id, percent, goalType) => {
-  /*
-  let usertoken = req.headers.authorization
-  let streamer_id = req.body.streamer_id
-  let percent = req.body.percentage
-  let goalType = req.body.type
-  */
   let usertoken = token[0]
   let streamer = args[0]
   let percent = args[1]
@@ -135,7 +122,7 @@ const twitchGoalReached = async (args, token, user, service_action_id) => {
         'Client-ID': process.env.TWITCH_CLIENT_ID
       }
     })
-    infos = data.data.data.filter(element => element.type === goalType)
+    infos = data.data.data.filter(element => element.type.toLowerCase() === goalType.toLowerCase())
     if (infos) {
       let goalpercent = infos[0].current_amount / infos[0].target_amount
       if (percent <= goalpercent) {
@@ -151,12 +138,6 @@ const twitchGoalReached = async (args, token, user, service_action_id) => {
 }
 
 const twitchLastPlayedIs = async (args, token, user, service_action_id) => {
-//const twitchLastPlayedIs = async (usertoken, streamer, gamename) => {
-  /*
-  let usertoken = req.headers.authorization
-  let streamer_id = req.body.streamer_id
-  let gamename = req.body.gameName
-  */
   let usertoken = token[0]
   let streamer_id = await UserIdFromName(token[0], args[0])
   let gamename = args[1]
@@ -167,7 +148,7 @@ const twitchLastPlayedIs = async (args, token, user, service_action_id) => {
       'Client-ID': process.env.TWITCH_CLIENT_ID
     }}
   )
-  if (data.data.data[0].game_name === gamename) {
+  if (data.data.data[0].game_name.toLowerCase() === gamename.toLowerCase()) {
     return {"status": "success"};
   } else {
     return {"status": "fail"};
@@ -179,12 +160,6 @@ const twitchLastPlayedIs = async (args, token, user, service_action_id) => {
 }
 
 const twitchWhisp = async (args, token, user, service_action_id) => {
-//const twitchWhisp = async (usertoken, self_id, streamer) => {
-  /*
-  usertoken = req.headers.authorization
-  self_id = req.body.user_id
-  receiver = req.body.to
-  */
   let usertoken = token[0]
   let self_id = token[2]
   streamer = args[0]
@@ -204,12 +179,6 @@ const twitchWhisp = async (args, token, user, service_action_id) => {
     return {"status": "error"};
   }
 }
-
-/*
-router.post('/twitch/whisp', async function(req, res) {
-  twitchWhisp(req, res)
-});
-*/
 
 GetUserId = async (req, res) => {
   if (!req.user.accessToken) {
@@ -281,13 +250,6 @@ router.get('/auth/callback',
 });
 
 const anyIsStreaming = async (usertoken, user_id) => {
-  /*
-  if (!req.headers.authorization || !req.query.user_id) {
-    res.status(400).send("error: missing field")
-  }
-  let usertoken = req.headers.authorization
-  let user_id = req.query.user_id
-  */
   try {
   const data = await axios.get("https://api.twitch.tv/helix/streams/followed?user_id="+ user_id, {
     headers: {
@@ -311,15 +273,6 @@ const anyIsStreaming = async (usertoken, user_id) => {
 }
 
 const streamerIsStreaming = async (args, token, user, service_action_id) => {
-//const streamerIsStreaming = async (args, token, user, service_id) => {
-  /*
-  if (!req.headers.authorization || !req.query.user_id || !req.body.broadcaster) {
-    res.json("error: one or several fields missing (headers.authorization: query.user_id: body.broadcaster)")
-  }
-  let usertoken = req.headers.authorization
-  let user_id = req.query.user_id
-  let username = req.body.broadcaster
-  */
   let usertoken = token[0]
   let self_id = token[2]
   let streamerName = args[0]
@@ -333,7 +286,7 @@ const streamerIsStreaming = async (args, token, user, service_action_id) => {
       return {"status": "error"};
     }
     let vals = data.data.data
-    const streamer = vals.find(e => e.user_name === streamerName)
+    const streamer = vals.find(e => e.user_name.toLowerCase() === streamerName.toLowerCase())
     if(streamer && streamer.type === "live") {
       return {"status": "success"};
     } else {

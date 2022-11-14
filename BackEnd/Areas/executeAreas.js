@@ -97,7 +97,7 @@ const ExecuteAreas = async () => {
       const service_action = await Services.findOne({action_id: {$in: areas[i].action._id}})
       const service_reaction = await Services.findOne({reaction_id: {$in: areas[i].reaction._id}})
       const return_action = await actions[areas[i].action._id.toString()](areas[i].action.args, action_token, user, service_action._id);
-      if (return_action.status === "success")
+      if (return_action && return_action.status === "success")
         reactions[areas[i].reaction._id.toString()](areas[i].reaction.args, reaction_token, user, service_reaction._id);
     }
   }

@@ -134,10 +134,16 @@ const check_follower = async (args, token, user, service_id) =>{
     }
   }).then((response) => {
     return (response)
-  }).catch((error) => {});
-  if (rawResponse.status === 204)
+  }).catch((error) => {
+    if (error.response.status === 404) {
+      return {status: "fail"};
+    } else {
+      return {status: "error"};
+    }
+  });
+  if (rawResponse && rawResponse.status === 204)
     return {status: "success"};
-  else if (rawResponse.status === 404)
+  else if (rawResponse && rawResponse.status === 404)
     return {status: "fail"};
 }
 
