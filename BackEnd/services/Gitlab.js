@@ -62,7 +62,7 @@ const list_projects_stars = async (args, token, user, service_action_id) => {
       }
     });
     const content = await rawResponse.json();
-    if (content.length > agrs[1])
+    if (content.length > args[1])
       return {status: "success"};
     return {status: "fail"};
   }
