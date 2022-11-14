@@ -50,7 +50,7 @@ router.get('/auth/callback',
     if (response.status != 200) {
       console.log("error");
       console.log(response)
-      res.redirect('http://localhost:8080/login');
+      res.redirect('http://localhost:8081/home');
     }
     console.log("GitLab service added");
     res.redirect('http://localhost:8081/home');
