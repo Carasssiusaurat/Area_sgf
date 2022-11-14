@@ -6,7 +6,7 @@ const router = express.Router();
 const { Interface } = require('readline');
 require('dotenv').config();
 const {addservice_copy} = require('../controllers/userController');
-const SCOPES = ["user-read-currently-playing", "user-read-playback-state", "user-modify-playback-state"]
+const SCOPES = ["user-read-currently-playing", "user-read-playback-state", "user-modify-playback-state", "playlist-modify-private"]
 const SpotifyStrategy = require('passport-spotify').Strategy;
 const refresh = require('passport-oauth2-refresh');
 const { get } = require('http');
@@ -33,7 +33,7 @@ const GetcurrentSong = async (token, user, service_id) => {
     tentative_refresh = 2;
     return {"status": "success", "song_name": response.data.item.name, "artist_name": artists, "album_name": response.data.item.album.name};
   }).catch((error) => {
-    if (error.response.status == 401 && tentative_refresh > 0) {
+    if (error && error.response && error.response.status == 401 && tentative_refresh > 0) {
       tentative_refresh--;
       refresh.requestNewAccessToken('spotify', token[1], (err, accessToken, refreshToken) => {
         if (err) {
@@ -108,7 +108,7 @@ const searchArtist = async (args, token, user, service_id) => {
     tentative_refresh = 2;
     return {"status": "fail"};
   }).catch((error) => {
-    if (error.response.status == 401 && tentative_refresh > 0) {
+    if (error && error.response && error.response.status == 401 && tentative_refresh > 0) {
       tentative_refresh--;
       refresh.requestNewAccessToken('spotify', token[1], (err, accessToken, refreshToken) => {
         if (err) {
@@ -153,7 +153,7 @@ const GetDevices = async (token, user, service_id) => {
     tentative_refresh = 2;
     return {"status": "fail"};
   }).catch((error) => {
-    if (error.response.status == 401 && tentative_refresh > 0) {
+    if (error && error.response && error.response.status == 401 && tentative_refresh > 0) {
       tentative_refresh--;
       refresh.requestNewAccessToken('spotify', token[1], (err, accessToken, refreshToken) => {
         if (err) {
@@ -186,10 +186,10 @@ const ChangeSong = async (args, token, user, service_id) => {
   if (device.status == "error" || uri.status == "error") {
     return {"status": "error"};
   }
-  if (device.status == "fail") {
+  if (device.status == "fail" || uri.status == "fail") {
     return {"status": "fail"};
   }
-  const data = await axios.put('https://api.spotify.com/v1/me/player/play?device_id=' + device.actual_device, 
+  const data = await axios.put('https://api.spotify.com/v1/me/player/play?device_id=' + device.actual_device,
     {
       uris: [uri.track_uri]
     },
@@ -202,74 +202,10 @@ const ChangeSong = async (args, token, user, service_id) => {
     }
   ).then((response) => {
     tentative_refresh = 2;
+    console.log("Song changed");
     return {"status": "success"};
   }).catch((error) => {
     console.log(error);
-    if (error.response.status == 401) {
-      refresh.requestNewAccessToken('spotify', token[1], function(err, accessToken, refreshToken) {
-        return 
-      })
-    }
-    return {"code_error": error.response.data.error.status};
-  });
-  return data;
-}
-
-const AddSongToPlaylist = async (args, token, user, service_id) => {
-  const playlist = await SearchPlaylist(args, token, user, service_id);
-  const track = await searchArtist(args, token, user, service_id);
-  if (playlist.status == "error" || track.status == "error") {
-    return {"status": "error"};
-  }
-  const data = await axios.post('https://api.spotify.com/v1/playlists/' + playlist.playlist_id + '/tracks', {
-    uris: [track.track_uri]
-  }, 
-  {
-    headers: {
-      Authorization: `Bearer ${token[0]}`,
-      'Content-Type': 'application/json'
-    }
-  }).then((response) => {
-    tentative_refresh = 2;
-    return {"status": "success"};
-  }).catch((error) => {
-    return {"code_error": error.response.data.error.status};
-  });
-}
-
-const GetUser = async (token) => {
-  const response = await axios.get('https://api.spotify.com/v1/me', {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    }
-  }).then((response) => {
-    tentative_refresh = 2;
-    return {"status": "success", "data": response.data};
-  }).catch((error) => {
-    return {"status": "error"};
-  });
-  return response;
-}
-
-const CreatePlaylist = async (args, token) => {
-  var user = await GetUser(token);
-  if (user.status == "error") {
-    return {"status": "error", "code_error": user.code_error};
-  }
-  const data = await axios.post('https://api.spotify.com/v1/users/' + user.id + '/playlists', {
-    name: args[2],
-    description: args[2],
-    public: false
-  },
-  {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  }).then((response) => {
-    tentative_refresh = 2;
-    return {"playlist_id": response.data.id, "status": "success"};
-  }).catch((error) => {
     if (error.response.status == 401 && tentative_refresh > 0) {
       tentative_refresh--;
       refresh.requestNewAccessToken('spotify', token[1], (err, accessToken, refreshToken) => {
@@ -285,7 +221,7 @@ const CreatePlaylist = async (args, token) => {
           }
         }
       });
-      SearchPlaylist(args, token, user, service_id);
+      ChangeSong(args, token, user, service_id);
     }
     if (error.response.status == 401) {
       console.log("token expired please reconnect");
@@ -293,6 +229,119 @@ const CreatePlaylist = async (args, token) => {
     }
     tentative_refresh = 2;
     return {"status": "error"};
+  });
+  return data;
+}
+
+const AddSongToPlaylist = async (args, token, user, service_id) => {
+  const playlist = await SearchPlaylist(args, token, user, service_id);
+  const track = await searchArtist(args, token, user, service_id);
+  if (playlist.status == "error" || track.status == "error") {
+    return {"status": "error"};
+  }
+  if (playlist.status == "fail" || track.status == "fail") {
+    return {"status": "fail"};
+  }
+  const data = await axios.post('https://api.spotify.com/v1/playlists/' + playlist.playlist_id + '/tracks', {
+    uris: [track.track_uri]
+  }, 
+  {
+    headers: {
+      Authorization: `Bearer ${token[0]}`,
+      'Content-Type': 'application/json'
+    }
+  }).then((response) => {
+    tentative_refresh = 2;
+    console.log("Song added to playlist");
+    return {"status": "success"};
+  }).catch((error) => {
+    console.log(error);
+    return {"code_error": error.response.data.error.status};
+  });
+}
+
+const GetUser = async (token, user, service_id) => {
+  const response = await axios.get('https://api.spotify.com/v1/me', {
+    headers: {
+      Authorization: `Bearer ${token[0]}`,
+      'Content-Type': 'application/json'
+    }
+  }).then((response) => {
+    tentative_refresh = 2;
+    return {"status": "success", "data": response.data};
+  }).catch((error) => {
+    console.log(tentative_refresh)
+    if (error.response.status == 401 && tentative_refresh > 0) {
+      tentative_refresh--;
+      refresh.requestNewAccessToken('spotify', token[1], (err, accessToken, refreshToken) => {
+        if (err) {
+          console.log(err);
+          return { "status": "error" }
+        } else {
+          console.log("new token:" + accessToken);
+          for (var i = 0; i < user.services.length; i++) {
+            if (user.services[i]._id == service_id.toString()) {
+              user.services[i].access_token = accessToken;
+              user.save();
+            }
+          }
+        }
+      });
+      GetUser(token, user, service_id);
+    }
+    if (error && error.response && error.response.status == 401 && tentative_refresh == 0) {
+      console.log("token expired please reconnect");
+      return { "status": "error" }
+    }
+    return {"status": "error"};
+  });
+  return response;
+}
+
+const CreatePlaylist = async (args, token, user, service_id) => {
+  var _user = await GetUser(token);
+  if (_user.status == "error") {
+    return {"status": "error"};
+  }
+  const data = await axios.post('https://api.spotify.com/v1/users/' + _user.data.id + '/playlists', {
+    name: args[2],
+    description: args[2],
+    public: false
+  },
+  {
+    headers: {
+      Authorization: `Bearer ${token[0]}`,
+      'Content-Type': 'application/json'
+    }
+  }).then((response) => {
+    tentative_refresh = 2;
+    console.log("Playlist created");
+    return {"playlist_id": response.data.id, "status": "success"};
+  }).catch((error) => {
+    console.log(error.message);
+    if ((error.response.status == 401 || error.response.status == 403) && tentative_refresh > 0) {
+      tentative_refresh--;
+      refresh.requestNewAccessToken('spotify', token[1], (err, accessToken, refreshToken) => {
+        if (err) {
+          console.log(err);
+          return { "status": "error" }
+        } else {
+          for (var i = 0; i < user.services.length; i++) {
+            if (user.services[i]._id == service_id.toString()) {
+              user.services[i].access_token = accessToken;
+              user.save();
+            }
+          }
+        }
+      });
+      CreatePlaylist(args, token, user, service_id);
+    }
+    if ((error.response.status == 401 || error.response.status == 403) && tentative_refresh > 0) {
+      console.log("token expired please reconnect");
+      return { "status": "error" }
+    }
+    tentative_refresh = 2;
+    return {"status": "error", "msg": error};
   });
   return data;
 }
@@ -312,7 +361,8 @@ const SearchPlaylist = async (args, token, user, service_id) => {
       }
     }
     tentative_refresh = 2;
-    return CreatePlaylist(args, token[0]);
+    console.log("Playlist not found");
+    return CreatePlaylist(args, token, user, service_id);
   }).catch((error) => {
     if (error.response.status == 401 && tentative_refresh > 0) {
       console.log("token expired");

@@ -33,7 +33,8 @@ passport.use(new LinkedInStrategy({
   }));
 
   const send_localisation = (args, token, user, service_id) => {
-    if (args[0] == token[2])
+    console.log("compare:" + args[0].toLowerCase() + " " + token[2].toLowerCase());
+    if (args[0].toLowerCase() == token[2].toLowerCase())
       return {status: "success"};
     return {status: "fail"};
   }
