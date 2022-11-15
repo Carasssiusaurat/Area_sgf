@@ -5,6 +5,8 @@ var session = require('express-session');
 const fetch = require("node-fetch");
 const { raw } = require('express');
 const { use } = require('passport');
+GITHUB_CLIENT_ID = "9068800ddbf3fc24a235"
+GITHUB_CLIENT_SECRET = "55ec6d8dea94231496e06d502a672b922a0358a4"
 let github;
 const app = express();
 
@@ -26,7 +28,7 @@ passport.deserializeUser(function(user, done) {
 passport.use(new GitHubStrategy({
     clientID: GITHUB_CLIENT_ID,
     clientSecret: GITHUB_CLIENT_SECRET,
-    callbackURL: "http://127.0.0.1:8080/auth/github/callback"
+    callbackURL: "http://127.0.0.1:8080/service/auth/github/callback"
   },
   function(accessToken, refreshToken, profile, done) {
     github = new Github(accessToken, "jaredhanson");
@@ -35,10 +37,10 @@ passport.use(new GitHubStrategy({
   }
 ));
 
-app.get('/auth/github',
+app.get('/service//auth/github',
   passport.authenticate('github', { scope: [ 'user:email', 'public_repo', 'repo', 'read:user', 'user:follow' ] }));
 
-app.get('/auth/github/callback', 
+app.get('/service/auth/github/callback', 
   passport.authenticate('github', { failureRedirect: '/login' }),
   function(req, res) {
     res.redirect('/');
